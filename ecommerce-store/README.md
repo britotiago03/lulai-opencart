@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# E-Commerce Store (Next.js + PostgreSQL + Docker)
 
-## Getting Started
+## 🚀 Getting Started
+This project is a Next.js-based eCommerce store that requires **Docker** to run. The backend is powered by **PostgreSQL**, and everything is containerized for easy setup.
 
-First, run the development server:
+## 🛠 Prerequisites
+- **Docker** and **Docker Compose** installed on your system.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 📥 Clone the Repository
+```sh
+git clone <your-repository-url>
+cd ecommerce-store
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ▶️ Start the Application
+To build and run the application, execute the following commands:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```sh
+cd ecommerce-store  # Ensure you are in the correct directory
+docker-compose down -v  # Stops and removes existing containers and volumes (optional)
+docker-compose up --build -d  # Builds and starts the containers in detached mode
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+If you **haven't changed the code** since the last time you ran the app, you can simply start it with:
+```sh
+cd ecommerce-store  # Ensure you are in the correct directory
+docker-compose up -d  # Starts the containers without rebuilding
+```
 
-## Learn More
+Once running, open your browser and visit:
+- **http://localhost:3000** to access the website.
 
-To learn more about Next.js, take a look at the following resources:
+## ⏹ Stop the Application
+To stop the running containers without deleting the database data:
+```sh
+cd ecommerce-store  # Ensure you are in the correct directory
+docker-compose down
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+To stop the containers and **delete the database data**:
+```sh
+cd ecommerce-store  # Ensure you are in the correct directory
+docker-compose down -v
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🗄️ Connect to the Database (PostgreSQL)
+After the app is running, you can access the database inside Docker with:
 
-## Deploy on Vercel
+```sh
+docker exec -it postgres_db psql -U postgres -d ecommerce_db
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+This will open the PostgreSQL interactive shell where you can run SQL queries.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🛠 Development & Debugging
+- Make sure Docker is running before starting the app.
+- Check logs with:
+  ```sh
+  docker-compose logs -f
+  ```
+- If you face issues, try running:
+  ```sh
+  cd ecommerce-store  # Ensure you are in the correct directory
+  docker-compose down -v && docker-compose up --build -d
+  ```
+
+## 📜 License
+This project is open-source. Feel free to modify and improve!
