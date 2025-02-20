@@ -63,6 +63,3 @@ This will open the PostgreSQL interactive shell where you can run SQL queries.
   cd ecommerce-store  # Ensure you are in the correct directory
   docker-compose down -v && docker-compose up --build -d
   ```
-
-## 📜 License
-This project is open-source. Feel free to modify and improve!
