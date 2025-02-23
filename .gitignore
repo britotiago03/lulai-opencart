@@ -13,7 +13,7 @@ ecommerce-store/!.yarn/releases
 ecommerce-store/!.yarn/versions
 
 # testing
-ecommerce-store//coverage
+ecommerce-store/coverage
 
 # next.js
 ecommerce-store/.next/
@@ -41,3 +41,44 @@ ecommerce-store/.vercel
 # typescript
 ecommerce-store/*.tsbuildinfo
 ecommerce-store/next-env.d.ts
+
+
+# dependencies
+chatbot-platform/node_modules
+chatbot-platform/.pnp
+chatbot-platform/.pnp.*
+chatbot-platform/.yarn/*
+chatbot-platform/!.yarn/patches
+chatbot-platform/!.yarn/plugins
+chatbot-platform/!.yarn/releases
+chatbot-platform/!.yarn/versions
+
+# testing
+chatbot-platform/coverage
+
+# next.js
+chatbot-platform/.next/
+chatbot-platform/out/
+
+# production
+chatbot-platform/build
+
+# misc
+chatbot-platform/.DS_Store
+chatbot-platform/*.pem
+
+# debug
+chatbot-platform/npm-debug.log*
+chatbot-platform/yarn-debug.log*
+chatbot-platform/yarn-error.log*
+chatbot-platform/.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+chatbot-platform/.env.local
+
+# vercel
+chatbot-platform/.vercel
+
+# typescript
+chatbot-platform/*.tsbuildinfo
+chatbot-platform/next-env.d.ts
