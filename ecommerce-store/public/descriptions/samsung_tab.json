@@ -1,0 +1,32 @@
+{
+  "title": "Samsung Galaxy Tab 10.1",
+  "overview": "The Samsung Galaxy Tab 10.1 is the world's thinnest tablet, offering a sleek design, a powerful dual-core processor, and an immersive Android 3.0 Honeycomb experience.",
+  "details": [
+    "Ultra-thin design at just 8.6mm thickness.",
+    "Runs on Android 3.0 Honeycomb with a pure Android experience.",
+    "1GHz dual-core Tegra 2 processor for smooth performance.",
+    "10.1-inch WXGA capacitive touch screen with 1280x800 resolution.",
+    "Equipped with a 3MP rear camera with LED flash and a 2MP front camera.",
+    "HSPA+ connectivity up to 21Mbps for fast mobile data speeds.",
+    "Supports 720p HD video recording and 1080p HD playback.",
+    "DLNA support for seamless media sharing.",
+    "Connectivity options include Bluetooth 2.1, USB 2.0, Wi-Fi 802.11 a/b/g/n, and gyroscope.",
+    "Expandable storage via microSD slot and a 3.5mm headphone jack.",
+    "Samsung Stick – a Bluetooth microphone for hands-free use.",
+    "Available in 16GB, 32GB, and 64GB storage options.",
+    "Pre-loaded with Social Hub, Reader’s Hub, Music Hub, and Mini Apps Tray.",
+    "Adobe Flash Player 10.2 support for enhanced web browsing.",
+    "Powered by a 6860mAh battery providing up to 10 hours of video playback."
+  ],
+  "specifications": {
+    "Operating System": "Android 3.0 Honeycomb",
+    "Processor": "1GHz dual-core Tegra 2",
+    "Display": "10.1-inch WXGA (1280x800) capacitive touchscreen",
+    "Rear Camera": "3MP with LED flash",
+    "Front Camera": "2MP",
+    "Storage Options": "16GB / 32GB / 64GB",
+    "Connectivity": "HSPA+, Wi-Fi 802.11 a/b/g/n, Bluetooth 2.1, USB 2.0",
+    "Battery": "6860mAh, up to 10 hours of video playback",
+    "Additional Features": "Samsung Stick Bluetooth microphone, Social Hub, Adobe Flash Player 10.2"
+  }
+}

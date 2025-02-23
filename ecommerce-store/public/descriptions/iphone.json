@@ -1,0 +1,20 @@
+{
+  "title": "iPhone",
+  "overview": "The iPhone revolutionizes mobile communication by combining a phone, an iPod, and an Internet communication device into a single, sleek product.",
+  "details": [
+    "Make calls effortlessly by tapping a name or number in your contacts.",
+    "Automatically syncs all your contacts from PC, Mac, or Internet services.",
+    "Visual Voicemail allows you to listen to messages in any order, like email.",
+    "Innovative multi-touch interface for easy navigation.",
+    "Seamless integration with iTunes for music, podcasts, and videos."
+  ],
+  "specifications": {
+    "Display": "Multi-touch widescreen display",
+    "Storage": "Varies by model",
+    "Connectivity": "Cellular, Wi-Fi, Bluetooth",
+    "Operating System": "iOS",
+    "Camera": "Built-in high-resolution camera",
+    "Battery Life": "Long-lasting battery with optimized power management",
+    "Design": "Sleek and compact design"
+  }
+}

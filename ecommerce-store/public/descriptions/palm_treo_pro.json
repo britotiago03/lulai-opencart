@@ -1,0 +1,30 @@
+{
+  "title": "Palm Treo Pro",
+  "overview": "The Palm Treo Pro is a sleek and powerful smartphone that keeps you connected with email, GPS, Wi-Fi, and multimedia on the go.",
+  "details": [
+    "Designed for professionals who need a balance between work and play.",
+    "Features Windows Mobile® 6.1 Professional Edition for productivity and compatibility.",
+    "Qualcomm® MSM7201 400MHz Processor for smooth performance.",
+    "320x320 transflective color TFT touchscreen for clear visuals.",
+    "Supports HSDPA/UMTS/EDGE/GPRS/GSM radio for global connectivity.",
+    "Tri-band UMTS and Quad-band GSM ensure wide network coverage.",
+    "Built-in GPS for navigation and location-based services.",
+    "Bluetooth 2.0 with Enhanced Data Rate for wireless connectivity.",
+    "256MB storage (100MB user available) and 128MB RAM for efficient multitasking.",
+    "2.0-megapixel camera with up to 8x digital zoom and video capture.",
+    "Rechargeable 1500mAh lithium-ion battery with up to 5 hours of talk time.",
+    "Expandable microSDHC card slot (supports up to 32GB).",
+    "MicroUSB 2.0 port for synchronization and charging.",
+    "3.5mm stereo headset jack for audio playback."
+  ],
+  "specifications": {
+    "Operating System": "Windows Mobile 6.1 Professional",
+    "Processor": "Qualcomm MSM7201 400MHz",
+    "Display": "320x320 transflective color TFT touchscreen",
+    "Connectivity": "HSDPA/UMTS/EDGE/GPRS/GSM, Wi-Fi 802.11b/g, Bluetooth 2.0",
+    "Camera": "2.0 MP with up to 8x digital zoom and video capture",
+    "Battery": "1500mAh, up to 5 hours talk time, 250 hours standby",
+    "Storage": "256MB (100MB user available), expandable via microSDHC (up to 32GB)",
+    "Dimensions": "60mm x 114mm x 13.5mm, 133g"
+  }
+}

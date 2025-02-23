@@ -1,0 +1,21 @@
+{
+  "title": "iPod Touch",
+  "overview": "The iPod Touch revolutionizes mobile entertainment with its multi-touch interface, widescreen display, and Wi-Fi connectivity for music, video, and web browsing.",
+  "details": [
+    "Features the same multi-touch screen technology as iPhone.",
+    "Pinch to zoom in on photos, scroll through songs and videos with a flick.",
+    "Cover Flow lets you browse your music collection visually.",
+    "Gorgeous 3.5-inch widescreen display with 320x480 resolution.",
+    "Shop the iTunes Wi-Fi Music Store from anywhere with internet access.",
+    "Surf the web using Safari and stream YouTube videos with built-in Wi-Fi."
+  ],
+  "specifications": {
+    "Display": "3.5-inch widescreen LCD",
+    "Resolution": "320x480 pixels",
+    "Connectivity": "Wi-Fi (802.11b/g)",
+    "Audio Formats": "MP3, AAC, WAV, AIFF, Apple Lossless",
+    "Video Formats": "H.264, MPEG-4",
+    "Battery Life": "Up to 22 hours for audio, 5 hours for video",
+    "Storage Options": "Varies by model"
+  }
+}

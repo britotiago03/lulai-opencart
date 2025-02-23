@@ -1,0 +1,22 @@
+{
+  "title": "Canon EOS 5D",
+  "overview": "The Canon EOS 5D defines a new DSLR category by offering a full-frame sensor in a compact body, making it highly appealing to professionals and photography enthusiasts.",
+  "details": [
+    "12.8-megapixel full-frame (35mm) high-resolution sensor.",
+    "Compact design, slightly larger than the EOS 20D.",
+    "Lacks environmental sealing, unlike the EOS-1D series.",
+    "Appeals to professionals looking for a high-quality DSLR in a lighter body.",
+    "Ideal upgrade for EOS 20D owners, but incompatible with EF-S lenses."
+  ],
+  "specifications": {
+    "Sensor": "12.8 MP Full-frame CMOS",
+    "Processor": "DIGIC II",
+    "ISO Range": "100-1600",
+    "Autofocus": "9-point AF system",
+    "LCD Screen": "2.5-inch TFT LCD",
+    "Viewfinder": "Pentaprism with 96% coverage",
+    "Continuous Shooting": "3 fps",
+    "Weight": "895g",
+    "Battery Life": "Up to 800 shots"
+  }
+}

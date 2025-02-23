@@ -1,0 +1,21 @@
+{
+  "title": "Apple iMac",
+  "overview": "The iMac delivers enhanced performance with powerful Intel Core 2 Duo processors and expanded memory, packed into a beautifully slim and stylish all-in-one design.",
+  "details": [
+    "Powered by Intel Core 2 Duo processors for seamless performance.",
+    "Slim, all-in-one design that saves desk space.",
+    "Pre-installed with Mac OS X Leopard and iLife '08.",
+    "Advanced graphics and high-resolution display for stunning visuals.",
+    "Ideal for both creative professionals and everyday users."
+  ],
+  "specifications": {
+    "Processor": "Intel Core 2 Duo",
+    "Memory": "Standard 2GB RAM, expandable",
+    "Storage": "Varies by model",
+    "Operating System": "Mac OS X Leopard",
+    "Graphics": "Integrated high-performance graphics",
+    "Screen": "High-resolution widescreen display",
+    "Connectivity": "Wi-Fi, Bluetooth, USB ports",
+    "Design": "Slim and elegant all-in-one form factor"
+  }
+}

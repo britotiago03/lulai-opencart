@@ -1,0 +1,22 @@
+{
+  "title": "iPod Nano",
+  "overview": "The small iPod with one big idea: video. The world's most popular music player now lets you enjoy movies, TV shows, and more on a brighter, high-resolution display.",
+  "details": [
+    "Compact design with a 2-inch display, 65% brighter than previous models.",
+    "Cover Flow allows easy browsing of music collection by album art.",
+    "Enhanced interface provides a seamless music and video browsing experience.",
+    "Sleek and colorful anodized aluminum and polished stainless steel enclosure.",
+    "Available in five stylish colors.",
+    "Seamless integration with iTunes for managing music, movies, TV shows, and audiobooks.",
+    "Syncs easily with an iPod or iPhone for a streamlined experience."
+  ],
+  "specifications": {
+    "Display": "2-inch high-resolution color LCD",
+    "Storage": "Varies by model",
+    "Battery Life": "Up to 24 hours audio playback, 5 hours video playback",
+    "Audio Formats": "MP3, AAC, WAV, AIFF, Apple Lossless",
+    "Video Formats": "H.264, MPEG-4",
+    "Connectivity": "USB 2.0, 3.5mm headphone jack",
+    "Colors": "Available in five colors"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "title": "Nikon D300",
+  "overview": "The Nikon D300 is a 12.3-megapixel professional digital SLR camera that combines high-end performance with advanced technologies inherited from the Nikon D3.",
+  "details": [
+    "Equipped with a 12.3-effective-megapixel sensor for high-resolution images.",
+    "Features Nikon's exclusive EXPEED Image Processing System for speed and efficiency.",
+    "New 51-point autofocus system with 3D Focus Tracking for precision shooting.",
+    "Includes two LiveView shooting modes for composing shots using the LCD monitor.",
+    "Scene Recognition System improves autofocus, autoexposure, and auto white balance.",
+    "Lightning-fast response with a 0.13-second startup time and 45-millisecond shutter lag.",
+    "Capable of 6 frames per second, expandable to 8 fps with optional MB-D10 battery pack.",
+    "Continuous shooting of up to 100 shots at full 12.3MP resolution.",
+    "Advanced highlight and color analysis for superior exposure accuracy.",
+    "Perfect for professionals seeking a high-performance, agile DSLR."
+  ],
+  "specifications": {
+    "Sensor": "12.3 MP CMOS sensor",
+    "Autofocus": "51-point AF with 3D Focus Tracking",
+    "ISO Range": "200-3200 (expandable to 100-6400)",
+    "Continuous Shooting": "6 fps (8 fps with MB-D10 battery pack)",
+    "LiveView": "Dual-mode LiveView for LCD framing",
+    "Storage": "CompactFlash (CF) card slot",
+    "Video": "No video recording",
+    "Weight": "825g (body only)"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "title": "MacBook Air",
+  "overview": "MacBook Air is an ultrathin, ultraportable laptop that redefines mobile computing with its innovative design and wireless capabilities.",
+  "details": [
+    "Ultrathin and ultraportable design for maximum mobility.",
+    "Designed through a breakthrough approach that prioritizes weight reduction.",
+    "Equipped with multiple wireless innovations for seamless connectivity.",
+    "Perfect for professionals and travelers who need a lightweight, high-performance laptop.",
+    "MacBook Air sets a new standard for mobile computing."
+  ],
+  "specifications": {
+    "Processor": "Intel Core 2 Duo",
+    "Weight": "Lightweight and ultra-thin design",
+    "Connectivity": "Wi-Fi, Bluetooth",
+    "Battery Life": "Long-lasting battery for all-day usage",
+    "Operating System": "Mac OS X",
+    "Design": "Sleek, minimalist, and innovative"
+  }
+}

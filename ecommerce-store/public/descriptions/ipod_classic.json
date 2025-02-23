@@ -1,0 +1,20 @@
+{
+  "title": "iPod Classic",
+  "overview": "The iPod Classic provides massive storage capacity, a sleek design, and an intuitive interface for an unparalleled music and video experience.",
+  "details": [
+    "Available in 80GB or 160GB storage options, capable of holding up to 40,000 songs or 200 hours of video.",
+    "Up to 40 hours of battery life for extended listening and viewing.",
+    "Cover Flow lets you browse music visually by flipping through album art.",
+    "Enhanced user interface for a better browsing and playback experience.",
+    "Durable and stylish anodized aluminum and polished stainless steel enclosure."
+  ],
+  "specifications": {
+    "Storage": "80GB or 160GB",
+    "Battery Life": "Up to 40 hours audio, up to 7 hours video",
+    "Display": "2.5-inch color LCD",
+    "Audio Formats": "MP3, AAC, WAV, AIFF, Apple Lossless",
+    "Video Formats": "H.264, MPEG-4",
+    "Dimensions": "103.5 x 61.8 x 10.5 mm",
+    "Weight": "140 grams"
+  }
+}

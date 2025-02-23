@@ -1,0 +1,20 @@
+{
+  "title": "MacBook",
+  "overview": "The new MacBook delivers powerful performance with Intel Core 2 Duo processors, increased storage, and an ultra-portable design.",
+  "details": [
+    "Powered by an Intel Core 2 Duo processor at speeds up to 2.16GHz.",
+    "Comes with 1GB memory standard and larger hard drive options.",
+    "Sleek, 1.08-inch-thin design built for portability and durability.",
+    "Built-in iSight camera for video calls, recordings, and fun photos.",
+    "Innovative MagSafe Power Adapter that detaches safely when pulled.",
+    "Wireless capabilities with Wi-Fi and Bluetooth for seamless connectivity."
+  ],
+  "specifications": {
+    "Processor": "Intel Core 2 Duo (up to 2.16GHz)",
+    "Memory": "1GB RAM (expandable)",
+    "Storage": "Varies by model",
+    "Display": "Glossy widescreen LCD",
+    "Battery Life": "Up to 6 hours",
+    "Connectivity": "Wi-Fi, Bluetooth, USB, MagSafe Power Adapter"
+  }
+}

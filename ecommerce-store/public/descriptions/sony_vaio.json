@@ -1,0 +1,19 @@
+{
+  "title": "Sony VAIO",
+  "overview": "The Sony VAIO is a next-generation notebook powered by Intel® Centrino® 2 processor technology, offering unparalleled speed, expanded connectivity, and enhanced multimedia support.",
+  "details": [
+    "Equipped with Intel® Centrino® 2 processor technology for exceptional speed and efficiency.",
+    "Provides expanded wireless connectivity for seamless internet access.",
+    "Enhanced multimedia support ensures a rich entertainment experience.",
+    "Optimized for greater energy efficiency, extending battery life.",
+    "Integrated high-performance components for professional-grade computing.",
+    "Ideal for multitasking, gaming, and high-performance applications."
+  ],
+  "specifications": {
+    "Processor": "Intel® Centrino® 2",
+    "Wireless Connectivity": "Expanded support for high-speed internet access",
+    "Multimedia": "Enhanced support for rich entertainment and high-definition content",
+    "Battery Life": "Optimized energy efficiency for extended usage",
+    "Performance": "Seamless integration of high-performance essentials for professional computing"
+  }
+}

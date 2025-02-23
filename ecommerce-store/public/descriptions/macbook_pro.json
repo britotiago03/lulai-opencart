@@ -1,0 +1,24 @@
+{
+  "title": "MacBook Pro",
+  "overview": "The MacBook Pro is designed for professionals who need power, speed, and graphics performance with the latest Intel architecture and leading-edge features.",
+  "details": [
+    "Powered by Intel's most advanced Core 2 Duo processors, offering over 50% more speed than previous models.",
+    "Supports up to 4GB of RAM for enhanced multitasking and performance.",
+    "Equipped with the NVIDIA GeForce 8600M GT for exceptional graphics processing.",
+    "Available with a high-resolution 17-inch display option (1920x1200 resolution).",
+    "Features a magnetic power connection for improved durability and safety.",
+    "Includes an illuminated keyboard with an ambient light sensor for low-light environments.",
+    "Built-in iSight camera for video conferencing and recording.",
+    "Comes with FireWire 800, DVI, and other high-bandwidth peripheral connections.",
+    "Utilizes 802.11n wireless technology, offering up to 5x the speed and 2x the range of previous models."
+  ],
+  "specifications": {
+    "Processor": "Intel Core 2 Duo (50% faster than original MacBook Pro)",
+    "Graphics": "NVIDIA GeForce 8600M GT",
+    "Display": "Up to 17-inch with 1920x1200 resolution",
+    "RAM": "Supports up to 4GB",
+    "Connectivity": "FireWire 800, DVI, Wi-Fi 802.11n, Bluetooth",
+    "Battery Life": "Optimized for extended use",
+    "Additional Features": "iSight camera, ambient light sensor, backlit keyboard"
+  }
+}

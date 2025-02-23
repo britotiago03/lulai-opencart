@@ -1,0 +1,26 @@
+{
+  "title": "HTC Touch HD",
+  "overview": "The HTC Touch HD redefines mobile functionality with its sleek design, high-resolution touchscreen, and powerful hardware, offering an unmatched multimedia and business experience.",
+  "details": [
+    "3.8-inch WVGA touchscreen with crisp high-definition clarity.",
+    "Runs on Windows Mobile Professional 6.1.",
+    "Ultrafast 3.5G connectivity for seamless browsing and streaming.",
+    "Integrated GPS and A-GPS support for navigation.",
+    "5-megapixel rear camera with auto-focus.",
+    "Advanced HTC TouchFLO™ 3D control interface for smooth navigation.",
+    "Supports multiple audio and video formats for entertainment on the go.",
+    "Expandable storage via microSDHC card (up to 32GB supported)."
+  ],
+  "specifications": {
+    "Processor": "Qualcomm® MSM 7201A™ 528 MHz",
+    "Operating System": "Windows Mobile® 6.1 Professional",
+    "Memory": "512 MB ROM, 288 MB RAM",
+    "Screen": "3.8-inch TFT-LCD, 480x800 resolution",
+    "Connectivity": "HSDPA/WCDMA, Quad-band GSM, Wi-Fi 802.11 b/g, Bluetooth 2.0",
+    "Camera": "5MP rear camera, VGA front camera",
+    "Battery": "1350 mAh removable Lithium-ion",
+    "Ports": "MicroUSB 2.0, 3.5mm audio jack",
+    "Weight": "146.4 grams",
+    "Special Features": "FM Radio, G-Sensor"
+  }
+}

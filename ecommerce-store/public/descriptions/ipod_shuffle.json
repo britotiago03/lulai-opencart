@@ -1,0 +1,22 @@
+{
+  "title": "iPod Shuffle",
+  "overview": "The world's most wearable music player, iPod Shuffle lets you take up to 240 songs with you anywhere in a lightweight, clip-on design.",
+  "details": [
+    "Clip-on design for maximum portability and convenience.",
+    "Holds up to 240 songs, making it perfect for workouts and on-the-go listening.",
+    "Available in five vibrant colors, including four new hues.",
+    "iTunes autofill feature creates a fresh playlist every time you sync.",
+    "Shuffle mode for a dynamic listening experience.",
+    "Includes an easy-to-use control pad for navigating songs.",
+    "USB dock for quick charging and syncing with iTunes.",
+    "Up to 12 hours of skip-free music playback."
+  ],
+  "specifications": {
+    "Storage": "Varies by model",
+    "Battery Life": "Up to 12 hours of continuous playback",
+    "Dimensions": "Very compact, lightweight design",
+    "Audio Formats": "MP3, AAC, WAV, AIFF, Apple Lossless",
+    "Connectivity": "USB dock for charging and syncing",
+    "Colors": "Available in five colors"
+  }
+}
