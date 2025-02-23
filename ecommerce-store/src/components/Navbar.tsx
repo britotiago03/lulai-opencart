@@ -10,7 +10,9 @@ export default function Navbar() {
         <nav className="flex justify-between p-4 bg-gray-800 text-white">
             <Link href="/" className="text-lg font-bold">My App</Link>
 
-            <div>
+            <div className="flex gap-4">
+                <Link href="/products" className="px-4 py-2 bg-gray-700 rounded">Products</Link>
+
                 {session ? (
                     <div className="flex items-center gap-4">
                         <p>Welcome, {session.user?.name}</p>
@@ -22,10 +24,10 @@ export default function Navbar() {
                         </button>
                     </div>
                 ) : (
-                    <div className="flex gap-4">
+                    <>
                         <Link href="/auth/login" className="px-4 py-2 bg-blue-500 rounded">Login</Link>
                         <Link href="/auth/signup" className="px-4 py-2 bg-green-500 rounded">Sign Up</Link>
-                    </div>
+                    </>
                 )}
             </div>
         </nav>

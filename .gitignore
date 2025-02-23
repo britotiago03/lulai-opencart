@@ -33,7 +33,7 @@ ecommerce-store/yarn-error.log*
 ecommerce-store/.pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
-ecommerce-store/.env*
+ecommerce-store/.env.local
 
 # vercel
 ecommerce-store/.vercel
