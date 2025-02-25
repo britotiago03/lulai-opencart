@@ -1,3 +1,4 @@
+/* chatbot-platform/src/lib/chatbots/types.ts */
 export interface Chatbot {
     id: string;
     name: string;

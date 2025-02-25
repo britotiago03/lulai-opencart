@@ -1,5 +1,7 @@
+/* chatbot-platform/src/app/dashboard/chatbots/page.tsx */
 import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import ChatbotList from "@/components/chatbots/ChatbotList";
 
 export default function ChatbotsPage() {
     return (
@@ -26,6 +28,7 @@ export default function ChatbotsPage() {
                     </CardContent>
                 </Card>
             </div>
+            <ChatbotList />
         </div>
     );
 }
