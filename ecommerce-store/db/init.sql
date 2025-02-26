@@ -40,6 +40,7 @@ CREATE TABLE products (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     brand TEXT NOT NULL,
+    category TEXT NOT NULL DEFAULT 'Uncategorized',
     price DOUBLE PRECISION NOT NULL,
     images JSONB NOT NULL,
     description_file TEXT NOT NULL
@@ -54,24 +55,19 @@ CREATE TABLE cart (
 );
 
 -- Insert sample products with reference to JSON description files
-INSERT INTO products (name, brand, price, images, description_file) VALUES
+INSERT INTO products (name, brand, category, price, images, description_file) VALUES
 (
     'Canon EOS 5D',
     'Canon',
+    'Cameras',
     98.00,
     '["/images/products/canon_eos_5d/canon_eos_5d_1.jpg", "/images/products/canon_eos_5d/canon_eos_5d_2.jpg", "/images/products/canon_eos_5d/canon_eos_5d_3.jpg"]',
     '/descriptions/canon_eos_5d.json'
 ),
 (
-    'HP LP3065 Monitor',
-    'HP',
-    122.00,
-    '["/images/products/hp_lp3065/hp_lp3065_1.jpg", "/images/products/hp_lp3065/hp_lp3065_2.jpg", "/images/products/hp_lp3065/hp_lp3065_3.jpg"]',
-    '/descriptions/hp_lp3065.json'
-),
-(
     'HTC Touch HD',
     'HTC',
+    'Smartphones',
     122.00,
     '["/images/products/htc_touch_hd/htc_touch_hd_1.jpg", "/images/products/htc_touch_hd/htc_touch_hd_2.jpg", "/images/products/htc_touch_hd/htc_touch_hd_3.jpg"]',
     '/descriptions/htc_touch_hd.json'
@@ -79,6 +75,7 @@ INSERT INTO products (name, brand, price, images, description_file) VALUES
 (
     'iMac',
     'Apple',
+    'Computers',
     122.00,
     '["/images/products/imac/imac_1.jpg", "/images/products/imac/imac_2.jpg", "/images/products/imac/imac_3.jpg"]',
     '/descriptions/imac.json'
@@ -86,6 +83,7 @@ INSERT INTO products (name, brand, price, images, description_file) VALUES
 (
     'iPhone',
     'Apple',
+    'Smartphones',
     123.20,
     '["/images/products/iphone/iphone_1.jpg", "/images/products/iphone/iphone_2.jpg",
     "/images/products/iphone/iphone_3.jpg", "/images/products/iphone/iphone_4.jpg",
@@ -95,6 +93,7 @@ INSERT INTO products (name, brand, price, images, description_file) VALUES
 (
     'iPod Classic',
     'Apple',
+    'Audio',
     122.00,
     '["/images/products/ipod_classic/ipod_classic_1.jpg", "/images/products/ipod_classic/ipod_classic_2.jpg",
      "/images/products/ipod_classic/ipod_classic_3.jpg", "/images/products/ipod_classic/ipod_classic_4.jpg"]',
@@ -103,6 +102,7 @@ INSERT INTO products (name, brand, price, images, description_file) VALUES
 (
     'iPod Nano',
     'Apple',
+    'Audio',
     122.00,
     '["/images/products/ipod_nano/ipod_nano_1.jpg", "/images/products/ipod_nano/ipod_nano_2.jpg",
     "/images/products/ipod_nano/ipod_nano_3.jpg", "/images/products/ipod_nano/ipod_nano_4.jpg",
@@ -112,6 +112,7 @@ INSERT INTO products (name, brand, price, images, description_file) VALUES
 (
     'iPod Shuffle',
     'Apple',
+    'Audio',
     122.00,
     '["/images/products/ipod_shuffle/ipod_shuffle_1.jpg", "/images/products/ipod_shuffle/ipod_shuffle_2.jpg",
     "/images/products/ipod_shuffle/ipod_shuffle_3.jpg", "/images/products/ipod_shuffle/ipod_shuffle_4.jpg",
@@ -121,6 +122,7 @@ INSERT INTO products (name, brand, price, images, description_file) VALUES
 (
     'iPod Touch',
     'Apple',
+    'Audio',
     122.00,
     '["/images/products/ipod_touch/ipod_touch_1.jpg", "/images/products/ipod_touch/ipod_touch_2.jpg",
     "/images/products/ipod_touch/ipod_touch_3.jpg", "/images/products/ipod_touch/ipod_touch_4.jpg",
@@ -131,6 +133,7 @@ INSERT INTO products (name, brand, price, images, description_file) VALUES
 (
     'MacBook',
     'Apple',
+    'Laptops',
     602.00,
     '["/images/products/macbook/macbook_1.jpg", "/images/products/macbook/macbook_2.jpg",
     "/images/products/macbook/macbook_3.jpg", "/images/products/macbook/macbook_4.jpg",
@@ -140,6 +143,7 @@ INSERT INTO products (name, brand, price, images, description_file) VALUES
 (
     'MacBook Air',
     'Apple',
+    'Laptops',
     1202.00,
     '["/images/products/macbook_air/macbook_air_1.jpg", "/images/products/macbook_air/macbook_air_2.jpg",
     "/images/products/macbook_air/macbook_air_3.jpg", "/images/products/macbook_air/macbook_air_4.jpg"]',
@@ -148,6 +152,7 @@ INSERT INTO products (name, brand, price, images, description_file) VALUES
 (
     'MacBook Pro',
     'Apple',
+    'Laptops',
     2000.00,
     '["/images/products/macbook_pro/macbook_pro_1.jpg", "/images/products/macbook_pro/macbook_pro_2.jpg",
     "/images/products/macbook_pro/macbook_pro_3.jpg", "/images/products/macbook_pro/macbook_pro_4.jpg"]',
@@ -156,6 +161,7 @@ INSERT INTO products (name, brand, price, images, description_file) VALUES
 (
     'Nikon D300',
     'Nikon',
+    'Cameras',
     98.00,
     '["/images/products/nikon_d300/nikon_d300_1.jpg", "/images/products/nikon_d300/nikon_d300_2.jpg",
     "/images/products/nikon_d300/nikon_d300_3.jpg", "/images/products/nikon_d300/nikon_d300_4.jpg",
@@ -165,6 +171,7 @@ INSERT INTO products (name, brand, price, images, description_file) VALUES
 (
     'Palm Treo Pro',
     'Palm',
+    'Smartphones',
     337.99,
     '["/images/products/palm_treo_pro/palm_treo_pro_1.jpg", "/images/products/palm_treo_pro/palm_treo_pro_2.jpg",
     "/images/products/palm_treo_pro/palm_treo_pro_3.jpg"]',
@@ -173,6 +180,7 @@ INSERT INTO products (name, brand, price, images, description_file) VALUES
 (
     'Samsung Galaxy Tab 10.1',
     'Samsung',
+    'Tablets',
     241.99,
     '["/images/products/samsung_tab/samsung_tab_1.jpg", "/images/products/samsung_tab/samsung_tab_2.jpg",
     "/images/products/samsung_tab/samsung_tab_3.jpg", "/images/products/samsung_tab/samsung_tab_4.jpg",
@@ -183,6 +191,7 @@ INSERT INTO products (name, brand, price, images, description_file) VALUES
 (
     'Sony VAIO',
     'Sony',
+    'Laptops',
     1202.00,
     '["/images/products/sony_vaio/sony_vaio_1.jpg", "/images/products/sony_vaio/sony_vaio_2.jpg",
     "/images/products/sony_vaio/sony_vaio_3.jpg", "/images/products/sony_vaio/sony_vaio_4.jpg",
@@ -195,3 +204,6 @@ CREATE INDEX IF NOT EXISTS users_email_idx ON users(email);
 CREATE INDEX IF NOT EXISTS sessions_token_idx ON sessions(session_token);
 CREATE INDEX IF NOT EXISTS subscriptions_user_id_idx ON subscriptions(user_id);
 CREATE INDEX IF NOT EXISTS products_brand_idx ON products(brand);
+CREATE INDEX IF NOT EXISTS products_category_idx ON products(category);
+CREATE INDEX IF NOT EXISTS products_price_idx ON products(price);
+CREATE INDEX IF NOT EXISTS products_name_idx ON products(name);
