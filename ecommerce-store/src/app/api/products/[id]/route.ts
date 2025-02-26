@@ -1,26 +1,43 @@
 import { NextResponse } from "next/server";
 import pool from "@/lib/db";
 
-export async function GET(_: Request, context: { params: { id?: string } }) {
+// Update the function signature to match Next.js expectations
+export async function GET(
+    _: Request,
+    { params }: { params: Promise<{ id: string }> | { id: string } }
+) {
     try {
-        const { params } = context; // ✅ No 'await' needed
+        // Use a more resilient approach to handling params
+        const resolvedParams = 'then' in params ? await params : params;
+        const id = resolvedParams.id;
 
-        if (!params?.id) {
+        if (!id) {
             return NextResponse.json({ error: "Invalid product ID" }, { status: 400 });
         }
 
-        const productId = parseInt(params.id, 10);
+        // Parse ID safely
+        const productId = Number(id);
         if (isNaN(productId)) {
             return NextResponse.json({ error: "Invalid product ID" }, { status: 400 });
         }
 
-        const result = await pool.query("SELECT * FROM products WHERE id = $1 LIMIT 1", [productId]);
-
-        if (result.rows.length === 0) {
+        // Fetch product details
+        const productResult = await pool.query("SELECT * FROM products WHERE id = $1 LIMIT 1", [productId]);
+        if (productResult.rows.length === 0) {
             return NextResponse.json({ error: "Product not found" }, { status: 404 });
         }
+        const product = productResult.rows[0];
 
-        return NextResponse.json(result.rows[0], { status: 200 });
+        // Fetch reviews
+        const reviewsResult = await pool.query(
+            `SELECT reviews.rating, reviews.comment, users.name AS reviewer
+            FROM reviews
+            JOIN users ON reviews.user_id = users.id
+            WHERE reviews.product_id = $1`,
+            [productId]
+        );
+
+        return NextResponse.json({ ...product, reviews: reviewsResult.rows }, { status: 200 });
     } catch (error) {
         console.error("Error fetching product:", error);
         return NextResponse.json(
