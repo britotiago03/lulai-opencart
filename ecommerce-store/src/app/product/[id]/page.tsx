@@ -11,6 +11,7 @@ interface Product {
     price: number;
     images: string[];
     description_file: string;
+    reviews: { rating: number; comment: string; reviewer: string }[];
 }
 
 interface Description {
@@ -82,28 +83,44 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
 
     return (
         <div className="container mx-auto p-8">
-            <h1 className="text-3xl font-bold">{product.name}</h1>
-            <p className="text-gray-500">{product.brand}</p>
-            <p className="text-lg font-semibold mt-2">${product.price.toFixed(2)}</p>
-
-            {/* ✅ Image Fix */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-                {product.images.map((image, index) => (
-                    <div key={index} className="relative w-[200px] h-[150px]">
-                        <Image
-                            src={image}
-                            alt={product.name}
-                            width={200} // ✅ Fixed width
-                            height={150} // ✅ Fixed height
-                            style={{ objectFit: "contain" }}
-                            priority={index === 0}
-                        />
+            {/* Product Info */}
+            <div className="flex flex-col md:flex-row gap-8">
+                {/* Product Images */}
+                <div className="w-full md:w-1/2">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {product.images.map((image, index) => (
+                            <div key={index} className="relative w-full h-48">
+                                <Image
+                                    src={image}
+                                    alt={product.name}
+                                    layout="fill"
+                                    objectFit="contain"
+                                    className="border border-gray-200 rounded-lg shadow"
+                                />
+                            </div>
+                        ))}
                     </div>
-                ))}
+                </div>
+
+                {/* Product Details */}
+                <div className="w-full md:w-1/2 space-y-4">
+                    <h1 className="text-3xl font-bold">{product.name}</h1>
+                    <p className="text-gray-500">{product.brand}</p>
+                    <p className="text-2xl font-semibold">${product.price.toFixed(2)}</p>
+
+                    {/* Add to Cart Button */}
+                    <button
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition"
+                        onClick={() => alert(`Added ${product.name} to cart!`)}
+                    >
+                        🛒 Add to Cart
+                    </button>
+                </div>
             </div>
 
+            {/* Product Description */}
             {description && (
-                <div className="mt-4">
+                <div className="mt-8">
                     <h2 className="text-2xl font-bold">{description.title}</h2>
                     <p className="mt-2">{description.overview}</p>
 
@@ -124,6 +141,24 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
                     </ul>
                 </div>
             )}
+
+            {/* Reviews Section */}
+            <div className="mt-10">
+                <h2 className="text-2xl font-bold">Customer Reviews</h2>
+                {product.reviews.length > 0 ? (
+                    <ul className="mt-4 space-y-4">
+                        {product.reviews.map((review, index) => (
+                            <li key={index} className="border p-4 rounded-lg shadow-md bg-gray-50">
+                                <p className="text-lg font-semibold">{review.reviewer}</p>
+                                <p className="text-yellow-500">⭐ {review.rating}/5</p>
+                                <p className="text-gray-700">{review.comment}</p>
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p className="text-gray-500 mt-2">No reviews yet.</p>
+                )}
+            </div>
         </div>
     );
 }
