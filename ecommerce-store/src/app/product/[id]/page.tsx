@@ -3,6 +3,11 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Pagination, Navigation } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/navigation";
 
 interface Product {
     id: number;
@@ -30,7 +35,6 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // ✅ Unwrap params promise
     useEffect(() => {
         void (async () => {
             const resolvedParams = await params;
@@ -38,7 +42,6 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
         })();
     }, [params]);
 
-    // ✅ Fetch product data after params are loaded
     useEffect(() => {
         if (!productId) return;
         setLoading(true);
@@ -73,7 +76,7 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
             }
         };
 
-        void fetchProduct(); // ✅ Indicate intentional async call
+        void fetchProduct();
     }, [productId]);
 
     if (!productId) return <p className="text-center text-gray-500">Loading product details...</p>;
@@ -83,32 +86,40 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
 
     return (
         <div className="container mx-auto p-8">
-            {/* Product Info */}
             <div className="flex flex-col md:flex-row gap-8">
-                {/* Product Images */}
+                {/* ✅ Product Image Slider */}
                 <div className="w-full md:w-1/2">
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <Swiper
+                        modules={[Autoplay, Pagination, Navigation]}
+                        autoplay={{ delay: 3000 }}
+                        pagination={{ clickable: true }}
+                        navigation
+                        loop
+                        className="w-full rounded-lg"
+                    >
                         {product.images.map((image, index) => (
-                            <div key={index} className="relative w-full h-48">
-                                <Image
-                                    src={image}
-                                    alt={product.name}
-                                    layout="fill"
-                                    objectFit="contain"
-                                    className="border border-gray-200 rounded-lg shadow"
-                                />
-                            </div>
+                            <SwiperSlide key={index} className="flex justify-center">
+                                <div className="relative w-full h-[350px]">
+                                    <Image
+                                        src={image}
+                                        alt={product.name}
+                                        layout="fill"
+                                        objectFit="contain"
+                                        className="rounded-lg bg-white"
+                                    />
+                                </div>
+                            </SwiperSlide>
                         ))}
-                    </div>
+                    </Swiper>
                 </div>
 
-                {/* Product Details */}
+                {/* ✅ Product Details */}
                 <div className="w-full md:w-1/2 space-y-4">
                     <h1 className="text-3xl font-bold">{product.name}</h1>
                     <p className="text-gray-500">{product.brand}</p>
                     <p className="text-2xl font-semibold">${product.price.toFixed(2)}</p>
 
-                    {/* Add to Cart Button */}
+                    {/* ✅ Add to Cart Button */}
                     <button
                         className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition"
                         onClick={() => alert(`Added ${product.name} to cart!`)}
@@ -118,7 +129,7 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
                 </div>
             </div>
 
-            {/* Product Description */}
+            {/* ✅ Product Description */}
             {description && (
                 <div className="mt-8">
                     <h2 className="text-2xl font-bold">{description.title}</h2>
@@ -142,7 +153,7 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
                 </div>
             )}
 
-            {/* Reviews Section */}
+            {/* ✅ Reviews Section */}
             <div className="mt-10">
                 <h2 className="text-2xl font-bold">Customer Reviews</h2>
                 {product.reviews.length > 0 ? (

@@ -19,8 +19,6 @@ interface Product {
 
 export default function Home() {
     const { data: session } = useSession();
-
-    // ✅ Explicitly type products as an array of Product objects
     const [products, setProducts] = useState<Product[]>([]);
 
     useEffect(() => {
@@ -31,14 +29,14 @@ export default function Home() {
                     console.error("Failed to fetch products:", res.statusText);
                     return;
                 }
-                const data: Product[] = await res.json(); // ✅ Ensure TypeScript recognizes it as Product[]
+                const data: Product[] = await res.json();
                 setProducts(data.slice(0, 4)); // Show only 4 featured products
             } catch (error) {
                 console.error("Error fetching products:", error);
             }
         };
 
-        fetchProducts().catch((err) => console.error("Unhandled error:", err)); // Explicitly handling the returned Promise
+        fetchProducts().catch((err) => console.error("Unhandled error:", err));
     }, []);
 
     const banners = [
@@ -78,14 +76,14 @@ export default function Home() {
                 )}
             </section>
 
-            {/* 🔹 Banner Carousel (Fixed Width & Proper Arrows) */}
+            {/* 🔹 Banner Carousel */}
             <section className="mb-8">
                 <div className="max-w-screen-lg mx-auto relative">
                     <Swiper
                         modules={[Autoplay, Pagination, Navigation]}
                         autoplay={{ delay: 4000 }}
                         pagination={{ clickable: true }}
-                        navigation // ✅ Enables Swiper's built-in navigation arrows
+                        navigation
                         loop
                         className="w-full"
                     >
@@ -107,13 +105,30 @@ export default function Home() {
             {/* 🔹 Featured Products */}
             <section className="mb-8">
                 <h2 className="text-2xl font-semibold mb-4">Featured Products</h2>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                     {products.map((product) => (
-                        <div key={product.id} className="border rounded-lg p-2 shadow-sm">
-                            <Image src={product.images[0]} alt={product.name} width={120} height={120} className="mx-auto object-contain" />
-                            <h3 className="text-sm font-semibold text-center mt-2">{product.name}</h3>
-                            <p className="text-center text-gray-600 text-sm">${product.price.toFixed(2)}</p>
-                        </div>
+                        <Link key={product.id} href={`/product/${product.id}`} className="group">
+                            <div className="border rounded-lg p-4 shadow-sm hover:shadow-md transition duration-300 flex flex-col items-center text-center">
+                                {/* ✅ Fixed Image Sizes */}
+                                <div className="relative w-[200px] h-[200px]">
+                                    <Image
+                                        src={product.images[0]}
+                                        alt={product.name}
+                                        layout="fill"
+                                        objectFit="contain"
+                                        className="rounded-lg bg-white"
+                                    />
+                                </div>
+
+                                <h3 className="text-sm font-semibold text-center mt-2">{product.name}</h3>
+                                <p className="text-center text-gray-600 text-sm">${product.price.toFixed(2)}</p>
+
+                                {/* ✅ Clickable Hover Effect */}
+                                <div className="opacity-0 group-hover:opacity-100 transition duration-300 mt-2">
+                                    <span className="text-blue-500 underline">View Product →</span>
+                                </div>
+                            </div>
+                        </Link>
                     ))}
                 </div>
             </section>
