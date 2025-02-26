@@ -172,7 +172,7 @@ export default function ResponseEditor({ responses, onChange, industry }: Respon
                                         value={newTrigger}
                                         onChange={(e) => setNewTrigger(e.target.value)}
                                         placeholder="e.g. shipping, return policy, opening hours"
-                                        className="w-full p-2 border rounded-md"
+                                        className="w-full p-2 border rounded-md bg-background text-foreground"
                                     />
                                 </div>
 
@@ -186,7 +186,7 @@ export default function ResponseEditor({ responses, onChange, industry }: Respon
                                         onChange={(e) => setNewResponse(e.target.value)}
                                         placeholder="Your chatbot's answer to this query"
                                         rows={3}
-                                        className="w-full p-2 border rounded-md"
+                                        className="w-full p-2 border rounded-md bg-background text-foreground"
                                     />
                                 </div>
 

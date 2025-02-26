@@ -1,5 +1,5 @@
 // src/lib/ai/openai.ts
-import { OpenAI } from 'openai';
+import OpenAI from 'openai';
 
 // Initialize the OpenAI client
 const openai = new OpenAI({
@@ -35,5 +35,38 @@ export async function enhanceResponse(
         console.error('Error enhancing response with AI:', error);
         // Return the original response if there's an error
         return response;
+    }
+}
+
+// Add this new function
+export async function getGeneralResponse(
+    userQuery: string,
+    industry: string,
+    chatbotName: string = 'Assistant'
+): Promise<string> {
+    try {
+        const completion = await openai.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: [
+                {
+                    role: "system",
+                    content: `You are ${chatbotName}, a friendly and helpful customer service chatbot for a ${industry} business.
+          Provide concise, accurate, and helpful answers to customer questions.
+          If you don't know something specific about the business, provide general information that would be helpful.
+          Keep responses under 100 words and maintain a friendly, professional tone.`
+                },
+                {
+                    role: "user",
+                    content: userQuery
+                }
+            ],
+            temperature: 0.7,
+            max_tokens: 150
+        });
+
+        return completion.choices[0].message.content || "I'm sorry, I don't have information about that.";
+    } catch (error) {
+        console.error('Error getting general AI response:', error);
+        return "I'm sorry, I couldn't process your request at the moment. How else can I assist you?";
     }
 }

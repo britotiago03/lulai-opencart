@@ -1,0 +1,359 @@
+// src/app/api/chatbots/[id]/interact/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { getChatbotById } from '@/lib/chatbots/db';
+import { enhancedMatchUserInput, getAIResponse } from '@/lib/chatbots/matcher';
+
+export async function POST(request: NextRequest, context: { params: { id: string } }) {
+    try {
+        const params = context.params;
+        const id = params.id;
+        const { message } = await request.json();
+
+        if (!message) {
+            return NextResponse.json(
+                { error: 'Message is required' },
+                { status: 400 }
+            );
+        }
+
+        // Get the chatbot
+        const chatbot = await getChatbotById(id);
+        if (!chatbot) {
+            return NextResponse.json(
+                { error: 'Chatbot not found' },
+                { status: 404 }
+            );
+        }
+
+        // Use the enhanced matcher for better intent detection
+        const matchResult = enhancedMatchUserInput(message, chatbot.responses);
+
+        // If we have a good match (confidence threshold), use it
+        if (matchResult.matched && (matchResult.confidence === undefined || matchResult.confidence >= 0.5)) {
+            // Log for debugging
+            console.log('Matched with confidence:', matchResult.confidence);
+
+            return NextResponse.json({
+                response: matchResult.response,
+                matched: true,
+                isAI: matchResult.isAI,
+                confidence: matchResult.confidence
+            });
+        }
+
+        // For low confidence matches or no matches, use OpenAI with context
+        const aiResponse = await getAIResponse(message, chatbot.industry, chatbot.name);
+
+        return NextResponse.json({
+            response: aiResponse,
+            matched: false,
+            isAI: true,
+            isGeneralAI: true
+        });
+
+    } catch (error) {
+        console.error('Error processing chatbot interaction:', error);
+        return NextResponse.json(
+            { error: 'Failed to process your message' },
+            { status: 500 }
+        );
+    }
+}
+
+
+
+
+
+
+
+// src/lib/chatbots/matcher.ts
+import { ChatbotResponse } from '@/lib/db/schema';
+import { enhanceResponse, getGeneralResponse } from "@/lib/ai/openai";
+
+interface MatchResult {
+    matched: boolean;
+    response?: string;
+    isAI?: boolean;
+    confidence?: number; // Adding confidence score
+}
+
+// Define common intents that apply across different businesses
+const COMMON_INTENTS = {
+    // Order-related intents
+    NEW_ORDER: [
+        'place order', 'make order', 'new order', 'order online',
+        'can i order', 'how to order', 'want to order', 'ordering',
+        'place an order', 'make an order', 'order for tomorrow'
+    ],
+    ORDER_STATUS: [
+        'order status', 'where is my order', 'track order', 'track my order',
+        'check order', 'find my order', 'delivery status'
+    ],
+    // Hours & location intents
+    HOURS: [
+        'hours', 'opening hours', 'closing time', 'when do you open',
+        'when do you close', 'business hours', 'open today'
+    ],
+    LOCATION: [
+        'location', 'address', 'where are you', 'directions',
+        'how to get there', 'where is your store'
+    ],
+    // Policy intents
+    RETURN_POLICY: [
+        'return policy', 'returns', 'how to return', 'can i return',
+        'exchange policy', 'refund policy', 'refund'
+    ],
+    // Support intents
+    CONTACT: [
+        'contact', 'customer service', 'speak to someone', 'phone number',
+        'email', 'support', 'help'
+    ],
+
+    SERVICES: [
+        'services', 'offer', 'what do you do', 'what can you do',
+        'what do you offer', 'what can i get'
+    ],
+    MENU_ITEMS: [
+        'menu items', 'dishes', 'food', 'specials', 'signature dishes',
+        'popular items', 'recommendations'
+    ],
+    RESERVATIONS: [
+        'reservation', 'booking', 'book a table', 'reserve',
+        'make a reservation'
+    ],
+    PRODUCTS: [
+        'products', 'plants', 'sell', 'items', 'inventory',
+        'what do you sell', 'what plants', 'types of plants'
+    ],
+    PLANT_CARE: [
+        'plant care', 'care tips', 'how to care', 'watering',
+        'sunlight', 'fertilize', 'soil', 'repot', 'maintenance'
+    ],
+    DELIVERY: [
+        'delivery', 'deliver', 'ship', 'shipping',
+        'home delivery', 'get delivered', 'bring to my home'
+    ]
+    // Add more common intents as needed
+};
+
+/**
+ * Enhanced matcher that considers intent detection for all types of businesses
+ */
+export function enhancedMatchUserInput(userInput: string, responses: ChatbotResponse[]): MatchResult {
+    const inputLower = userInput.toLowerCase().trim();
+
+    // debugging
+    console.log('User input:', userInput);
+
+    // 1. First try exact phrase matching (highest confidence)
+    for (const response of responses) {
+        if (inputLower === response.trigger.toLowerCase()) {
+            return {
+                matched: true,
+                response: response.response,
+                isAI: response.isAI,
+                confidence: 1.0
+            };
+        }
+    }
+
+    // 2. Then try intent-based matching
+    const detectedIntents = detectIntents(inputLower);
+    // debuggin
+    console.log('Detected intents:', detectedIntents);
+
+    if (detectedIntents.length > 0) {
+        // Sort responses by relevance to detected intents
+        const sortedResponses = rankResponsesByIntent(responses, detectedIntents);
+        // debugging
+        console.log('Ranked responses:', sortedResponses.map(r => r.trigger).slice(0, 3));
+
+        if (sortedResponses.length > 0) {
+            const bestMatch = sortedResponses[0];
+            return {
+                matched: true,
+                response: bestMatch.response,
+                isAI: bestMatch.isAI,
+                confidence: 0.8
+            };
+        }
+    }
+
+    // 3. Fall back to keyword matching (lowest confidence)
+    for (const response of responses) {
+        const keywords = response.trigger
+            .toLowerCase()
+            .split(/\s+/)
+            .filter(keyword => keyword.length > 2);
+
+        // Count how many keywords match
+        const matchCount = keywords.filter(keyword => inputLower.includes(keyword)).length;
+
+        if (matchCount > 0) {
+            // Calculate confidence based on how many keywords matched
+            const confidence = Math.min(0.7, 0.3 + (matchCount / keywords.length) * 0.4);
+
+            return {
+                matched: true,
+                response: response.response,
+                isAI: response.isAI,
+                confidence
+            };
+        }
+    }
+
+    // No match found
+    return { matched: false, confidence: 0 };
+}
+
+/**
+ * Detect which common intents might apply to user input
+ */
+function detectIntents(input: string): {intent: string, score: number}[] {
+    const results: {intent: string, score: number}[] = [];
+    const words = input.split(/\s+/);
+
+    // Check each intent category
+    for (const [intent, phrases] of Object.entries(COMMON_INTENTS)) {
+        let highestScore = 0;
+
+        // Check for exact phrase matches (highest priority)
+        for (const phrase of phrases) {
+            if (input.includes(phrase)) {
+                // Longer phrase matches are more relevant
+                const score = 0.7 + (phrase.length / input.length) * 0.3;
+                highestScore = Math.max(highestScore, score);
+            }
+        }
+
+        // Check for word-level matches if no exact match
+        if (highestScore === 0) {
+            let matchCount = 0;
+            let totalWords = 0;
+
+            for (const phrase of phrases) {
+                const phraseWords = phrase.split(/\s+/).filter(w => w.length > 2);
+                totalWords += phraseWords.length;
+
+                for (const pWord of phraseWords) {
+                    if (words.some(word => word === pWord || word.includes(pWord))) {
+                        matchCount++;
+                    }
+                }
+            }
+
+            if (matchCount > 0 && totalWords > 0) {
+                highestScore = 0.4 + (matchCount / totalWords) * 0.3;
+            }
+        }
+
+        if (highestScore > 0) {
+            results.push({ intent, score: highestScore });
+        }
+    }
+
+    // Sort by score descending
+    return results.sort((a, b) => b.score - a.score);
+}
+
+/**
+ * Find the most relevant responses based on detected intents
+ */
+function rankResponsesByIntent(
+    responses: ChatbotResponse[],
+    intents: {intent: string, score: number}[]
+): ChatbotResponse[] {
+    // Map of intent to relevant keywords to look for in triggers
+    const intentKeywords: Record<string, string[]> = {
+        'SERVICES': ['service', 'offer', 'provide', 'workshop'],
+        'PRODUCTS': ['product', 'plant', 'sell', 'item'],
+        'HOURS': ['hour', 'open', 'close', 'time'],
+        'LOCATION': ['location', 'address', 'where', 'find'],
+        'DELIVERY': ['delivery', 'deliver', 'shipping', 'ship'],
+        'CONTACT': ['contact', 'phone', 'email', 'reach'],
+        'PLANT_CARE': ['care', 'maintain', 'water', 'sunlight', 'fertilize'],
+        'RETURN_POLICY': ['return', 'refund', 'exchange', 'policy'],
+        'NEW_ORDER': ['order', 'buy', 'purchase'],
+        'WORKSHOP': ['workshop', 'class', 'event', 'learn']
+    };
+
+    // Score each response based on how well it matches the detected intents
+    return responses
+        .map(response => {
+            const triggerLower = response.trigger.toLowerCase();
+            let score = 0;
+
+            // For each detected intent
+            for (const {intent, score: intentScore} of intents) {
+                const keywords = intentKeywords[intent] || [];
+
+                // Check if this response's trigger contains keywords related to this intent
+                for (const keyword of keywords) {
+                    if (triggerLower.includes(keyword)) {
+                        score += intentScore * 0.8; // Boost score for keyword matches
+                        break;
+                    }
+                }
+
+                // Also check for direct intent phrases in trigger
+                const intentPhrases = COMMON_INTENTS[intent as keyof typeof COMMON_INTENTS] || [];
+                for (const phrase of intentPhrases) {
+                    if (triggerLower.includes(phrase)) {
+                        score += intentScore; // Full score for direct phrase matches
+                        break;
+                    }
+                }
+            }
+
+            return { response, score };
+        })
+        .filter(item => item.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .map(item => item.response);
+}
+
+/**
+ * Get a response from OpenAI for general questions
+ */
+export async function getAIResponse(userInput: string, industry: string, chatbotName?: string): Promise<string> {
+    try {
+        return await getGeneralResponse(userInput, industry, chatbotName);
+    } catch (error) {
+        console.error('Error getting AI response:', error);
+        return "I'm sorry, I couldn't process your request at the moment. How else can I assist you?";
+    }
+}
+
+// Keep the original function for backwards compatibility
+export function matchUserInput(userInput: string, responses: ChatbotResponse[]): MatchResult {
+    const inputLower = userInput.toLowerCase().trim();
+
+    // First try exact matches on trigger phrases
+    for (const response of responses) {
+        if (inputLower === response.trigger.toLowerCase()) {
+            return {
+                matched: true,
+                response: response.response,
+                isAI: response.isAI
+            };
+        }
+    }
+
+    // Then look for keywords within the input
+    for (const response of responses) {
+        const keywords = response.trigger
+            .toLowerCase()
+            .split(/\s+/)
+            .filter(keyword => keyword.length > 2);
+
+        if (keywords.some(keyword => inputLower.includes(keyword))) {
+            return {
+                matched: true,
+                response: response.response,
+                isAI: response.isAI
+            };
+        }
+    }
+
+    return { matched: false };
+}
