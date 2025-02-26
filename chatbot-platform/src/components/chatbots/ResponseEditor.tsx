@@ -8,20 +8,55 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 interface ResponseEditorProps {
     responses: ChatbotResponse[];
     onChange: (responses: ChatbotResponse[]) => void;
+    industry: string; // Add this prop
 }
 
-export default function ResponseEditor({ responses, onChange }: ResponseEditorProps) {
+export default function ResponseEditor({ responses, onChange, industry }: ResponseEditorProps) {
     const [newTrigger, setNewTrigger] = useState('');
     const [newResponse, setNewResponse] = useState('');
     const [isAI, setIsAI] = useState(false);
+    const [isEnhancing, setIsEnhancing] = useState(false);
 
-    const handleAddResponse = () => {
+    const handleAddResponse = async () => {
         if (!newTrigger || !newResponse) return;
+
+        let responseText = newResponse;
+
+        // If AI enhancement is selected, call the API
+        if (isAI) {
+            setIsEnhancing(true);
+            try {
+                const response = await fetch('/api/ai/enhance', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        trigger: newTrigger,
+                        response: newResponse,
+                        industry
+                    }),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    responseText = data.enhancedResponse;
+                } else {
+                    console.error('Failed to enhance response with AI');
+                    // Continue with original response
+                }
+            } catch (error) {
+                console.error('Error enhancing response:', error);
+                // Continue with original response
+            } finally {
+                setIsEnhancing(false);
+            }
+        }
 
         const newResponseObj: ChatbotResponse = {
             id: `temp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
             trigger: newTrigger,
-            response: newResponse,
+            response: responseText,
             isAI
         };
 
@@ -37,6 +72,38 @@ export default function ResponseEditor({ responses, onChange }: ResponseEditorPr
     const handleDeleteResponse = (id: string) => {
         const updatedResponses = responses.filter(response => response.id !== id);
         onChange(updatedResponses);
+    };
+
+    // Add a function to enhance an existing response
+    const handleEnhanceExisting = async (id: string, trigger: string, responseText: string) => {
+        try {
+            const response = await fetch('/api/ai/enhance', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    trigger,
+                    response: responseText,
+                    industry
+                }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                // Update the specific response
+                const updatedResponses = responses.map(resp =>
+                    resp.id === id
+                        ? { ...resp, response: data.enhancedResponse, isAI: true }
+                        : resp
+                );
+                onChange(updatedResponses);
+            } else {
+                console.error('Failed to enhance response with AI');
+            }
+        } catch (error) {
+            console.error('Error enhancing response:', error);
+        }
     };
 
     return (
@@ -56,7 +123,7 @@ export default function ResponseEditor({ responses, onChange }: ResponseEditorPr
                                         key={response.id}
                                         className="p-3 border rounded-md flex justify-between items-start"
                                     >
-                                        <div>
+                                        <div className="flex-1">
                                             <div className="flex items-center gap-2 mb-1">
                                                 <span className="text-sm font-medium">Trigger:</span>
                                                 <span className="text-sm">{response.trigger}</span>
@@ -67,16 +134,26 @@ export default function ResponseEditor({ responses, onChange }: ResponseEditorPr
                                             </div>
                                             {response.isAI && (
                                                 <span className="mt-1 inline-block px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded-full">
-                          AI Enhanced
-                        </span>
+                                                    AI Enhanced
+                                                </span>
                                             )}
                                         </div>
-                                        <button
-                                            onClick={() => handleDeleteResponse(response.id)}
-                                            className="text-red-500 hover:text-red-700"
-                                        >
-                                            Delete
-                                        </button>
+                                        <div className="flex gap-2">
+                                            {!response.isAI && (
+                                                <button
+                                                    onClick={() => handleEnhanceExisting(response.id, response.trigger, response.response)}
+                                                    className="text-blue-500 hover:text-blue-700 text-sm"
+                                                >
+                                                    Enhance with AI
+                                                </button>
+                                            )}
+                                            <button
+                                                onClick={() => handleDeleteResponse(response.id)}
+                                                className="text-red-500 hover:text-red-700 text-sm"
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -128,10 +205,10 @@ export default function ResponseEditor({ responses, onChange }: ResponseEditorPr
 
                                 <button
                                     onClick={handleAddResponse}
-                                    disabled={!newTrigger || !newResponse}
+                                    disabled={!newTrigger || !newResponse || isEnhancing}
                                     className="w-full bg-foreground text-background py-2 rounded-md hover:bg-opacity-90 disabled:opacity-50"
                                 >
-                                    Add Response
+                                    {isEnhancing ? 'Enhancing with AI...' : 'Add Response'}
                                 </button>
                             </div>
                         </div>

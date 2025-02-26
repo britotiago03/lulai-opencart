@@ -154,6 +154,7 @@ export default function ChatbotForm({ onSubmit, isSubmitting = false }: ChatbotF
                     <ResponseEditor
                         responses={formData.responses}
                         onChange={handleResponsesChange}
+                        industry={formData.industry}
                     />
 
                     <div className="flex justify-between">

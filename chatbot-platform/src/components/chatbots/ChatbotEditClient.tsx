@@ -217,6 +217,7 @@ export default function ChatbotEditClient({ id }: { id: string }) {
                         <ResponseEditor
                             responses={formData.responses}
                             onChange={handleResponsesChange}
+                            industry={formData.industry}
                         />
                     </CardContent>
                 </Card>
