@@ -34,6 +34,9 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
     const [description, setDescription] = useState<Description | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [quantity, setQuantity] = useState(1);
+    const [addingToCart, setAddingToCart] = useState(false);
+    const [addStatus, setAddStatus] = useState<{ success: boolean; message: string } | null>(null);
 
     useEffect(() => {
         void (async () => {
@@ -79,6 +82,53 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
         void fetchProduct();
     }, [productId]);
 
+    const addToCart = async () => {
+        if (!product) return;
+
+        setAddingToCart(true);
+        setAddStatus(null);
+
+        try {
+            const response = await fetch('/api/cart/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    productId: product.id,
+                    quantity: quantity
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                setAddStatus({
+                    success: true,
+                    message: `${quantity} ${quantity === 1 ? 'item' : 'items'} added to cart!`
+                });
+
+                // Trigger cart update event for navbar
+                window.dispatchEvent(new Event('cart-updated'));
+            } else {
+                setAddStatus({
+                    success: false,
+                    message: data.error || 'Failed to add item to cart'
+                });
+            }
+        } catch (error) {
+            console.error("Error adding to cart:", error);
+            setAddStatus({ success: false, message: 'Network error' });
+        } finally {
+            setAddingToCart(false);
+
+            // Clear status message after 3 seconds
+            setTimeout(() => {
+                setAddStatus(null);
+            }, 3000);
+        }
+    };
+
     if (!productId) return <p className="text-center text-gray-500">Loading product details...</p>;
     if (loading) return <p className="text-center text-gray-500">Loading product details...</p>;
     if (error) return <p className="text-center text-red-500">{error}</p>;
@@ -119,13 +169,49 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
                     <p className="text-gray-500">{product.brand}</p>
                     <p className="text-2xl font-semibold">${product.price.toFixed(2)}</p>
 
+                    {/* ✅ Quantity Selector */}
+                    <div className="flex items-center space-x-4">
+                        <label htmlFor="quantity" className="text-gray-700">Quantity:</label>
+                        <div className="flex items-center">
+                            <button
+                                onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
+                                className="px-3 py-1 bg-gray-200 rounded-l"
+                            >
+                                −
+                            </button>
+                            <input
+                                type="number"
+                                id="quantity"
+                                min="1"
+                                value={quantity}
+                                onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                                className="w-16 text-center py-1 border-y outline-none"
+                            />
+                            <button
+                                onClick={() => setQuantity(prev => prev + 1)}
+                                className="px-3 py-1 bg-gray-200 rounded-r"
+                            >
+                                +
+                            </button>
+                        </div>
+                    </div>
+
                     {/* ✅ Add to Cart Button */}
-                    <button
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition"
-                        onClick={() => alert(`Added ${product.name} to cart!`)}
-                    >
-                        🛒 Add to Cart
-                    </button>
+                    <div className="mt-4">
+                        {addStatus ? (
+                            <div className={`py-3 px-6 rounded-lg text-white text-center ${addStatus.success ? 'bg-green-600' : 'bg-red-600'}`}>
+                                {addStatus.message}
+                            </div>
+                        ) : (
+                            <button
+                                className={`${addingToCart ? 'bg-gray-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'} text-white font-bold py-3 px-6 rounded-lg transition w-full md:w-auto`}
+                                onClick={addToCart}
+                                disabled={addingToCart}
+                            >
+                                {addingToCart ? 'Adding to Cart...' : '🛒 Add to Cart'}
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
 

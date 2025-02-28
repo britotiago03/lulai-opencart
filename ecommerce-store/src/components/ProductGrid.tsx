@@ -22,6 +22,8 @@ interface Description {
 
 export default function ProductGrid({ products }: { products: Product[] }) {
     const [descriptions, setDescriptions] = useState<Record<number, Description>>({});
+    const [addingToCart, setAddingToCart] = useState<Record<number, boolean>>({});
+    const [addStatus, setAddStatus] = useState<{ id: number; success: boolean; message: string } | null>(null);
 
     useEffect(() => {
         const fetchDescriptions = async () => {
@@ -47,6 +49,48 @@ export default function ProductGrid({ products }: { products: Product[] }) {
             }
         })();
     }, [products]);
+
+    const addToCart = async (productId: number, productName: string) => {
+        // Set loading state for this specific product
+        setAddingToCart(prev => ({ ...prev, [productId]: true }));
+
+        try {
+            const response = await fetch('/api/cart/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    productId,
+                    quantity: 1
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Show success message
+                setAddStatus({ id: productId, success: true, message: `${productName} added to cart!` });
+
+                // Trigger cart update event for navbar
+                window.dispatchEvent(new Event('cart-updated'));
+            } else {
+                // Show error message
+                setAddStatus({ id: productId, success: false, message: data.error || 'Failed to add item to cart' });
+            }
+        } catch (error) {
+            console.error("Error adding item to cart:", error);
+            setAddStatus({ id: productId, success: false, message: 'Network error' });
+        } finally {
+            // Clear loading state
+            setAddingToCart(prev => ({ ...prev, [productId]: false }));
+
+            // Clear status message after 3 seconds
+            setTimeout(() => {
+                setAddStatus(prev => prev?.id === productId ? null : prev);
+            }, 3000);
+        }
+    };
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -78,15 +122,23 @@ export default function ProductGrid({ products }: { products: Product[] }) {
                         </div>
 
                         {/* ✅ Add to Cart Button (Independent Click) */}
-                        <button
-                            onClick={(e) => {
-                                e.preventDefault(); // Prevents navigation when clicking "Add to Cart"
-                                alert(`Added ${product.name} to cart!`);
-                            }}
-                            className="mt-4 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition w-full"
-                        >
-                            🛒 Add to Cart
-                        </button>
+                        <div className="mt-4 w-full" onClick={(e) => e.preventDefault()}>
+                            {addStatus?.id === product.id ? (
+                                <div className={`w-full py-2 px-4 rounded text-white text-center ${addStatus.success ? 'bg-green-600' : 'bg-red-600'}`}>
+                                    {addStatus.message}
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={() => addToCart(product.id, product.name)}
+                                    disabled={addingToCart[product.id]}
+                                    className={`w-full ${addingToCart[product.id]
+                                        ? 'bg-gray-400 cursor-not-allowed'
+                                        : 'bg-green-500 hover:bg-green-600'} text-white py-2 px-4 rounded transition`}
+                                >
+                                    {addingToCart[product.id] ? 'Adding...' : '🛒 Add to Cart'}
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </Link>
             ))}

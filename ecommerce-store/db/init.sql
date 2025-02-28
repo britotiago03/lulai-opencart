@@ -44,11 +44,21 @@ CREATE TABLE products (
 );
 
 -- Create cart table
-CREATE TABLE cart (
+CREATE TABLE carts (
     id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES users(id),
-    product_id INT REFERENCES products(id),
-    quantity INT DEFAULT 1
+    user_id INTEGER REFERENCES users(id),
+    session_id TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE cart_items (
+    id SERIAL PRIMARY KEY,
+    cart_id INTEGER NOT NULL REFERENCES carts(id) ON DELETE CASCADE,
+    product_id INTEGER NOT NULL REFERENCES products(id),
+    quantity INTEGER NOT NULL DEFAULT 1,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE reviews (
@@ -400,3 +410,7 @@ CREATE INDEX IF NOT EXISTS products_price_idx ON products(price);
 CREATE INDEX IF NOT EXISTS products_name_idx ON products(name);
 CREATE INDEX IF NOT EXISTS reviews_product_idx ON reviews(product_id);
 CREATE INDEX IF NOT EXISTS reviews_user_idx ON reviews(user_id);
+CREATE INDEX IF NOT EXISTS carts_user_id_idx ON carts(user_id);
+CREATE INDEX IF NOT EXISTS carts_session_id_idx ON carts(session_id);
+CREATE INDEX IF NOT EXISTS cart_items_cart_id_idx ON cart_items(cart_id);
+CREATE INDEX IF NOT EXISTS cart_items_product_id_idx ON cart_items(product_id);
