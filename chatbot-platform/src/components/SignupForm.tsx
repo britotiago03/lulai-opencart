@@ -9,7 +9,6 @@ export default function SignupForm() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
-    const [isAdmin, setIsAdmin] = useState(false); 
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -19,11 +18,11 @@ export default function SignupForm() {
         const res = await fetch(endpoint, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, email, password, isAdmin }),
+            body: JSON.stringify({ name, email, password }),
         });
 
         if (res.ok) {
-            router.push(isAdmin ? "/auth/admin-login" : "/auth/login");
+            router.push("/auth/login");
         } else {
             const data = await res.json();
             setError(data.error || "Signup failed");
@@ -61,17 +60,6 @@ export default function SignupForm() {
                     className="w-full p-2 h-12 border border-gray-300 rounded-lg bg-transparent text-black"
                     required
                 />
-            </div>
-            <div className="flex items-center">
-                <label className="flex items-center text-gray-500">
-                    <input
-                        type="checkbox"
-                        checked={isAdmin}
-                        onChange={(e) => setIsAdmin(e.target.checked)}
-                        className="mr-2 rounded bg-transparent border-gray-300"
-                    />
-                    Sign up as Admin
-                </label>
             </div>
             <button
                 type="submit"

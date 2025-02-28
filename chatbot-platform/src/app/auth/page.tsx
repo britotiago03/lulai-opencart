@@ -1,12 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import Image from "next/image";
 import SignupForm from "@/components/SignupForm";
 import SigninForm from "@/components/SigninForm";
-import Image from "next/image";
 
-export default function LoginPage() {
-    const [isSignUp, setIsSignUp] = useState(true);
+export default function AuthPage() {
+    const router = useRouter();
+    const pathname = usePathname();
+    const [isSignUp, setIsSignUp] = useState(pathname === "/auth/signup");
+
+    useEffect(() => {
+        if (isSignUp) {
+            router.push("/auth/signup");
+        } else {
+            router.push("/auth/signin");
+        }
+    }, [isSignUp, router]);
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
@@ -29,7 +40,7 @@ export default function LoginPage() {
                 </div>
 
                 {/* Sign Up / Sign In Form */}
-                <div className="flex flex-col items-center justify-center w-full md:w-1/2 p-4 md:ml-32 mt-4 md:mt-0">
+                <div className="relative flex flex-col items-center justify-center w-full md:w-1/2 p-4 md:ml-32 mt-4 md:mt-0">
                     <div className="w-full max-w-md">
                         <div className="flex justify-center mb-4">
                             <button
@@ -45,13 +56,8 @@ export default function LoginPage() {
                                 Sign In
                             </button>
                         </div>
-                        <div className="relative w-full h-full">
-                            <div className={`inset-0 ${isSignUp ? "block" : "hidden"}`}>
-                                <SignupForm />
-                            </div>
-                            <div className={`inset-0 ${!isSignUp ? "block" : "hidden"}`}>
-                                <SigninForm />
-                            </div>
+                        <div className="relative w-full">
+                            {isSignUp ? <SignupForm /> : <SigninForm />}
                         </div>
                     </div>
                 </div>
