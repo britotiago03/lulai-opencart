@@ -12,8 +12,15 @@ CREATE TABLE users (
     password VARCHAR(255) NOT NULL,
     subscription_status VARCHAR(50) DEFAULT 'free',
     subscription_end_date TIMESTAMP WITH TIME ZONE,
+    is_admin BOOLEAN DEFAULT FALSE,
+    api_key VARCHAR(255) UNIQUE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Inserting admin users with hashed passwords and API keys
+INSERT INTO users (name, email, password, is_admin, api_key) VALUES
+('Admin User 1', 'admin1@example.com', '$2b$10$C2RZoMmZKZll7bOJO6lSROeBz3ntoNNABYiVA2y86/6kb1SmZTv9i', TRUE, 'admin1-api-key'),
+('Admin User 2', 'admin2@example.com', '$2b$10$Ty8FytGEj581KECxNkMGUuyV6qMbALivQQ9aJPHSinUqqh3ksR2Y2', TRUE, 'admin2-api-key');
 
 -- Create sessions table
 CREATE TABLE sessions (
