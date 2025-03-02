@@ -22,7 +22,7 @@ export default function SignupForm() {
         });
 
         if (res.ok) {
-            router.push("/auth/login");
+            router.push("/auth/signin");
         } else {
             const data = await res.json();
             setError(data.error || "Signup failed");
