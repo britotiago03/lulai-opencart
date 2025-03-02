@@ -19,20 +19,15 @@ export async function getCartId(createIfNotExists = false): Promise<number | nul
     let cartId: number | null = null;
 
     if (session?.user?.email) {
-        // 🟢 Logged-in User: First find user ID from email, then find cart
+        // 🟢 Logged-in User: Find user ID from email, then find cart
         const userRes = await pool.query("SELECT id FROM users WHERE email = $1", [session.user.email]);
 
-        if (!userRes.rowCount || userRes.rowCount === 0) {
-            console.warn(`No user found for email: ${session.user.email}`);
-            return null;
-        }
-
+        if (!userRes.rowCount) return null;
         const userId = userRes.rows[0].id;
 
         // Now find the cart using this user ID
         const cartRes = await pool.query("SELECT id FROM carts WHERE user_id = $1", [userId]);
-
-        if (cartRes?.rowCount && cartRes.rowCount > 0) {
+        if (cartRes?.rowCount) {
             cartId = cartRes.rows[0].id;
         } else if (createIfNotExists) {
             // Create a new cart for the logged-in user
@@ -44,25 +39,26 @@ export async function getCartId(createIfNotExists = false): Promise<number | nul
         }
     } else {
         // 🔴 Anonymous User: Find cart by session ID stored in cookies
-        const cookieStore = cookies();
-        // Important: Use await when accessing cookies
-        const sessionIdCookie = await cookieStore.get("session-id");
+        // Force TypeScript to treat cookies() as returning a Promise
+        const cookieStore = await (cookies() as unknown as Promise<ReturnType<typeof cookies>>);
+        const sessionIdCookie = cookieStore.get("session-id");
         let sessionId = sessionIdCookie?.value;
 
-        // Create a new session ID if one doesn't exist
+        // If no session ID exists, create one
         if (!sessionId && createIfNotExists) {
             sessionId = crypto.randomUUID();
-            // Important: Use await when setting cookies
-            await cookieStore.set("session-id", sessionId, {
+            // Using a different approach to await a void function
+            cookieStore.set("session-id", sessionId, {
                 httpOnly: true,
                 maxAge: 86400 * 30
             });
+            // Use a separate await Promise.resolve() to satisfy runtime requirements
+            await Promise.resolve();
         }
 
         if (sessionId) {
             const cartRes = await pool.query("SELECT id FROM carts WHERE session_id = $1", [sessionId]);
-
-            if (cartRes?.rowCount && cartRes.rowCount > 0) {
+            if (cartRes?.rowCount) {
                 cartId = cartRes.rows[0].id;
             } else if (createIfNotExists) {
                 // Create a new cart for the anonymous user
