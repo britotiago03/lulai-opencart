@@ -1,13 +1,5 @@
-"use client";
-
 import { notFound } from "next/navigation";
-import Image from "next/image";
-import { useEffect, useState } from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Pagination, Navigation } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/pagination";
-import "swiper/css/navigation";
+import ProductDetailsClient from "@/components/ProductDetailsClient";
 
 interface Product {
     id: number;
@@ -26,234 +18,40 @@ interface Description {
     specifications: Record<string, string>;
 }
 
-export default function ProductDetails({ params }: { params: Promise<{ id: string }> }) {
-    const [productId, setProductId] = useState<string | null>(null);
-    const [product, setProduct] = useState<Product | null>(null);
-    const [description, setDescription] = useState<Description | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [quantity, setQuantity] = useState(1);
-    const [addingToCart, setAddingToCart] = useState(false);
-    const [addStatus, setAddStatus] = useState<{ success: boolean; message: string } | null>(null);
+// ✅ Ensure we fetch the product with an absolute API URL
+async function fetchProduct(id: string): Promise<Product | null> {
+    const apiUrl = process.env.API_URL || "http://localhost:3000";
+    const res = await fetch(`${apiUrl}/api/products/${id}`, { cache: "force-cache" });
 
-    useEffect(() => {
-        void (async () => {
-            const resolvedParams = await params;
-            setProductId(resolvedParams.id);
-        })();
-    }, [params]);
+    if (!res.ok) return null;
+    return res.json();
+}
 
-    useEffect(() => {
-        if (!productId) return;
-        setLoading(true);
-        setError(null);
+// ✅ Ensure correct description file URL
+async function fetchDescription(descriptionFile: string | null): Promise<Description | null> {
+    if (!descriptionFile) return null;
 
-        const fetchProduct = async () => {
-            try {
-                const productRes = await fetch(`/api/products/${productId}`);
-                if (!productRes.ok) {
-                    setError("Product not found.");
-                    setLoading(false);
-                    return;
-                }
+    try {
+        const apiUrl = process.env.API_URL || "http://localhost:3000";
 
-                const productData: Product = await productRes.json();
-                setProduct(productData);
+        // ✅ Convert relative paths like `/descriptions/macbook_air.json` to an absolute URL
+        const descriptionUrl = descriptionFile.startsWith("http") ? descriptionFile : `${apiUrl}${descriptionFile}`;
 
-                const descRes = await fetch(`${productData.description_file}`);
-                if (!descRes.ok) {
-                    setError("Description not found.");
-                    setLoading(false);
-                    return;
-                }
+        const res = await fetch(descriptionUrl, { cache: "no-store" }); // Don't cache in case descriptions update frequently
+        return res.ok ? await res.json() : null;
+    } catch (error) {
+        console.error("Error fetching description:", error);
+        return null;
+    }
+}
 
-                const descData: Description = await descRes.json();
-                setDescription(descData);
-            } catch (error) {
-                console.error("Error fetching product:", error);
-                setError(error instanceof Error ? error.message : "Something went wrong.");
-            } finally {
-                setLoading(false);
-            }
-        };
+export default async function ProductPage({ params }: { params: { id: string } }) {
+    if (!params || !params.id) return notFound();
 
-        void fetchProduct();
-    }, [productId]);
-
-    const addToCart = async () => {
-        if (!product) return;
-
-        setAddingToCart(true);
-        setAddStatus(null);
-
-        try {
-            const response = await fetch('/api/cart/add', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    productId: product.id,
-                    quantity: quantity
-                }),
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                setAddStatus({
-                    success: true,
-                    message: `${quantity} ${quantity === 1 ? 'item' : 'items'} added to cart!`
-                });
-
-                // Trigger cart update event for navbar
-                window.dispatchEvent(new Event('cart-updated'));
-            } else {
-                setAddStatus({
-                    success: false,
-                    message: data.error || 'Failed to add item to cart'
-                });
-            }
-        } catch (error) {
-            console.error("Error adding to cart:", error);
-            setAddStatus({ success: false, message: 'Network error' });
-        } finally {
-            setAddingToCart(false);
-
-            // Clear status message after 3 seconds
-            setTimeout(() => {
-                setAddStatus(null);
-            }, 3000);
-        }
-    };
-
-    if (!productId) return <p className="text-center text-gray-500">Loading product details...</p>;
-    if (loading) return <p className="text-center text-gray-500">Loading product details...</p>;
-    if (error) return <p className="text-center text-red-500">{error}</p>;
+    const product = await fetchProduct(params.id);
     if (!product) return notFound();
 
-    return (
-        <div className="container mx-auto p-8">
-            <div className="flex flex-col md:flex-row gap-8">
-                {/* ✅ Product Image Slider */}
-                <div className="w-full md:w-1/2">
-                    <Swiper
-                        modules={[Autoplay, Pagination, Navigation]}
-                        autoplay={{ delay: 3000 }}
-                        pagination={{ clickable: true }}
-                        navigation
-                        loop
-                        className="w-full rounded-lg"
-                    >
-                        {product.images.map((image, index) => (
-                            <SwiperSlide key={index} className="flex justify-center">
-                                <div className="relative w-full h-[350px]">
-                                    <Image
-                                        src={image}
-                                        alt={product.name}
-                                        layout="fill"
-                                        objectFit="contain"
-                                        className="rounded-lg bg-white"
-                                    />
-                                </div>
-                            </SwiperSlide>
-                        ))}
-                    </Swiper>
-                </div>
+    const description = await fetchDescription(product.description_file);
 
-                {/* ✅ Product Details */}
-                <div className="w-full md:w-1/2 space-y-4">
-                    <h1 className="text-3xl font-bold">{product.name}</h1>
-                    <p className="text-gray-500">{product.brand}</p>
-                    <p className="text-2xl font-semibold">${product.price.toFixed(2)}</p>
-
-                    {/* ✅ Quantity Selector */}
-                    <div className="flex items-center space-x-4">
-                        <label htmlFor="quantity" className="text-gray-700">Quantity:</label>
-                        <div className="flex items-center">
-                            <button
-                                onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
-                                className="px-3 py-1 bg-gray-200 rounded-l"
-                            >
-                                −
-                            </button>
-                            <input
-                                type="number"
-                                id="quantity"
-                                min="1"
-                                value={quantity}
-                                onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                                className="w-16 text-center py-1 border-y outline-none"
-                            />
-                            <button
-                                onClick={() => setQuantity(prev => prev + 1)}
-                                className="px-3 py-1 bg-gray-200 rounded-r"
-                            >
-                                +
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* ✅ Add to Cart Button */}
-                    <div className="mt-4">
-                        {addStatus ? (
-                            <div className={`py-3 px-6 rounded-lg text-white text-center ${addStatus.success ? 'bg-green-600' : 'bg-red-600'}`}>
-                                {addStatus.message}
-                            </div>
-                        ) : (
-                            <button
-                                className={`${addingToCart ? 'bg-gray-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'} text-white font-bold py-3 px-6 rounded-lg transition w-full md:w-auto`}
-                                onClick={addToCart}
-                                disabled={addingToCart}
-                            >
-                                {addingToCart ? 'Adding to Cart...' : '🛒 Add to Cart'}
-                            </button>
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            {/* ✅ Product Description */}
-            {description && (
-                <div className="mt-8">
-                    <h2 className="text-2xl font-bold">{description.title}</h2>
-                    <p className="mt-2">{description.overview}</p>
-
-                    <h3 className="text-xl font-bold mt-4">Details</h3>
-                    <ul className="list-disc pl-5">
-                        {description.details.map((detail, index) => (
-                            <li key={index}>{detail}</li>
-                        ))}
-                    </ul>
-
-                    <h3 className="text-xl font-bold mt-4">Specifications</h3>
-                    <ul className="list-disc pl-5">
-                        {Object.entries(description.specifications).map(([key, value]) => (
-                            <li key={key}>
-                                <strong>{key}:</strong> {value}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            )}
-
-            {/* ✅ Reviews Section */}
-            <div className="mt-10">
-                <h2 className="text-2xl font-bold">Customer Reviews</h2>
-                {product.reviews.length > 0 ? (
-                    <ul className="mt-4 space-y-4">
-                        {product.reviews.map((review, index) => (
-                            <li key={index} className="border p-4 rounded-lg shadow-md bg-gray-50">
-                                <p className="text-lg font-semibold">{review.reviewer}</p>
-                                <p className="text-yellow-500">⭐ {review.rating}/5</p>
-                                <p className="text-gray-700">{review.comment}</p>
-                            </li>
-                        ))}
-                    </ul>
-                ) : (
-                    <p className="text-gray-500 mt-2">No reviews yet.</p>
-                )}
-            </div>
-        </div>
-    );
+    return <ProductDetailsClient product={product} description={description} />;
 }
