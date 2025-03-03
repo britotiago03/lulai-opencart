@@ -2,30 +2,23 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-
-interface Product {
-    id: number;
-    name: string;
-    brand: string;
-    price: number;
-    images: string[];
-    description_file: string;
-}
-
-interface Description {
-    title: string;
-    overview: string;
-    details: string[];
-    specifications: Record<string, string>;
-}
+import React, { useEffect, useState } from "react";
+import { Product, Description } from "@/types/product";
 
 export default function ProductGrid({ products }: { products: Product[] }) {
     const [descriptions, setDescriptions] = useState<Record<number, Description>>({});
     const [addingToCart, setAddingToCart] = useState<Record<number, boolean>>({});
     const [addStatus, setAddStatus] = useState<{ id: number; success: boolean; message: string } | null>(null);
+    const [isClient, setIsClient] = useState(false);
+
+    // Ensure client-side only execution
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
 
     useEffect(() => {
+        if (!isClient || products.length === 0) return;
+
         const fetchDescriptions = async () => {
             const descData: Record<number, Description> = {};
 
@@ -33,7 +26,9 @@ export default function ProductGrid({ products }: { products: Product[] }) {
                 products.map(async (product) => {
                     try {
                         const response = await fetch(product.description_file);
-                        descData[product.id] = await response.json();
+                        if (response.ok) {
+                            descData[product.id] = await response.json();
+                        }
                     } catch (error) {
                         console.error(`Error loading description for ${product.name}`, error);
                     }
@@ -43,14 +38,15 @@ export default function ProductGrid({ products }: { products: Product[] }) {
             setDescriptions(descData);
         };
 
-        (async () => {
-            if (products.length > 0) {
-                await fetchDescriptions();
-            }
-        })();
-    }, [products]);
+        // Execute the function
+        void fetchDescriptions();
+    }, [products, isClient]);
 
-    const addToCart = async (productId: number, productName: string) => {
+    const addToCart = async (e: React.MouseEvent, productId: number, productName: string) => {
+        // Stop event propagation to prevent Link navigation
+        e.preventDefault();
+        e.stopPropagation();
+
         // Set loading state for this specific product
         setAddingToCart(prev => ({ ...prev, [productId]: true }));
 
@@ -97,14 +93,14 @@ export default function ProductGrid({ products }: { products: Product[] }) {
             {products.map((product) => (
                 <Link key={product.id} href={`/product/${product.id}`} className="group">
                     <div className="border p-4 rounded-lg shadow-md hover:shadow-lg transition duration-300 flex flex-col items-center text-center">
-                        {/* ✅ Fixed Image Sizes */}
-                        <div className="relative w-[250px] h-[200px]">
+                        {/* Product Image */}
+                        <div className="relative w-full h-48">
                             <Image
                                 src={product.images[0]}
                                 alt={product.name}
-                                layout="fill"
-                                objectFit="contain"
-                                className="rounded-lg bg-white"
+                                fill
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                className="object-contain rounded-lg bg-white"
                             />
                         </div>
 
@@ -116,12 +112,12 @@ export default function ProductGrid({ products }: { products: Product[] }) {
                             <p className="text-gray-700 mt-2 line-clamp-2">{descriptions[product.id].overview}</p>
                         )}
 
-                        {/* ✅ Clickable Hover Effect */}
+                        {/* Clickable Hover Effect */}
                         <div className="opacity-0 group-hover:opacity-100 transition duration-300 mt-2">
                             <span className="text-blue-500 underline">View Product →</span>
                         </div>
 
-                        {/* ✅ Add to Cart Button (Independent Click) */}
+                        {/* Add to Cart Button (Independent Click) */}
                         <div className="mt-4 w-full" onClick={(e) => e.preventDefault()}>
                             {addStatus?.id === product.id ? (
                                 <div className={`w-full py-2 px-4 rounded text-white text-center ${addStatus.success ? 'bg-green-600' : 'bg-red-600'}`}>
@@ -129,7 +125,7 @@ export default function ProductGrid({ products }: { products: Product[] }) {
                                 </div>
                             ) : (
                                 <button
-                                    onClick={() => addToCart(product.id, product.name)}
+                                    onClick={(e) => addToCart(e, product.id, product.name)}
                                     disabled={addingToCart[product.id]}
                                     className={`w-full ${addingToCart[product.id]
                                         ? 'bg-gray-400 cursor-not-allowed'

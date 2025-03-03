@@ -32,11 +32,9 @@ export async function POST() {
         const userId = userLookupRes.rows[0].id;
         console.log("Found user ID:", userId);
 
-        // Get session ID from cookies
-        const cookieStore = cookies();
-        const sessionIdCookie = await cookieStore.get("session-id");
-        const sessionId = sessionIdCookie?.value;
-
+        // Get session ID from cookies - Next.js requires awaiting cookies() even though TypeScript doesn't
+        const cookieStore = await cookies();
+        const sessionId = cookieStore.get("session-id")?.value;
         console.log("Anonymous session ID from cookie:", sessionId);
 
         // If there's no session ID, there's no anonymous cart to merge
@@ -127,8 +125,9 @@ export async function POST() {
         await client.query("DELETE FROM carts WHERE id = $1", [anonCartId]);
         console.log(`Deleted anonymous cart ${anonCartId}`);
 
-        // 6. Clear the session ID cookie
-        await cookieStore.set("session-id", "", { maxAge: 0 });
+        // 6. Clear the session ID cookie - Next.js requires awaiting cookies() even though TypeScript doesn't
+        const cookieStoreForSetting = await cookies();
+        cookieStoreForSetting.set("session-id", "", { maxAge: 0 });
         console.log("Cleared session-id cookie");
 
         await client.query('COMMIT');
