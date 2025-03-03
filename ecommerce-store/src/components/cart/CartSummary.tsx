@@ -42,7 +42,7 @@ export function CartSummary({ cart, onCheckoutAction }: CartSummaryProps) {
             </button>
 
             <div className="mt-4">
-                <Link href="/products" className="text-blue-600 hover:underline inline-block">
+                <Link href={`/products`} className="text-blue-600 hover:underline inline-block">
                     ← Continue Shopping
                 </Link>
             </div>
