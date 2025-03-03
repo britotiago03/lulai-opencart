@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import ProductDetailsClient from "@/components/ProductDetailsClient";
+import ProductDetailsClient from "@/components/product/ProductDetailsClient";
 
 interface Product {
     id: number;
