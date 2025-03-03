@@ -46,9 +46,11 @@ async function fetchDescription(descriptionFile: string | null): Promise<Descrip
 }
 
 export default async function ProductPage({ params }: { params: { id: string } }) {
-    if (!params || !params.id) return notFound();
+    // Await the params object before accessing it
+    const resolvedParams = await params;
+    if (!resolvedParams || !resolvedParams.id) return notFound();
 
-    const product = await fetchProduct(params.id);
+    const product = await fetchProduct(resolvedParams.id);
     if (!product) return notFound();
 
     const description = await fetchDescription(product.description_file);
