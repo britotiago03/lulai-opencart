@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCart } from "@/hooks/useCart";
+import { useCart } from "@/hooks/cart/useCart";
 import { CartTable } from "@/components/cart/CartTable";
 import { CartSummary } from "@/components/cart/CartSummary";
 import { EmptyCart } from "@/components/cart/EmptyCart";
