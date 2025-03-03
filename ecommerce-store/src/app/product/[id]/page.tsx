@@ -26,8 +26,6 @@ interface Description {
     specifications: Record<string, string>;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
-
 export default function ProductDetails({ params }: { params: Promise<{ id: string }> }) {
     const [productId, setProductId] = useState<string | null>(null);
     const [product, setProduct] = useState<Product | null>(null);
@@ -52,7 +50,7 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
 
         const fetchProduct = async () => {
             try {
-                const productRes = await fetch(`${API_BASE_URL}/api/products/${productId}`);
+                const productRes = await fetch(`/api/products/${productId}`);
                 if (!productRes.ok) {
                     setError("Product not found.");
                     setLoading(false);
@@ -62,7 +60,7 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
                 const productData: Product = await productRes.json();
                 setProduct(productData);
 
-                const descRes = await fetch(`${API_BASE_URL}${productData.description_file}`);
+                const descRes = await fetch(`${productData.description_file}`);
                 if (!descRes.ok) {
                     setError("Description not found.");
                     setLoading(false);
