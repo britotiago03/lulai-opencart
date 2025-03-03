@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useDebounce } from '@/hooks/useDebounce';
+import { useDebounce } from '@/hooks/products/useDebounce';
 import { Product } from '@/types/product';
 
 interface FilterOptions {
