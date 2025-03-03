@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import ProductGrid from "@/components/ProductGrid";
-import { useProductCache } from "@/hooks/useProductCache";
-import { FilterBar } from "@/components/FilterBar";
+import ProductGrid from "@/components/products/ProductGrid";
+import { useProductCache } from "@/hooks/products/useProductCache";
+import { FilterBar } from "@/components/products/FilterBar";
 
 export default function ProductsPage() {
     const [search, setSearch] = useState("");
