@@ -1,8 +1,8 @@
 import { getProducts } from "@/lib/products"; // Fetch at build time
 import Link from "next/link";
 import Image from "next/image";
-import SwiperBanner from "@/components/SwiperBanner"; // ✅ Import Swiper client component
-import ManufacturersCarousel from "@/components/ManufacturersCarousel"; // ✅ Import manufacturers carousel client component
+import SwiperBanner from "@/components/home/SwiperBanner"; // ✅ Import Swiper client component
+import ManufacturersCarousel from "@/components/home/ManufacturersCarousel"; // ✅ Import manufacturers carousel client component
 
 export default async function Home() {
     // ✅ Pre-fetch products at build time (SSG)
