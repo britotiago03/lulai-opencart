@@ -1,24 +1,42 @@
 import React from "react";
 import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import Providers from "@/components/Providers";
+import Navbar from "@/components/Navbar";
 import "./globals.css";
 
-// ✅ Keep static part of Navbar on the server (SSG)
-import ServerNavbar from "@/components/ServerNavbar";
-import ProvidersWrapper from "@/components/ProvidersWrapper"; // ✅ New Wrapper
+const geistSans = Geist({
+    variable: "--font-geist-sans",
+    subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+    variable: "--font-geist-mono",
+    subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
     title: "My Next.js App",
     description: "A fully functional Next.js authentication system",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+// Enable static generation of the layout shell
+export const dynamic = 'force-static';
+
+export default function RootLayout({
+                                       children,
+                                   }: {
+    children: React.ReactNode;
+}) {
     return (
         <html lang="en">
-        <body className="antialiased">
-        <ProvidersWrapper> {/* ✅ Now this runs only on the client */}
-            <ServerNavbar /> {/* ✅ Pre-rendered at build time */}
-            {children}
-        </ProvidersWrapper>
+        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <Providers>
+            <Navbar />
+            <main>
+                {children}
+            </main>
+        </Providers>
         </body>
         </html>
     );
