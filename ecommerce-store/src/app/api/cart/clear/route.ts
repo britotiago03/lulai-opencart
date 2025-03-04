@@ -1,54 +1,54 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { executeTransaction } from '@/lib/db';
+import { NextResponse } from 'next/server';
+import pool from '@/lib/db';
+import { getCartId } from '@/lib/cart-utils';
 
-export async function POST(request: NextRequest) {
+export async function POST() {
+    const client = await pool.connect();
+
     try {
-        // Get session ID from request cookies
-        const sessionId = request.cookies.get('session_id')?.value;
+        // Use the shared utility function to get the cart ID
+        const cartId = await getCartId();
 
-        if (!sessionId) {
-            return NextResponse.json(
-                { success: true, message: 'No cart to clear' }
-            );
+        if (!cartId) {
+            console.warn("No active cart found");
+            return NextResponse.json({ success: true, message: 'No cart to clear' });
         }
 
-        // Process using our transaction helper
-        return await executeTransaction(async (client) => {
-            // Find the cart ID
-            const cartResult = await client.query(
-                `SELECT id FROM carts WHERE session_id = $1`,
-                [sessionId]
-            );
+        console.log("Clearing cart ID:", cartId);
 
-            if (cartResult.rows.length > 0) {
-                const cartId = cartResult.rows[0].id;
+        // Start transaction
+        await client.query('BEGIN');
 
-                // Delete all items in the cart
-                await client.query(
-                    `DELETE FROM cart_items WHERE cart_id = $1`,
-                    [cartId]
-                );
+        // Delete all items in the cart
+        const deleteResult = await client.query(
+            `DELETE FROM cart_items WHERE cart_id = $1`,
+            [cartId]
+        );
 
-                // Optionally, you could also delete the cart itself
-                // await client.query(
-                //   `DELETE FROM carts WHERE id = $1`,
-                //   [cartId]
-                // );
-            }
+        console.log("Deleted items count:", deleteResult.rowCount);
 
-            return NextResponse.json({ success: true });
-        });
+        // Optional: Delete the cart itself
+        // await client.query(`DELETE FROM carts WHERE id = $1`, [cartId]);
+
+        // Commit transaction
+        await client.query('COMMIT');
+
+        return NextResponse.json({ success: true, message: "Cart cleared successfully" });
     } catch (error) {
-        console.error('Error clearing cart:', error);
+        console.error("Error clearing cart:", error);
 
-        // Safe error handling
-        const errorMessage = error instanceof Error
-            ? error.message
-            : 'An unexpected error occurred';
+        // Rollback transaction in case of an error
+        try {
+            await client.query('ROLLBACK');
+        } catch (rollbackError) {
+            console.error("Error during rollback:", rollbackError);
+        }
 
         return NextResponse.json(
-            { error: 'Failed to clear cart', details: errorMessage },
+            { error: "Failed to clear cart", details: error instanceof Error ? error.message : "Unknown error" },
             { status: 500 }
         );
+    } finally {
+        client.release();
     }
 }
