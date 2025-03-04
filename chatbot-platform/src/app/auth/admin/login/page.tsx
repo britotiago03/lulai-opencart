@@ -4,7 +4,6 @@ import Image from "next/image";
 import AdminLoginForm from "@/components/AdminLoginForm";
 
 export default function AdminLoginPage() {
-
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col md:flex-row w-full max-w-4xl">
@@ -25,14 +24,14 @@ export default function AdminLoginPage() {
                     </p>
                 </div>
 
-                {/* Sign Up / Sign In Form */}
+                {/* Admin Login Form */}
                 <div className="relative flex flex-col items-center justify-center w-full md:w-1/2 p-4 md:ml-32 mt-4 md:mt-0">
                     <div className="w-full max-w-md">
                         <div className="flex justify-center mb-4">
                             <h1 className="text-3xl font-bold text-center text-gray-900 mb-4">Admin login page</h1>
                         </div>
                         <div className="relative w-full">
-                            <AdminLoginForm/>
+                            <AdminLoginForm />
                         </div>
                     </div>
                 </div>

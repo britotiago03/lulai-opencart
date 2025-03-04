@@ -12,7 +12,7 @@ const pool = new Pool({
 
 export async function POST(req: Request) {
     try {
-        const { email, password, apiKey } = await req.json();
+        const { email, password} = await req.json();
 
         // Find user by email
         const userResult = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
@@ -26,11 +26,6 @@ export async function POST(req: Request) {
         const isValidPassword = await bcrypt.compare(password, user.password);
         if (!isValidPassword) {
             return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
-        }
-
-        // Verify API key
-        if (user.api_key !== apiKey) {
-            return NextResponse.json({ error: "Invalid API key" }, { status: 401 });
         }
 
         // Return success response (NextAuth will handle session creation)

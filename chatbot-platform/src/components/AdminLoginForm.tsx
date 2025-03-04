@@ -9,16 +9,10 @@ export default function AdminLoginForm() {
     const searchParams = useSearchParams();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [apiKey, setApiKey] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        const apiKeyFromQuery = searchParams.get("apiKey");
-        if (apiKeyFromQuery) {
-            setApiKey(apiKeyFromQuery);
-        }
-    }, [searchParams]);
+    
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -30,7 +24,6 @@ export default function AdminLoginForm() {
                 redirect: false,
                 email,
                 password,
-                apiKey,
             });
 
             if (result?.error) {
