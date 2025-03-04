@@ -70,6 +70,51 @@ CREATE TABLE reviews (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Create orders table
+CREATE TABLE orders (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    session_id TEXT,
+    status VARCHAR(50) NOT NULL DEFAULT 'pending',
+    payment_method VARCHAR(50) NOT NULL,
+    payment_status VARCHAR(50) NOT NULL DEFAULT 'pending',
+    payment_details JSONB,
+    shipping_amount DECIMAL(10, 2) NOT NULL DEFAULT 5.99,
+    tax_amount DECIMAL(10, 2) NOT NULL,
+    subtotal_amount DECIMAL(10, 2) NOT NULL,
+    total_amount DECIMAL(10, 2) NOT NULL,
+    notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create order items table
+CREATE TABLE order_items (
+    id SERIAL PRIMARY KEY,
+    order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    product_id INTEGER NOT NULL REFERENCES products(id),
+    quantity INTEGER NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    total DECIMAL(10, 2) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create shipping addresses table
+CREATE TABLE shipping_addresses (
+    id SERIAL PRIMARY KEY,
+    order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    phone VARCHAR(50),
+    address TEXT NOT NULL,
+    city VARCHAR(100) NOT NULL,
+    state VARCHAR(100) NOT NULL,
+    zip_code VARCHAR(20) NOT NULL,
+    country VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Insert sample users (for reviews)
 INSERT INTO users (name, email, password) VALUES
 ('Alice Johnson', 'alice.johnson@example.com', '$2a$10$XoQH7Pv3KU3l5u1o4eGZ7eypwl7LrsYAGpH1iyA0Fk2kI8FfNoH2G'), -- Password: alice123
@@ -400,6 +445,67 @@ INSERT INTO reviews (product_id, user_id, rating, comment) VALUES
 (15, 74, 5, 'Sony VAIO never disappoints! Sleek and durable build.'),
 (15, 75, 4, 'Good overall, but I wish it had better cooling and upgrade options.');
 
+-- Insert sample orders
+INSERT INTO orders (user_id, status, payment_method, payment_status, payment_details, shipping_amount, tax_amount, subtotal_amount, total_amount) VALUES
+-- User 1 orders
+(1, 'completed', 'stripe', 'paid',
+ '{"cardLast4": "4242", "cardholderName": "Alice Johnson"}',
+ 5.99, 24.40, 305.00, 335.39),
+
+(1, 'processing', 'paypal', 'paid',
+ '{"email": "alice.johnson@example.com"}',
+ 5.99, 40.00, 500.00, 545.99),
+
+-- User 2 orders
+(2, 'pending', 'manual', 'pending',
+ '{"manualMethod": "bank_transfer", "notes": "Will transfer funds tomorrow"}',
+ 5.99, 96.16, 1202.00, 1304.15),
+
+-- User 3 orders
+(3, 'completed', 'stripe', 'paid',
+ '{"cardLast4": "1234", "cardholderName": "Charlie Davis"}',
+ 5.99, 19.36, 242.00, 267.35),
+
+-- User 4 orders with different statuses
+(4, 'shipped', 'paypal', 'paid',
+ '{"email": "david.lee@example.com"}',
+ 5.99, 48.16, 602.00, 656.15),
+
+(4, 'cancelled', 'stripe', 'refunded',
+ '{"cardLast4": "5678", "cardholderName": "David Lee"}',
+ 5.99, 160.00, 2000.00, 2165.99);
+
+-- Insert sample shipping addresses for the orders
+INSERT INTO shipping_addresses (order_id, first_name, last_name, email, phone, address, city, state, zip_code, country) VALUES
+(1, 'Alice', 'Johnson', 'alice.johnson@example.com', '(555) 123-4567', '123 Main St', 'San Francisco', 'CA', '94105', 'US'),
+(2, 'Alice', 'Johnson', 'alice.johnson@example.com', '(555) 123-4567', '123 Main St', 'San Francisco', 'CA', '94105', 'US'),
+(3, 'Bob', 'Smith', 'bob.smith@example.com', '(555) 234-5678', '456 Oak Ave', 'New York', 'NY', '10001', 'US'),
+(4, 'Charlie', 'Davis', 'charlie.davis@example.com', '(555) 345-6789', '789 Pine St', 'Chicago', 'IL', '60601', 'US'),
+(5, 'David', 'Lee', 'david.lee@example.com', '(555) 456-7890', '1010 Maple Rd', 'Seattle', 'WA', '98101', 'US'),
+(6, 'David', 'Lee', 'david.lee@example.com', '(555) 456-7890', '1010 Maple Rd', 'Seattle', 'WA', '98101', 'US');
+
+-- Insert sample order items
+INSERT INTO order_items (order_id, product_id, quantity, price, total) VALUES
+-- Order 1 items (Apple iPhone and HTC Touch HD)
+(1, 4, 1, 123.20, 123.20), -- iPhone
+(1, 2, 1, 122.00, 122.00), -- HTC Touch HD
+(1, 8, 1, 59.80, 59.80),   -- iPod Touch
+
+-- Order 2 items (Apple MacBook)
+(2, 9, 1, 602.00, 602.00), -- MacBook
+
+-- Order 3 items (MacBook Pro)
+(3, 11, 1, 2000.00, 2000.00), -- MacBook Pro
+
+-- Order 4 items (Samsung Galaxy Tab)
+(4, 14, 1, 241.99, 241.99), -- Samsung Galaxy Tab
+
+-- Order 5 items (MacBook Air)
+(5, 10, 1, 1202.00, 1202.00), -- MacBook Air
+
+-- Order 6 items (MacBook Pro - Cancelled order)
+(6, 11, 1, 2000.00, 2000.00); -- MacBook Pro
+
 -- Add indexes
 CREATE INDEX IF NOT EXISTS users_email_idx ON users(email);
 CREATE INDEX IF NOT EXISTS sessions_token_idx ON sessions(session_token);
@@ -414,3 +520,10 @@ CREATE INDEX IF NOT EXISTS carts_user_id_idx ON carts(user_id);
 CREATE INDEX IF NOT EXISTS carts_session_id_idx ON carts(session_id);
 CREATE INDEX IF NOT EXISTS cart_items_cart_id_idx ON cart_items(cart_id);
 CREATE INDEX IF NOT EXISTS cart_items_product_id_idx ON cart_items(product_id);
+CREATE INDEX IF NOT EXISTS orders_user_id_idx ON orders(user_id);
+CREATE INDEX IF NOT EXISTS orders_session_id_idx ON orders(session_id);
+CREATE INDEX IF NOT EXISTS orders_status_idx ON orders(status);
+CREATE INDEX IF NOT EXISTS orders_payment_status_idx ON orders(payment_status);
+CREATE INDEX IF NOT EXISTS order_items_order_id_idx ON order_items(order_id);
+CREATE INDEX IF NOT EXISTS order_items_product_id_idx ON order_items(product_id);
+CREATE INDEX IF NOT EXISTS shipping_addresses_order_id_idx ON shipping_addresses(order_id);
