@@ -1,9 +1,42 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import AdminLoginForm from "@/components/AdminLoginForm";
+import { validateApiKey } from "@/lib/apiKey.service";
 
 export default function AdminLoginPage() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const [isValidKey, setIsValidKey] = useState<boolean | null>(null);
+
+    useEffect(() => {
+        // Fetch API key from URL query
+        const apiKey = searchParams.get("apiKey");
+        if(!apiKey) {
+            router.replace("/404");
+            return;
+        }
+
+        // Validate API key
+        const checkApiKey = async () => {
+            const isValidKey = await validateApiKey(apiKey);
+            if(!isValidKey) {
+                router.replace("/404");
+                return;
+            } else {
+                setIsValidKey(true);
+            }
+
+        }
+
+        checkApiKey();
+    }, [searchParams, router]);
+
+    // Prevent rendering until APi key is validated
+    if (isValidKey === null) return null;
+
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col md:flex-row w-full max-w-4xl">
