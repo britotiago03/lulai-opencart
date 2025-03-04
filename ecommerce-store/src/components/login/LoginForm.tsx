@@ -1,44 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
-export default function SignupForm() {
+export default function LoginForm() {
     const router = useRouter();
-    const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError("");
+        setLoading(true);
 
-        const res = await fetch("/api/auth/signup", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, email, password }),
-        });
+        try {
+            const result = await signIn("credentials", {
+                redirect: false,
+                email,
+                password,
+            });
 
-        if (res.ok) {
-            router.push("/auth/login");
-        } else {
-            const data = await res.json();
-            setError(data.error || "Signup failed");
+            if (result?.error) {
+                setError("Invalid email or password");
+            } else {
+                router.push("/");
+                router.refresh();
+            }
+        } catch (err) {
+            setError("Something went wrong. Please try again.");
+            console.error("Login error:", err);
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-                <input
-                    type="text"
-                    placeholder="Name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full p-2 border rounded"
-                    required
-                />
-            </div>
             <div>
                 <input
                     type="email"
@@ -47,6 +47,7 @@ export default function SignupForm() {
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full p-2 border rounded"
                     required
+                    disabled={loading}
                 />
             </div>
             <div>
@@ -57,13 +58,15 @@ export default function SignupForm() {
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full p-2 border rounded"
                     required
+                    disabled={loading}
                 />
             </div>
             <button
                 type="submit"
-                className="w-full p-2 text-white bg-green-500 rounded hover:bg-green-600"
+                className={`w-full p-2 text-white bg-blue-500 rounded hover:bg-blue-600 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+                disabled={loading}
             >
-                Sign Up
+                {loading ? "Logging in..." : "Login"}
             </button>
             {error && <p className="text-red-500">{error}</p>}
         </form>

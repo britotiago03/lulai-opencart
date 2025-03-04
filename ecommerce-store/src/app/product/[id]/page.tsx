@@ -1,13 +1,5 @@
-"use client";
-
 import { notFound } from "next/navigation";
-import Image from "next/image";
-import { useEffect, useState } from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Pagination, Navigation } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/pagination";
-import "swiper/css/navigation";
+import ProductDetailsClient from "@/components/product/ProductDetailsClient";
 
 interface Product {
     id: number;
@@ -26,150 +18,42 @@ interface Description {
     specifications: Record<string, string>;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+// ✅ Ensure we fetch the product with an absolute API URL
+async function fetchProduct(id: string): Promise<Product | null> {
+    const apiUrl = process.env.API_URL || "http://localhost:3000";
+    const res = await fetch(`${apiUrl}/api/products/${id}`, { cache: "force-cache" });
 
-export default function ProductDetails({ params }: { params: Promise<{ id: string }> }) {
-    const [productId, setProductId] = useState<string | null>(null);
-    const [product, setProduct] = useState<Product | null>(null);
-    const [description, setDescription] = useState<Description | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    if (!res.ok) return null;
+    return res.json();
+}
 
-    useEffect(() => {
-        void (async () => {
-            const resolvedParams = await params;
-            setProductId(resolvedParams.id);
-        })();
-    }, [params]);
+// ✅ Ensure correct description file URL
+async function fetchDescription(descriptionFile: string | null): Promise<Description | null> {
+    if (!descriptionFile) return null;
 
-    useEffect(() => {
-        if (!productId) return;
-        setLoading(true);
-        setError(null);
+    try {
+        const apiUrl = process.env.API_URL || "http://localhost:3000";
 
-        const fetchProduct = async () => {
-            try {
-                const productRes = await fetch(`${API_BASE_URL}/api/products/${productId}`);
-                if (!productRes.ok) {
-                    setError("Product not found.");
-                    setLoading(false);
-                    return;
-                }
+        // ✅ Convert relative paths like `/descriptions/macbook_air.json` to an absolute URL
+        const descriptionUrl = descriptionFile.startsWith("http") ? descriptionFile : `${apiUrl}${descriptionFile}`;
 
-                const productData: Product = await productRes.json();
-                setProduct(productData);
+        const res = await fetch(descriptionUrl, { cache: "no-store" }); // Don't cache in case descriptions update frequently
+        return res.ok ? await res.json() : null;
+    } catch (error) {
+        console.error("Error fetching description:", error);
+        return null;
+    }
+}
 
-                const descRes = await fetch(`${API_BASE_URL}${productData.description_file}`);
-                if (!descRes.ok) {
-                    setError("Description not found.");
-                    setLoading(false);
-                    return;
-                }
+export default async function ProductPage({ params }: { params: { id: string } }) {
+    // Await the params object before accessing it
+    const resolvedParams = await params;
+    if (!resolvedParams || !resolvedParams.id) return notFound();
 
-                const descData: Description = await descRes.json();
-                setDescription(descData);
-            } catch (error) {
-                console.error("Error fetching product:", error);
-                setError(error instanceof Error ? error.message : "Something went wrong.");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        void fetchProduct();
-    }, [productId]);
-
-    if (!productId) return <p className="text-center text-gray-500">Loading product details...</p>;
-    if (loading) return <p className="text-center text-gray-500">Loading product details...</p>;
-    if (error) return <p className="text-center text-red-500">{error}</p>;
+    const product = await fetchProduct(resolvedParams.id);
     if (!product) return notFound();
 
-    return (
-        <div className="container mx-auto p-8">
-            <div className="flex flex-col md:flex-row gap-8">
-                {/* ✅ Product Image Slider */}
-                <div className="w-full md:w-1/2">
-                    <Swiper
-                        modules={[Autoplay, Pagination, Navigation]}
-                        autoplay={{ delay: 3000 }}
-                        pagination={{ clickable: true }}
-                        navigation
-                        loop
-                        className="w-full rounded-lg"
-                    >
-                        {product.images.map((image, index) => (
-                            <SwiperSlide key={index} className="flex justify-center">
-                                <div className="relative w-full h-[350px]">
-                                    <Image
-                                        src={image}
-                                        alt={product.name}
-                                        layout="fill"
-                                        objectFit="contain"
-                                        className="rounded-lg bg-white"
-                                    />
-                                </div>
-                            </SwiperSlide>
-                        ))}
-                    </Swiper>
-                </div>
+    const description = await fetchDescription(product.description_file);
 
-                {/* ✅ Product Details */}
-                <div className="w-full md:w-1/2 space-y-4">
-                    <h1 className="text-3xl font-bold">{product.name}</h1>
-                    <p className="text-gray-500">{product.brand}</p>
-                    <p className="text-2xl font-semibold">${product.price.toFixed(2)}</p>
-
-                    {/* ✅ Add to Cart Button */}
-                    <button
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition"
-                        onClick={() => alert(`Added ${product.name} to cart!`)}
-                    >
-                        🛒 Add to Cart
-                    </button>
-                </div>
-            </div>
-
-            {/* ✅ Product Description */}
-            {description && (
-                <div className="mt-8">
-                    <h2 className="text-2xl font-bold">{description.title}</h2>
-                    <p className="mt-2">{description.overview}</p>
-
-                    <h3 className="text-xl font-bold mt-4">Details</h3>
-                    <ul className="list-disc pl-5">
-                        {description.details.map((detail, index) => (
-                            <li key={index}>{detail}</li>
-                        ))}
-                    </ul>
-
-                    <h3 className="text-xl font-bold mt-4">Specifications</h3>
-                    <ul className="list-disc pl-5">
-                        {Object.entries(description.specifications).map(([key, value]) => (
-                            <li key={key}>
-                                <strong>{key}:</strong> {value}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            )}
-
-            {/* ✅ Reviews Section */}
-            <div className="mt-10">
-                <h2 className="text-2xl font-bold">Customer Reviews</h2>
-                {product.reviews.length > 0 ? (
-                    <ul className="mt-4 space-y-4">
-                        {product.reviews.map((review, index) => (
-                            <li key={index} className="border p-4 rounded-lg shadow-md bg-gray-50">
-                                <p className="text-lg font-semibold">{review.reviewer}</p>
-                                <p className="text-yellow-500">⭐ {review.rating}/5</p>
-                                <p className="text-gray-700">{review.comment}</p>
-                            </li>
-                        ))}
-                    </ul>
-                ) : (
-                    <p className="text-gray-500 mt-2">No reviews yet.</p>
-                )}
-            </div>
-        </div>
-    );
+    return <ProductDetailsClient product={product} description={description} />;
 }

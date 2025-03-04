@@ -1,7 +1,8 @@
+import React from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Providers from "@/components/Providers"; // ✅ Import Providers
-import Navbar from "@/components/Navbar"; // ✅ Import Navbar
+import Providers from "@/components/layout/Providers";
+import Navbar from "@/components/layout/Navbar";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -19,6 +20,9 @@ export const metadata: Metadata = {
     description: "A fully functional Next.js authentication system",
 };
 
+// Enable static generation of the layout shell
+export const dynamic = 'force-static';
+
 export default function RootLayout({
                                        children,
                                    }: {
@@ -27,9 +31,11 @@ export default function RootLayout({
     return (
         <html lang="en">
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Providers>  {/* ✅ Wrap everything in Providers */}
+        <Providers>
             <Navbar />
-            {children}
+            <main>
+                {children}
+            </main>
         </Providers>
         </body>
         </html>

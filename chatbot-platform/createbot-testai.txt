@@ -1,0 +1,109 @@
+Step 1: Create a New Chatbot
+
+Navigate to your chatbot dashboard at http://localhost:3000/dashboard/chatbots
+Click the "Create New Chatbot" button
+Fill in the basic information:
+
+Name: "Asian Fusion Restaurant"
+Description: "Chatbot for our Asian fusion restaurant to help with orders, bookings, and inquiries"
+Industry: Select "food" from the dropdown
+
+
+Click "Next: Choose Template"
+If there's a food industry template available, select it. Otherwise, click "Skip: Add Responses Manually"
+
+Step 2: Add Responses for the Chatbot
+Now let's add various responses for common restaurant inquiries:
+Business Hours
+
+Trigger: "hours" or "opening hours"
+Response: "We're open Monday to Thursday 11:00 AM - 10:00 PM, Friday and Saturday 11:00 AM - 11:00 PM, and Sunday 12:00 PM - 9:00 PM."
+Check the "Use AI to enhance this response" box
+
+Reservations
+
+Trigger: "booking" or "reservation"
+Response: "We accept reservations online through our website or by calling (555) 123-4567. For parties larger than 8, please call us directly."
+Check the "Use AI to enhance this response" box
+
+Delivery
+
+Trigger: "delivery"
+Response: "We offer delivery within a 5-mile radius with a minimum order of $25. Delivery fee is $5 or free for orders over $50. You can order through our website or food delivery apps."
+Check the "Use AI to enhance this response" box
+
+Menu
+
+Trigger: "menu"
+Response: "Our menu features a fusion of Asian cuisines including Chinese, Japanese, Thai, and Vietnamese dishes. Signature items include our Dragon Roll, Pad Thai, and Peking Duck. View our full menu on our website."
+Check the "Use AI to enhance this response" box
+
+Allergies
+
+Trigger: "allergies" or "dietary restrictions"
+Response: "We can accommodate various dietary restrictions and allergies. Please inform your server about any allergies when ordering. We have gluten-free, vegetarian, and vegan options available."
+Check the "Use AI to enhance this response" box
+
+Order Status
+
+Trigger: "order status" or "where is my order"
+Response: "To check on your order status, please provide your order number. For delivery orders, you can track your order through the app or website you placed your order on."
+Check the "Use AI to enhance this response" box
+
+Specials
+
+Trigger: "specials" or "promotions"
+Response: "We have daily lunch specials from 11:00 AM to 3:00 PM. Tuesday is our buy-one-get-one-half-off sushi night, and Thursday features our Chef's special tasting menu."
+Check the "Use AI to enhance this response" box
+
+Location
+
+Trigger: "location" or "address"
+Response: "We're located at 123 Main Street, downtown. We have a parking lot at the back of the restaurant and street parking is also available."
+Check the "Use AI to enhance this response" box
+
+Step 3: Create the Chatbot
+Click the "Create Chatbot" button at the bottom of the form to save your chatbot.
+Step 4: Test the Chatbot
+
+Once created, you should see your "Asian Fusion Restaurant" chatbot in the dashboard
+Click on it to view details
+Click the "Test Chatbot" button
+
+Step 5: Chat Scenarios to Test
+Try these scenarios to test how your chatbot handles different types of inquiries:
+Exact Trigger Phrases:
+
+"What are your hours?"
+"How do I make a booking?"
+"Do you offer delivery?"
+
+Variations of Trigger Phrases:
+
+"What time do you close on Fridays?"
+"Can I reserve a table for tomorrow night?"
+"How much is the delivery fee?"
+
+Multiple Keywords:
+
+"I have a shellfish allergy, what can I order from your menu?"
+"Where is your restaurant located and do you have parking?"
+
+Not Predefined Questions (should use OpenAI):
+
+"What type of rice do you use?"
+"Are your ingredients locally sourced?"
+"Can I bring my own wine?"
+"Do you have outdoor seating?"
+
+Order Tracking Example:
+
+"I placed an order 20 minutes ago, where is it?"
+
+Each of these test cases will help you verify:
+
+Your predefined responses are working
+The keyword matching is effective
+OpenAI is handling general questions properly
+
+After testing, you can refine your trigger phrases and responses based on how the chatbot performs. If you find that certain questions aren't being matched properly, you can add more responses or adjust your existing trigger phrases.

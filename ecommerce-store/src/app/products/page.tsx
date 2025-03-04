@@ -1,92 +1,71 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import ProductGrid from "@/components/ProductGrid";
+import { useState } from "react";
+import ProductGrid from "@/components/products/ProductGrid";
+import { useProductCache } from "@/hooks/products/useProductCache";
+import { FilterBar } from "@/components/products/FilterBar";
 
 export default function ProductsPage() {
-    const [products, setProducts] = useState([]);
     const [search, setSearch] = useState("");
     const [category, setCategory] = useState("");
     const [minPrice, setMinPrice] = useState("");
     const [maxPrice, setMaxPrice] = useState("");
     const [brand, setBrand] = useState("");
 
-    useEffect(() => {
-        const fetchProducts = async () => {
-            const queryParams = new URLSearchParams();
+    const {
+        products,
+        categories,
+        brands,
+        loading,
+        isFiltering
+    } = useProductCache({ search, category, minPrice, maxPrice, brand });
 
-            if (search) queryParams.append("search", search);
-            if (category) queryParams.append("category", category);
-            if (minPrice) queryParams.append("minPrice", minPrice);
-            if (maxPrice) queryParams.append("maxPrice", maxPrice);
-            if (brand) queryParams.append("brand", brand);
-
-            const res = await fetch(`/api/products?${queryParams.toString()}`);
-            const data = await res.json();
-            setProducts(data);
-        };
-
-        fetchProducts();
-    }, [search, category, minPrice, maxPrice, brand]);
+    // Define state setter actions with appropriate names for serialization
+    const setSearchAction = (value: string) => setSearch(value);
+    const setCategoryAction = (value: string) => setCategory(value);
+    const setMinPriceAction = (value: string) => setMinPrice(value);
+    const setMaxPriceAction = (value: string) => setMaxPrice(value);
+    const setBrandAction = (value: string) => setBrand(value);
 
     return (
         <div className="container mx-auto p-8">
             <h1 className="text-3xl font-bold mb-6">All Products</h1>
 
-            {/* Search & Filters */}
-            <div className="flex flex-wrap gap-4 mb-6">
-                <input
-                    type="text"
-                    placeholder="Search products..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="border p-2 rounded"
-                />
+            <FilterBar
+                search={search}
+                setSearchAction={setSearchAction}
+                category={category}
+                setCategoryAction={setCategoryAction}
+                minPrice={minPrice}
+                setMinPriceAction={setMinPriceAction}
+                maxPrice={maxPrice}
+                setMaxPriceAction={setMaxPriceAction}
+                brand={brand}
+                setBrandAction={setBrandAction}
+                categories={categories}
+                brands={brands}
+            />
 
-                <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="border p-2 rounded"
-                >
-                    <option value="">All Categories</option>
-                    <option value="Cameras">Cameras</option>
-                    <option value="Computers">Computers</option>
-                    <option value="Smartphones">Smartphones</option>
-                    <option value="Laptops">Laptops</option>
-                    <option value="Audio">Audio</option>
-                </select>
+            {loading ? (
+                <div className="flex justify-center my-12">
+                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+                </div>
+            ) : (
+                <>
+                    {isFiltering && (
+                        <div className="flex items-center mb-4 text-gray-600">
+                            <div className="mr-2 w-4 h-4 border-t-2 border-blue-500 border-solid rounded-full animate-spin"></div>
+                            Filtering products...
+                        </div>
+                    )}
 
-                <select
-                    value={brand}
-                    onChange={(e) => setBrand(e.target.value)}
-                    className="border p-2 rounded"
-                >
-                    <option value="">All Brands</option>
-                    <option value="Apple">Apple</option>
-                    <option value="Canon">Canon</option>
-                    <option value="Samsung">Samsung</option>
-                    <option value="Sony">Sony</option>
-                    <option value="Nikon">Nikon</option>
-                </select>
+                    <div className="mb-4 text-gray-600">
+                        Showing {products.length} products
+                    </div>
 
-                <input
-                    type="number"
-                    placeholder="Min Price"
-                    value={minPrice}
-                    onChange={(e) => setMinPrice(e.target.value)}
-                    className="border p-2 rounded w-24"
-                />
-                <input
-                    type="number"
-                    placeholder="Max Price"
-                    value={maxPrice}
-                    onChange={(e) => setMaxPrice(e.target.value)}
-                    className="border p-2 rounded w-24"
-                />
-            </div>
-
-            {/* Product List */}
-            <ProductGrid products={products} />
+                    <ProductGrid products={products} />
+                </>
+            )}
         </div>
     );
 }
