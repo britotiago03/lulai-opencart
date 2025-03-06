@@ -1,19 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeTransaction, calculateOrderTotals, insertShippingAddress, insertOrderItems } from '@/lib/db';
-import { CustomerInfo } from '@/types/order';
-import { StripePaymentData } from '@/types/payment';
+import { OrderData } from '@/types/payment';
 import { CartItem } from '@/lib/db';
-
-interface CheckoutData {
-    customerInfo: CustomerInfo;
-    paymentMethod: string;
-    paymentData: StripePaymentData;
-    cartItems: CartItem[];
-}
+import stripe from '@/lib/stripe';
 
 export async function POST(request: NextRequest) {
     try {
-        const data: CheckoutData = await request.json();
+        const data: OrderData = await request.json();
 
         // Validate required data
         if (!data.customerInfo || !data.paymentData || !data.cartItems || data.cartItems.length === 0) {
@@ -23,61 +16,113 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Calculate order totals
-        const { subtotal, shippingAmount, taxAmount, totalAmount } = calculateOrderTotals(data.cartItems);
+        // Get the payment intent ID from the request
+        const { paymentIntentId } = data.paymentData;
 
-        // Process the order using our transaction helper
-        return await executeTransaction(async (client) => {
-            // In a real app, you would process the payment with Stripe here
-            // For this demo, we'll assume payment was successful
-
-            // 1. Create or get cart (assuming guest checkout with session_id for now)
-            // In a real app, you'd check for user_id if logged in
-            const sessionId = 'session_' + Math.random().toString(36).substring(2, 15);
-
-            // 2. Insert order record
-            const orderResult = await client.query(
-                `INSERT INTO orders 
-                (session_id, status, payment_method, payment_status, payment_details, 
-                shipping_amount, tax_amount, subtotal_amount, total_amount)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-                RETURNING id`,
-                [
-                    sessionId,
-                    'processing',
-                    'stripe',
-                    'paid',
-                    JSON.stringify({
-                        cardLast4: data.paymentData.last4,
-                        cardholderName: data.paymentData.cardholderName
-                    }),
-                    shippingAmount,
-                    taxAmount,
-                    subtotal,
-                    totalAmount
-                ]
+        if (!paymentIntentId) {
+            return NextResponse.json(
+                { error: 'No payment intent ID provided' },
+                { status: 400 }
             );
+        }
 
-            const orderId = orderResult.rows[0].id;
+        // Calculate order totals
+        const { subtotal, shippingAmount, taxAmount, totalAmount } = calculateOrderTotals(data.cartItems as CartItem[]);
 
-            // 3. Insert shipping address
-            await insertShippingAddress(client, orderId, data.customerInfo);
+        try {
+            // Retrieve the payment intent to confirm payment status
+            const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
-            // 4. Insert order items
-            await insertOrderItems(client, orderId, data.cartItems);
+            // Process the order using our transaction helper
+            return await executeTransaction(async (client) => {
+                // Generate session ID for guest checkout
+                const sessionId = 'session_' + Math.random().toString(36).substring(2, 15);
 
-            // 5. Return success response
-            return NextResponse.json({
-                success: true,
-                orderId,
-                // In a real app with Stripe, you might include a redirectUrl here
-                // redirectUrl: stripeCheckoutSession.url
+                // Payment status based on Stripe payment intent status
+                const paymentStatus = paymentIntent.status === 'succeeded' ? 'paid' :
+                    (paymentIntent.status === 'requires_capture' ? 'authorized' : 'pending');
+
+                // Get payment method details for storing with the order
+                let cardLast4 = '****';
+                let cardBrand = '';
+
+                if (paymentIntent.payment_method) {
+                    try {
+                        const paymentMethod = await stripe.paymentMethods.retrieve(
+                            paymentIntent.payment_method as string
+                        );
+
+                        if (paymentMethod.type === 'card' && paymentMethod.card) {
+                            cardLast4 = paymentMethod.card.last4;
+                            cardBrand = paymentMethod.card.brand;
+                        }
+                    } catch (error) {
+                        console.error('Error retrieving payment method:', error);
+                    }
+                }
+
+                // Insert order record
+                const orderResult = await client.query(
+                    `INSERT INTO orders 
+                    (session_id, status, payment_method, payment_status, payment_details, 
+                    shipping_amount, tax_amount, subtotal_amount, total_amount)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                    RETURNING id`,
+                    [
+                        sessionId,
+                        'processing',
+                        'stripe',
+                        paymentStatus,
+                        JSON.stringify({
+                            cardLast4,
+                            cardBrand,
+                            paymentIntentId,
+                            cardholderName: data.paymentData.cardholderName,
+                            stripePaymentIntentStatus: paymentIntent.status
+                        }),
+                        shippingAmount,
+                        taxAmount,
+                        subtotal,
+                        totalAmount
+                    ]
+                );
+
+                const orderId = orderResult.rows[0].id;
+
+                // Insert shipping address
+                await insertShippingAddress(client, orderId, data.customerInfo);
+
+                // Insert order items
+                await insertOrderItems(client, orderId, data.cartItems as CartItem[]);
+
+                // If the payment requires further action (like 3D Secure), return the client secret
+                if (paymentIntent.status === 'requires_action') {
+                    return NextResponse.json({
+                        requiresAction: true,
+                        clientSecret: paymentIntent.client_secret,
+                        orderId
+                    });
+                }
+
+                // Otherwise return success
+                return NextResponse.json({
+                    success: true,
+                    orderId,
+                    paymentStatus
+                });
             });
-        });
+        } catch (stripeError) {
+            console.error('Stripe error:', stripeError);
+            return NextResponse.json(
+                { error: 'Failed to process payment with Stripe' },
+                { status: 500 }
+            );
+        }
     } catch (error) {
-        console.error('Stripe checkout error:', error);
+        console.error('Checkout error:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to process payment';
         return NextResponse.json(
-            { error: 'Failed to process payment' },
+            { error: errorMessage },
             { status: 500 }
         );
     }
