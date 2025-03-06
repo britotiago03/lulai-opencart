@@ -4,14 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/hooks/cart/useCart";
 import { CheckoutForm } from "@/components/checkout/CheckoutForm";
-import { PaymentMethodSelector } from "@/components/checkout/PaymentMethodSelector";
 import { OrderSummary } from "@/components/checkout/OrderSummary";
-import { StripePaymentForm } from "@/components/checkout/payment/StripePaymentForm";
-import { PayPalPaymentForm } from "@/components/checkout/payment/PayPalPaymentForm";
-import { ManualPaymentForm } from "@/components/checkout/payment/ManualPaymentForm";
-import { PaymentData } from "@/types/payment";
-
-export type PaymentMethod = "stripe" | "paypal" | "manual";
+import { StripeProvider } from "@/components/checkout/payment/StripeProvider";
+import { StripePaymentData } from "@/types/payment";
 
 interface CustomerInfo {
     firstName: string;
@@ -27,7 +22,6 @@ interface CustomerInfo {
 
 export default function CheckoutPage() {
     const { cart, loading, error, fetchCart } = useCart();
-    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("stripe");
     const [checkoutStep, setCheckoutStep] = useState(1);
     const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
         firstName: "",
@@ -44,7 +38,7 @@ export default function CheckoutPage() {
     const [checkoutError, setCheckoutError] = useState<string | null>(null);
     const router = useRouter();
 
-    // ✅ Prevent redirection if an order was just placed
+    // Prevent redirection if an order was just placed
     const justPlacedOrder = typeof window !== "undefined" ? sessionStorage.getItem("justPlacedOrder") : null;
 
     if (loading) {
@@ -65,7 +59,7 @@ export default function CheckoutPage() {
         );
     }
 
-    // ✅ Only redirect to cart if an order was NOT just placed
+    // Only redirect to cart if an order was NOT just placed
     if (cart.items.length === 0 && justPlacedOrder !== "true") {
         router.push("/cart");
         return (
@@ -80,11 +74,6 @@ export default function CheckoutPage() {
         setCustomerInfo(info);
         setCheckoutStep(2);
         window.scrollTo(0, 0);
-    };
-
-    const handlePaymentMethodChange = (method: PaymentMethod) => {
-        setPaymentMethod(method);
-        setCheckoutError(null);
     };
 
     const clearCart = async () => {
@@ -103,14 +92,16 @@ export default function CheckoutPage() {
         }
     };
 
-    const handlePaymentSubmit = async (paymentData: PaymentData) => {
+    const handlePaymentSubmit = async (paymentData: StripePaymentData) => {
         setIsSubmitting(true);
         setCheckoutError(null);
 
         try {
+            console.log("Processing payment with data:", paymentData);
+
             const orderData = {
                 customerInfo,
-                paymentMethod,
+                paymentMethod: "stripe",
                 paymentData,
                 cartItems: cart.items.map((item) => ({
                     productId: item.product_id,
@@ -119,8 +110,7 @@ export default function CheckoutPage() {
                 })),
             };
 
-            const endpoint = `/api/checkout/${paymentMethod}`;
-            const response = await fetch(endpoint, {
+            const response = await fetch("/api/checkout/stripe", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(orderData),
@@ -134,20 +124,15 @@ export default function CheckoutPage() {
                 return;
             }
 
-            // ✅ Set flag before clearing cart
+            console.log("Payment processed successfully:", data);
+
+            // Set flag before clearing cart
             sessionStorage.setItem("justPlacedOrder", "true");
 
             await clearCart();
 
-            if (paymentMethod === "stripe" && data.redirectUrl) {
-                window.location.href = data.redirectUrl;
-                return;
-            } else if (paymentMethod === "paypal" && data.approvalUrl) {
-                window.location.href = data.approvalUrl;
-                return;
-            } else {
-                router.push(`/order-confirmation/${data.orderId}`);
-            }
+            // Redirect to order confirmation
+            router.push(`/order-confirmation/${data.orderId}`);
         } catch (error) {
             console.error("Payment error:", error);
             setCheckoutError(error instanceof Error ? error.message : "An unexpected error occurred");
@@ -188,7 +173,7 @@ export default function CheckoutPage() {
                         <CheckoutForm customerInfo={customerInfo} onSubmitAction={handleCustomerInfoSubmit} />
                     ) : (
                         <div className="bg-white p-6 rounded-lg shadow-md">
-                            <h2 className="text-xl font-bold mb-4">Payment Method</h2>
+                            <h2 className="text-xl font-bold mb-4">Payment Information</h2>
 
                             {checkoutError && (
                                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -196,12 +181,12 @@ export default function CheckoutPage() {
                                 </div>
                             )}
 
-                            <PaymentMethodSelector selectedMethod={paymentMethod} onMethodChangeAction={handlePaymentMethodChange} />
-
                             <div className="mt-6">
-                                {paymentMethod === "stripe" && <StripePaymentForm onSubmitAction={handlePaymentSubmit} isSubmitting={isSubmitting} amount={cart.totalPrice} />}
-                                {paymentMethod === "paypal" && <PayPalPaymentForm onSubmitAction={handlePaymentSubmit} isSubmitting={isSubmitting} amount={cart.totalPrice} />}
-                                {paymentMethod === "manual" && <ManualPaymentForm onSubmitAction={handlePaymentSubmit} isSubmitting={isSubmitting} />}
+                                <StripeProvider
+                                    onSubmitAction={handlePaymentSubmit}
+                                    isSubmitting={isSubmitting}
+                                    amount={cart.totalPrice}
+                                />
                             </div>
 
                             <button type="button" onClick={() => setCheckoutStep(1)} className="mt-4 text-blue-600 hover:underline">
