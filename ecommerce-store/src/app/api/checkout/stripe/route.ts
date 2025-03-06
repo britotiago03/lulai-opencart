@@ -3,6 +3,9 @@ import { executeTransaction, calculateOrderTotals, insertShippingAddress, insert
 import { OrderData } from '@/types/payment';
 import { CartItem } from '@/lib/db';
 import stripe from '@/lib/stripe';
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import pool from '@/lib/db';
 
 export async function POST(request: NextRequest) {
     try {
@@ -15,6 +18,30 @@ export async function POST(request: NextRequest) {
                 { status: 400 }
             );
         }
+
+        // Get the current session to identify the user
+        const session = await getServerSession(authOptions);
+        console.log("Checkout session:", session);
+
+        // Get userId from session or look it up by email
+        let userId = null;
+        if (session?.user) {
+            if (session.user.id) {
+                userId = session.user.id;
+            } else if (session.user.email) {
+                // Get user from database by email
+                const userResult = await pool.query(
+                    "SELECT id FROM users WHERE email = $1",
+                    [session.user.email]
+                );
+
+                if (userResult.rows.length > 0) {
+                    userId = userResult.rows[0].id;
+                }
+            }
+        }
+
+        console.log("Order will be created with user ID:", userId);
 
         // Get the payment intent ID from the request
         const { paymentIntentId } = data.paymentData;
@@ -61,14 +88,15 @@ export async function POST(request: NextRequest) {
                     }
                 }
 
-                // Insert order record
+                // Insert order record - now includes user_id
                 const orderResult = await client.query(
                     `INSERT INTO orders 
-                    (session_id, status, payment_method, payment_status, payment_details, 
+                    (user_id, session_id, status, payment_method, payment_status, payment_details, 
                     shipping_amount, tax_amount, subtotal_amount, total_amount)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
                     RETURNING id`,
                     [
+                        userId, // Added user ID
                         sessionId,
                         'processing',
                         'stripe',
@@ -88,6 +116,7 @@ export async function POST(request: NextRequest) {
                 );
 
                 const orderId = orderResult.rows[0].id;
+                console.log(`Created order ${orderId} for user ${userId}`);
 
                 // Insert shipping address
                 await insertShippingAddress(client, orderId, data.customerInfo);

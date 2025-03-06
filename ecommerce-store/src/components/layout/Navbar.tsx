@@ -102,13 +102,28 @@ export default function Navbar() {
 
                         {session ? (
                             <div className="flex items-center gap-4">
-                                <p>Welcome, {session.user?.name}</p>
-                                <button
-                                    onClick={() => signOut({ callbackUrl: `/auth/login` })}
-                                    className="bg-red-500 px-4 py-2 rounded"
-                                >
-                                    Logout
-                                </button>
+                                <div className="relative group">
+                                    <button className="flex items-center gap-2 px-4 py-2 bg-gray-700 rounded">
+                                        {session.user?.name} <span>▼</span>
+                                    </button>
+                                    <div className="absolute right-0 w-48 mt-2 bg-white text-gray-800 rounded shadow-lg hidden group-hover:block">
+                                        <Link href={`/account`} className="block px-4 py-2 hover:bg-gray-100">
+                                            Dashboard
+                                        </Link>
+                                        <Link href={`/account/orders`} className="block px-4 py-2 hover:bg-gray-100">
+                                            My Orders
+                                        </Link>
+                                        <Link href={`/account/profile`} className="block px-4 py-2 hover:bg-gray-100">
+                                            Profile
+                                        </Link>
+                                        <button
+                                            onClick={() => signOut({ callbackUrl: `/auth/login` })}
+                                            className="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 border-t"
+                                        >
+                                            Logout
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         ) : (
                             <>
