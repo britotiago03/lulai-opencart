@@ -1,6 +1,7 @@
 import NextAuth, { User } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { verifyUser } from "@/lib/auth.service";
+import GoogleProvider from "next-auth/providers/google";
 
 interface Subscription {
     plan_type: string;
@@ -21,6 +22,13 @@ const handler = NextAuth({
         maxAge: 30 * 24 * 60 * 60, // 30 days
     },
     providers: [
+        // Google OAuth provider
+        GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID as string,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+        }),
+        
+        // Other credentials provider
         CredentialsProvider({
             name: "Credentials",
             credentials: {
@@ -71,8 +79,9 @@ const handler = NextAuth({
         signIn: "/auth/signin",
         error: "/auth/signin",
     },
+    secret: process.env.NEXTAUTH_SECRET,
 });
 
-// ✅ Correct export for Next.js 13+
+// Correct export for Next.js 13+
 export const GET = handler;
 export const POST = handler;
