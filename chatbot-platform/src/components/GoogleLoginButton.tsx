@@ -8,7 +8,7 @@ export default function GoogleLoginButton() {
     <div>
       
       {session ? (
-        <div>
+        <div className="text-gray-500">
           <p>Welcome, {session.user?.name}</p>
           <button 
             className="px-6 py-3 text-gray-500 border-2 border-black rounded-lg"
@@ -18,7 +18,7 @@ export default function GoogleLoginButton() {
       ) : (
         <button 
           className="flex items-center pl-2 pr-6 py-3 text-gray-500 border-2 border-black rounded-lg"
-          onClick={() => signIn("google", {callbackUrl: "/"})}>
+          onClick={() => signIn("google", {callbackUrl: "/dashboard"})}>
           <Image
             src="/google_icon.png"
             alt="Next.js logo"
