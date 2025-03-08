@@ -2,6 +2,7 @@
 import ToSigninButton from "./ToSigninButton";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
+import SigninProtectionComponent from "./SigninProtectionComponent";
 
 export default function GuestDashboard() {
     const { data : session} = useSession();
@@ -27,12 +28,7 @@ export default function GuestDashboard() {
                     </p>
                 </>
                 ) : (
-                    <>
-                        <p className="font-[family-name:var(--font-geist-mono)] text-center text-gray-500 max-w-2xl">
-                        Please sign in to access the dashboard page.
-                        </p>
-                        <ToSigninButton/>                        
-                    </>
+                    <SigninProtectionComponent/>
                 )
             }
             
