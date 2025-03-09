@@ -1,9 +1,9 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import SubscriptionCard from "@/components/SubscriptionCard";
+import SubscriptionCard from "@/components/subscription/SubscriptionCard";
 import Image from "next/image";
-import SigninProtectionComponent from "./SigninProtectionComponent";
+import SigninProtectionComponent from "../authentication/signin/SigninProtectionComponent";
 
 
 export default function SubscriptionsComponent() {

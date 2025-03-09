@@ -1,5 +1,5 @@
 "use client";
-import ToSigninButton  from "@/components/ToSigninButton";
+import ToSigninButton  from "@/components/authentication/signin/ToSigninButton";
 
 export default function SigninProtectionComponent() {
     return (

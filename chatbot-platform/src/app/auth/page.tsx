@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
-import SignupForm from "@/components/SignupForm";
-import SigninForm from "@/components/SigninForm";
-import GoogleLoginButton from "@/components/GoogleLoginButton";
+import SignupForm from "@/components/authentication/signup/SignupForm";
+import SigninForm from "@/components/authentication/signin/SigninForm";
+import GoogleLoginButton from "@/components/google/GoogleLoginButton";
 import { SessionProvider } from "next-auth/react";
 
 export default function AuthPage() {

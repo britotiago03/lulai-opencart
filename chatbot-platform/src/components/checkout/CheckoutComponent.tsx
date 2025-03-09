@@ -1,7 +1,7 @@
 "use client";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
-import SigninProtectionComponent from "../SigninProtectionComponent";
+import SigninProtectionComponent from "../authentication/signin/SigninProtectionComponent";
 import CheckoutPage from "./TiagoCheckoutComponent";
 
 export default function CheckoutComponent() {

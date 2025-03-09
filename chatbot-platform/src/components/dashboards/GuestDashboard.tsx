@@ -1,8 +1,8 @@
 "use client";
-import ToSigninButton from "./ToSigninButton";
+import ToSigninButton from "../authentication/signin/ToSigninButton";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
-import SigninProtectionComponent from "./SigninProtectionComponent";
+import SigninProtectionComponent from "../authentication/signin/SigninProtectionComponent";
 
 export default function GuestDashboard() {
     const { data : session} = useSession();

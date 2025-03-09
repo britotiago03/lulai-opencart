@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
-import AdminLoginForm from "@/components/AdminLoginForm";
+import AdminLoginForm from "@/components/admin/AdminLoginForm";
 import { validateApiKey } from "@/lib/apiKey.service";
 
 export default function AdminLoginPage() {
