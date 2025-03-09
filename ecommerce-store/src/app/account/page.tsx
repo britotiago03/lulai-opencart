@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useUserProfile } from "@/lib/userProfileService";
 
 interface OrderSummary {
     id: string;
@@ -13,11 +13,22 @@ interface OrderSummary {
 }
 
 export default function AccountDashboard() {
-    const { data: session } = useSession();
+    console.log("AccountDashboard rendering");
+
+    // Get user profile data from service
+    const { profile, isLoading: profileLoading } = useUserProfile();
     const [recentOrders, setRecentOrders] = useState<OrderSummary[]>([]);
     const [loading, setLoading] = useState(true);
 
+    // Log profile changes
     useEffect(() => {
+        console.log("AccountDashboard profile changed:", profile);
+    }, [profile]);
+
+    // Fetch orders when profile changes
+    useEffect(() => {
+        console.log("AccountDashboard fetching orders");
+
         // Fetch recent orders
         const fetchRecentOrders = async () => {
             try {
@@ -36,10 +47,11 @@ export default function AccountDashboard() {
             }
         };
 
-        if (session?.user) {
+        // If we have profile data, fetch orders
+        if (profile) {
             void fetchRecentOrders();
         }
-    }, [session]);
+    }, [profile]); // Only depend on profile
 
     // Format date for display
     const formatDate = (dateString: string) => {
@@ -62,6 +74,36 @@ export default function AccountDashboard() {
         }
     };
 
+    // Show loading if either profile or orders are loading
+    if (profileLoading || loading) {
+        return (
+            <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+            </div>
+        );
+    }
+
+    // If no profile data, user is not logged in
+    if (!profile) {
+        return (
+            <div className="flex flex-col items-center justify-center h-64">
+                <p className="text-lg mb-4">Please log in to view your dashboard</p>
+                <Link
+                    href={`/auth/login`}
+                    className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
+                >
+                    Login
+                </Link>
+            </div>
+        );
+    }
+
+    // Directly use profile.name and profile.email
+    const profileName = profile.name;
+    const profileEmail = profile.email;
+
+    console.log("AccountDashboard rendering with name:", profileName);
+
     return (
         <div>
             <h1 className="text-2xl font-bold mb-6">Account Dashboard</h1>
@@ -70,10 +112,10 @@ export default function AccountDashboard() {
                 <div className="bg-blue-50 p-6 rounded-lg">
                     <h2 className="text-lg font-semibold mb-2">Account Information</h2>
                     <p className="text-gray-700 mb-1">
-                        <span className="font-medium">Name:</span> {session?.user?.name}
+                        <span className="font-medium">Name:</span> {profileName}
                     </p>
                     <p className="text-gray-700 mb-4">
-                        <span className="font-medium">Email:</span> {session?.user?.email}
+                        <span className="font-medium">Email:</span> {profileEmail}
                     </p>
                     <Link
                         href={`/account/profile`}
@@ -125,11 +167,7 @@ export default function AccountDashboard() {
                     </Link>
                 </div>
 
-                {loading ? (
-                    <div className="flex justify-center p-8">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-                    </div>
-                ) : recentOrders.length === 0 ? (
+                {recentOrders.length === 0 ? (
                     <div className="bg-gray-50 p-6 rounded-lg text-center">
                         <p className="text-gray-600">You haven&apos;t placed any orders yet.</p>
                         <Link
@@ -174,9 +212,9 @@ export default function AccountDashboard() {
                                         {formatDate(order.date)}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeStyle(order.status)}`}>
-                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                      </span>
+                                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeStyle(order.status)}`}>
+                                            {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                                        </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         {order.items}

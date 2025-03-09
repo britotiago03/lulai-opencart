@@ -1,51 +1,22 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
-
-interface UserProfile {
-    id: string;
-    name: string;
-    email: string;
-    subscriptionStatus: string;
-}
+import { useUserProfile } from "@/lib/userProfileService";
 
 export default function ProfilePage() {
-    const { data: session, update } = useSession();
-    const [profile, setProfile] = useState<UserProfile | null>(null);
+    // Get user profile data from service only
+    const { profile, isLoading, updateName } = useUserProfile();
     const [name, setName] = useState("");
-    const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState(false);
     const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
+    // Update the name input field when profile data changes
     useEffect(() => {
-        const fetchProfile = async () => {
-            if (!session?.user) return;
-
-            try {
-                setLoading(true);
-                const res = await fetch("/api/account/profile");
-
-                if (res.ok) {
-                    const data = await res.json();
-                    setProfile(data.profile);
-                    setName(data.profile.name || "");
-                } else {
-                    // If we don't have a profile yet, set name from session
-                    setName(session.user.name || "");
-                }
-            } catch (error) {
-                console.error("Error fetching profile:", error);
-                // Use session data as fallback
-                setName(session.user.name || "");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        void fetchProfile();
-    }, [session]);
+        if (profile?.name) {
+            setName(profile.name);
+        }
+    }, [profile]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -53,20 +24,12 @@ export default function ProfilePage() {
         setUpdating(true);
 
         try {
-            const res = await fetch("/api/account/profile", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name }),
-            });
+            const success = await updateName(name);
 
-            if (res.ok) {
-                // Update session with new name - this is critical for navbar update
-                await update({ name });
-
+            if (success) {
                 setMessage({ text: "Profile updated successfully", type: "success" });
             } else {
-                const errorData = await res.json();
-                setMessage({ text: errorData.error || "Failed to update profile", type: "error" });
+                setMessage({ text: "Failed to update profile", type: "error" });
             }
         } catch (error) {
             console.error("Error updating profile:", error);
@@ -76,10 +39,25 @@ export default function ProfilePage() {
         }
     };
 
-    if (loading) {
+    if (isLoading) {
         return (
             <div className="flex justify-center items-center h-64">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+            </div>
+        );
+    }
+
+    // If no profile data, user is not logged in
+    if (!profile) {
+        return (
+            <div className="flex flex-col items-center justify-center h-64">
+                <p className="text-lg mb-4">Please log in to view your profile</p>
+                <Link
+                    href={`/auth/login`}
+                    className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
+                >
+                    Login
+                </Link>
             </div>
         );
     }
@@ -119,7 +97,7 @@ export default function ProfilePage() {
                             <input
                                 type="email"
                                 id="email"
-                                value={profile?.email || session?.user?.email || ""}
+                                value={profile.email}
                                 className="w-full p-2 border rounded-md bg-gray-100"
                                 disabled
                                 title="Email cannot be changed"
@@ -127,7 +105,7 @@ export default function ProfilePage() {
                             <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
                         </div>
 
-                        {profile?.subscriptionStatus && (
+                        {profile.subscriptionStatus && (
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Subscription Status

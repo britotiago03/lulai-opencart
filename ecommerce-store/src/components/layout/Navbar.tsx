@@ -3,9 +3,12 @@
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
+import { useUserProfile } from "@/lib/userProfileService";
 
 export default function Navbar() {
     const { data: session } = useSession();
+    // Get user profile data from service
+    const { profile } = useUserProfile();
     const [cartItemCount, setCartItemCount] = useState(0);
     const [isHydrated, setIsHydrated] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -98,6 +101,9 @@ export default function Navbar() {
         };
     }, [isMenuOpen]);
 
+    // Determine the display name (use profile data first, fall back to session)
+    const displayName = profile?.name || session?.user?.name || "";
+
     return (
         <nav className="flex justify-between p-4 bg-gray-800 text-white sticky top-0 z-50">
             <Link href={`/`} className="text-lg font-bold">My App</Link>
@@ -125,7 +131,7 @@ export default function Navbar() {
                                         className="flex items-center gap-2 px-4 py-2 bg-gray-700 rounded"
                                         onClick={() => setIsMenuOpen(!isMenuOpen)}
                                     >
-                                        {session.user?.name} <span>▼</span>
+                                        {displayName} <span>▼</span>
                                     </button>
                                     {isMenuOpen && (
                                         <div className="absolute right-0 w-48 mt-2 bg-white text-gray-800 rounded shadow-lg z-50">
