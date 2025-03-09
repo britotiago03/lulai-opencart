@@ -8,6 +8,7 @@ export default function Navbar() {
     const { data: session } = useSession();
     const [cartItemCount, setCartItemCount] = useState(0);
     const [isHydrated, setIsHydrated] = useState(false);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     // Mark when hydration is complete to prevent mismatch
     useEffect(() => {
@@ -80,8 +81,25 @@ export default function Navbar() {
         }
     }, [session, mergeCartAfterLogin, isHydrated]);
 
+    // Close menu when clicking outside
+    useEffect(() => {
+        if (!isMenuOpen) return;
+
+        const handleClickOutside = (event: MouseEvent): void => {
+            const target = event.target as Element;
+            if (isMenuOpen && !target.closest('.menu-container')) {
+                setIsMenuOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isMenuOpen]);
+
     return (
-        <nav className="flex justify-between p-4 bg-gray-800 text-white">
+        <nav className="flex justify-between p-4 bg-gray-800 text-white sticky top-0 z-50">
             <Link href={`/`} className="text-lg font-bold">My App</Link>
 
             <div className="flex gap-4 items-center">
@@ -102,27 +120,32 @@ export default function Navbar() {
 
                         {session ? (
                             <div className="flex items-center gap-4">
-                                <div className="relative group">
-                                    <button className="flex items-center gap-2 px-4 py-2 bg-gray-700 rounded">
+                                <div className="relative menu-container">
+                                    <button
+                                        className="flex items-center gap-2 px-4 py-2 bg-gray-700 rounded"
+                                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                                    >
                                         {session.user?.name} <span>▼</span>
                                     </button>
-                                    <div className="absolute right-0 w-48 mt-2 bg-white text-gray-800 rounded shadow-lg hidden group-hover:block">
-                                        <Link href={`/account`} className="block px-4 py-2 hover:bg-gray-100">
-                                            Dashboard
-                                        </Link>
-                                        <Link href={`/account/orders`} className="block px-4 py-2 hover:bg-gray-100">
-                                            My Orders
-                                        </Link>
-                                        <Link href={`/account/profile`} className="block px-4 py-2 hover:bg-gray-100">
-                                            Profile
-                                        </Link>
-                                        <button
-                                            onClick={() => signOut({ callbackUrl: `/auth/login` })}
-                                            className="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 border-t"
-                                        >
-                                            Logout
-                                        </button>
-                                    </div>
+                                    {isMenuOpen && (
+                                        <div className="absolute right-0 w-48 mt-2 bg-white text-gray-800 rounded shadow-lg z-50">
+                                            <Link href={`/account`} className="block px-4 py-2 hover:bg-gray-100">
+                                                Dashboard
+                                            </Link>
+                                            <Link href={`/account/orders`} className="block px-4 py-2 hover:bg-gray-100">
+                                                My Orders
+                                            </Link>
+                                            <Link href={`/account/profile`} className="block px-4 py-2 hover:bg-gray-100">
+                                                Profile
+                                            </Link>
+                                            <button
+                                                onClick={() => signOut({ callbackUrl: `/auth/login` })}
+                                                className="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 border-t"
+                                            >
+                                                Logout
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ) : (
