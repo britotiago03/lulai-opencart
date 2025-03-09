@@ -1,7 +1,8 @@
 "use client";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
-import SigninProtectionComponent from "./SigninProtectionComponent";
+import SigninProtectionComponent from "../SigninProtectionComponent";
+import CheckoutPage from "./TiagoCheckoutComponent";
 
 export default function CheckoutComponent() {
     const { data: session } = useSession();
@@ -28,7 +29,7 @@ export default function CheckoutComponent() {
 
             { session ? (
                 <main className="flex flex-col gap-8 items-center sm:items-center row-start-2 mt-16 text-gray-500">
-                    <p>This page is currently under development</p>
+                    <CheckoutPage/>
                 </main>
                 ) : (
                     <main className="flex flex-col gap-8 items-center sm:items-center row-start-2 mt-16">

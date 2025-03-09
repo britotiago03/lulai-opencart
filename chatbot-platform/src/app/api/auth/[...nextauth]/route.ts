@@ -1,4 +1,4 @@
-import NextAuth, { User } from "next-auth";
+import NextAuth, { User, NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { verifyUser } from "@/lib/auth.service";
 import GoogleProvider from "next-auth/providers/google";
@@ -16,7 +16,7 @@ interface CustomUser extends User {
     subscription: Subscription | null; // 🔧 Fixed type
 }
 
-const handler = NextAuth({
+export const authOptions: NextAuthOptions = {
     session: {
         strategy: "jwt",
         maxAge: 30 * 24 * 60 * 60, // 30 days
@@ -80,7 +80,9 @@ const handler = NextAuth({
         error: "/auth/signin",
     },
     secret: process.env.NEXTAUTH_SECRET,
-});
+}
+
+const handler = NextAuth(authOptions);
 
 // Correct export for Next.js 13+
 export const GET = handler;
