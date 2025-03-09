@@ -1,14 +1,6 @@
 import { NextResponse } from "next/server";
-import { Pool } from "pg";
+import pool from "@/lib/db";
 import bcrypt from "bcryptjs";
-
-const pool = new Pool({
-    user: "postgres",
-    host: "postgres", // ✅ Use "postgres" inside Docker
-    database: "ecommerce_db",
-    password: "postgres",
-    port: 5432,
-});
 
 export async function POST(req: Request) {
     try {
