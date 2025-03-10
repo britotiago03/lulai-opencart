@@ -9,7 +9,19 @@ CREATE TABLE users (
     password VARCHAR(255) NOT NULL,
     subscription_status VARCHAR(50) DEFAULT 'free',
     subscription_end_date TIMESTAMP WITH TIME ZONE,
+    verified BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE verification_tokens (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    token VARCHAR(255) NOT NULL,
+    type VARCHAR(50) NOT NULL, -- 'email_verification' or 'email_change'
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    new_email VARCHAR(255) NULL, -- Only used for email change
+    UNIQUE(token)
 );
 
 -- Create sessions table
@@ -117,81 +129,81 @@ CREATE TABLE shipping_addresses (
 
 -- Insert sample users (for reviews)
 INSERT INTO users (name, email, password) VALUES
-('Alice Johnson', 'alice.johnson@example.com', '$2a$10$XoQH7Pv3KU3l5u1o4eGZ7eypwl7LrsYAGpH1iyA0Fk2kI8FfNoH2G'), -- Password: alice123
-('Bob Smith', 'bob.smith@example.com', '$2a$10$7c6n7yRTiX/i5pEwI9pTqe/jmP/dQ3hjOHjdp2BOU5Nz5fdP/zqXW'), -- Password: bob123
-('Charlie Davis', 'charlie.davis@example.com', '$2a$10$0/0Qs6Viuwm6VRmnqP.yJuCqFXV6cGklOQlWOS4W3CJzMzB5Xj2me'), -- Password: charlie123
-('David Lee', 'david.lee@example.com', '$2a$10$Hgf5Z4wOVHQUy7Hd1yJh4.k7fYlh8bn4XJX5IhiA5Th34oE3YgFAu'), -- Password: david123
-('Emma Watson', 'emma.watson@example.com', '$2a$10$Dqg.BgRrB2npLO6eE3aovujWZPML42wlpeogXXq23Q3t9KQ53JHBO'), -- Password: emma123
-('Sophia Martinez', 'sophia.martinez@example.com', '$2a$10$T39EopFhPZK6BlL3yP/ruObZ/NBOItDwmUyOZbH23Gx9pY0JwGaqO'), -- Password: sophia123
-('James Anderson', 'james.anderson@example.com', '$2a$10$W9yE5KhgXqMJr1X7zLp/7uV7Gp6lKqFtP3z6hYgfI1R.LCRUzBa0q'), -- Password: james123
-('Olivia Wilson', 'olivia.wilson@example.com', '$2a$10$VQaXqHn4Zf3W9mRU/4Bv5uswP84RH06KbOMyN.g5GH11yH.M3/Lsm'), -- Password: olivia123
-('Ethan Brown', 'ethan.brown@example.com', '$2a$10$XyZ7lF21B4S1HV6tIUZjNeRE0MvlV9U8XxXW.O3kg02LMQxzPi5Dq'), -- Password: ethan123
-('Mia Thomas', 'mia.thomas@example.com', '$2a$10$RyB81eH3OeZfpI17y6i9G.u43gkHLzwdPcRAf6Ky3XGBwzUojh50y'), -- Password: mia123
-('Liam Carter', 'liam.carter@example.com', '$2a$10$3K7d5kPZQmhf3N6vN6yfpOwG/zkBtZxOZ6WJ0Pfp1.TtN/L9M3BaW'), -- Password: liam123
-('Ava Robinson', 'ava.robinson@example.com', '$2a$10$K9Uz41MnqP6JW3B2vXv71uF4lq82Gy8XRz9HY6/LuOeF1/0T3G7Na'), -- Password: ava123
-('Noah Walker', 'noah.walker@example.com', '$2a$10$Xq82Rlfn6W39PTGQ8Bz5Mvg9LF4o7J/G8pON4KZ3FPLp6zN0qWzPY'), -- Password: noah123
-('Isabella Harris', 'isabella.harris@example.com', '$2a$10$72JrV5n2Rf41PTGQO7J6Mv9XN4o3YK/G87PL5QZ3FWXx8pL3TwNzQ'), -- Password: isabella123
-('William White', 'william.white@example.com', '$2a$10$Xq70RZfn2W36PTGQO7Bz4Mvg9LF4o7J/G89PL6KZ3FPWp5zN0YzPY'), -- Password: william123
-('Elijah Scott', 'elijah.scott@example.com', '$2a$10$XgF7nTQpR3K2LM9nWYJ4cLzQH8kTfO3BP9R5L6FQWNp7M0Z2YbVPa'), -- Password: elijah123
-('Amelia Adams', 'amelia.adams@example.com', '$2a$10$N5WQ72TPG3KLMO6n7YJQ8XcLZ9HPF4O3WBPR6F5VNp7M2Z0XbLVaY'), -- Password: amelia123
-('Lucas Mitchell', 'lucas.mitchell@example.com', '$2a$10$M4QW7TPG2KLMO5n8YJXQ9LZHPF3O3WBPR5F6VNP7M2Z0XbLVaYbT'), -- Password: lucas123
-('Harper Evans', 'harper.evans@example.com', '$2a$10$O3WQ7TPG2KLMN5YJXQ9LZHPF6V3O3WBPR5F7VNpM2Z0XbLVaYbLQ'), -- Password: harper123
-('Benjamin Flores', 'benjamin.flores@example.com', '$2a$10$N6WQ7TPG3KLMO2nYJXQ8LZHPF5O3WBPR4F7VNpM2Z0XbLVaYbLQX'), -- Password: benjamin123
-('Henry Parker', 'henry.parker@example.com', '$2a$10$XzT6nYQpL3WJ4K2MO9nFQ8bVZHPF5O3BR7VNpM2Xb0YLVaQb6TPW'), -- Password: henry123
-('Victoria Reed', 'victoria.reed@example.com', '$2a$10$N5WQ72TPG3KLMO6n7YJQ8XcLZ9HPF4O3WBPR6F5VNp7M2Z0XbLVaY'), -- Password: victoria123
-('Daniel Bennett', 'daniel.bennett@example.com', '$2a$10$M4QW7TPG2KLMO5n8YJXQ9LZHPF3O3WBPR5F6VNP7M2Z0XbLVaYbT'), -- Password: daniel123
-('Scarlett Fisher', 'scarlett.fisher@example.com', '$2a$10$O3WQ7TPG2KLMN5YJXQ9LZHPF6V3O3WBPR5F7VNpM2Z0XbLVaYbLQ'), -- Password: scarlett123
-('Matthew Collins', 'matthew.collins@example.com', '$2a$10$N6WQ7TPG3KLMO2nYJXQ8LZHPF5O3WBPR4F7VNpM2Z0XbLVaYbLQX'), -- Password: matthew123
-('Natalie Cooper', 'natalie.cooper@example.com', '$2a$10$XzT6nYQpL3WJ4K2MO9nFQ8bVZHPF5O3BR7VNpM2Xb0YLVaQb6TPW'), -- Password: natalie123
-('Samuel Turner', 'samuel.turner@example.com', '$2a$10$N5WQ72TPG3KLMO6n7YJQ8XcLZ9HPF4O3WBPR6F5VNp7M2Z0XbLVaY'), -- Password: samuel123
-('Hannah Brooks', 'hannah.brooks@example.com', '$2a$10$M4QW7TPG2KLMO5n8YJXQ9LZHPF3O3WBPR5F6VNP7M2Z0XbLVaYbT'), -- Password: hannah123
-('Jack Morgan', 'jack.morgan@example.com', '$2a$10$O3WQ7TPG2KLMN5YJXQ9LZHPF6V3O3WBPR5F7VNpM2Z0XbLVaYbLQ'), -- Password: jack123
-('Emily Foster', 'emily.foster@example.com', '$2a$10$N6WQ7TPG3KLMO2nYJXQ8LZHPF5O3WBPR4F7VNpM2Z0XbLVaYbLQX'), -- Password: emily123
-('Zachary Price', 'zachary.price@example.com', '$2a$10$XzT6nYQpL3WJ4K2MO9nFQ8bVZHPF5O3BR7VNpM2Xb0YLVaQb6TPW'), -- Password: zachary123
-('Madison Hayes', 'madison.hayes@example.com', '$2a$10$N5WQ72TPG3KLMO6n7YJQ8XcLZ9HPF4O3WBPR6F5VNp7M2Z0XbLVaY'), -- Password: madison123
-('Andrew Green', 'andrew.green@example.com', '$2a$10$M4QW7TPG2KLMO5n8YJXQ9LZHPF3O3WBPR5F6VNP7M2Z0XbLVaYbT'), -- Password: andrew123
-('Samantha Bell', 'samantha.bell@example.com', '$2a$10$O3WQ7TPG2KLMN5YJXQ9LZHPF6V3O3WBPR5F7VNpM2Z0XbLVaYbLQ'), -- Password: samantha123
-('Ethan Hall', 'ethan.hall@example.com', '$2a$10$N6WQ7TPG3KLMO2nYJXQ8LZHPF5O3WBPR4F7VNpM2Z0XbLVaYbLQX'), -- Password: ethan123
-('Brandon Lee', 'brandon.lee@example.com', '$2a$10$XzT6nYQpL3WJ4K2MO9nFQ8bVZHPF5O3BR7VNpM2Xb0YLVaQb6TPW'), -- Password: brandon123
-('Jessica Ward', 'jessica.ward@example.com', '$2a$10$N5WQ72TPG3KLMO6n7YJQ8XcLZ9HPF4O3WBPR6F5VNp7M2Z0XbLVaY'), -- Password: jessica123
-('Ryan Nelson', 'ryan.nelson@example.com', '$2a$10$M4QW7TPG2KLMO5n8YJXQ9LZHPF3O3WBPR5F6VNP7M2Z0XbLVaYbT'), -- Password: ryan123
-('Sophia Carter', 'sophia.carter@example.com', '$2a$10$O3WQ7TPG2KLMN5YJXQ9LZHPF6V3O3WBPR5F7VNpM2Z0XbLVaYbLQ'), -- Password: sophia123
-('Dylan Rivera', 'dylan.rivera@example.com', '$2a$10$N6WQ7TPG3KLMO2nYJXQ8LZHPF5O3WBPR4F7VNpM2Z0XbLVaYbLQX'), -- Password: dylan123
-('Logan Bennett', 'logan.bennett@example.com', '$2a$10$XzT6nYQpL3WJ4K2MO9nFQ8bVZHPF5O3BR7VNpM2Xb0YLVaQb6TPW'), -- Password: logan123
-('Grace Sullivan', 'grace.sullivan@example.com', '$2a$10$N5WQ72TPG3KLMO6n7YJQ8XcLZ9HPF4O3WBPR6F5VNp7M2Z0XbLVaY'), -- Password: grace123
-('Owen Patterson', 'owen.patterson@example.com', '$2a$10$M4QW7TPG2KLMO5n8YJXQ9LZHPF3O3WBPR5F6VNP7M2Z0XbLVaYbT'), -- Password: owen123
-('Lily Ramirez', 'lily.ramirez@example.com', '$2a$10$O3WQ7TPG2KLMN5YJXQ9LZHPF6V3O3WBPR5F7VNpM2Z0XbLVaYbLQ'), -- Password: lily123
-('Nathan Foster', 'nathan.foster@example.com', '$2a$10$N6WQ7TPG3KLMO2nYJXQ8LZHPF5O3WBPR4F7VNpM2Z0XbLVaYbLQX'), -- Password: nathan123
-('Hailey Ross', 'hailey.ross@example.com', '$2a$10$XzT6nYQpL3WJ4K2MO9nFQ8bVZHPF5O3BR7VNpM2Xb0YLVaQb6TPW'), -- Password: hailey123
-('Mason Kelly', 'mason.kelly@example.com', '$2a$10$N5WQ72TPG3KLMO6n7YJQ8XcLZ9HPF4O3WBPR6F5VNp7M2Z0XbLVaY'), -- Password: mason123
-('Avery Diaz', 'avery.diaz@example.com', '$2a$10$M4QW7TPG2KLMO5n8YJXQ9LZHPF3O3WBPR5F6VNP7M2Z0XbLVaYbT'), -- Password: avery123
-('Sebastian Cooper', 'sebastian.cooper@example.com', '$2a$10$O3WQ7TPG2KLMN5YJXQ9LZHPF6V3O3WBPR5F7VNpM2Z0XbLVaYbLQ'), -- Password: sebastian123
-('Ella Rivera', 'ella.rivera@example.com', '$2a$10$N6WQ7TPG3KLMO2nYJXQ8LZHPF5O3WBPR4F7VNpM2Z0XbLVaYbLQX'), -- Password: ella123
-('Eli Thompson', 'eli.thompson@example.com', '$2a$10$XzT6nYQpL3WJ4K2MO9nFQ8bVZHPF5O3BR7VNpM2Xb0YLVaQb6TPW'), -- Password: eli123
-('Layla Hughes', 'layla.hughes@example.com', '$2a$10$N5WQ72TPG3KLMO6n7YJQ8XcLZ9HPF4O3WBPR6F5VNp7M2Z0XbLVaY'), -- Password: layla123
-('Isaac Morgan', 'isaac.morgan@example.com', '$2a$10$M4QW7TPG2KLMO5n8YJXQ9LZHPF3O3WBPR5F6VNP7M2Z0XbLVaYbT'), -- Password: isaac123
-('Zoe Ramirez', 'zoe.ramirez@example.com', '$2a$10$O3WQ7TPG2KLMN5YJXQ9LZHPF6V3O3WBPR5F7VNpM2Z0XbLVaYbLQ'), -- Password: zoe123
-('Lucas Bennett', 'lucas.bennett@example.com', '$2a$10$N6WQ7TPG3KLMO2nYJXQ8LZHPF5O3WBPR4F7VNpM2Z0XbLVaYbLQX'), -- Password: lucas123
-('Adam Carter', 'adam.carter@example.com', '$2a$10$XzT6nYQpL3WJ4K2MO9nFQ8bVZHPF5O3BR7VNpM2Xb0YLVaQb6TPW'), -- Password: adam123
-('Chloe Sanders', 'chloe.sanders@example.com', '$2a$10$N5WQ72TPG3KLMO6n7YJQ8XcLZ9HPF4O3WBPR6F5VNp7M2Z0XbLVaY'), -- Password: chloe123
-('Jonathan Reed', 'jonathan.reed@example.com', '$2a$10$M4QW7TPG2KLMO5n8YJXQ9LZHPF3O3WBPR5F6VNP7M2Z0XbLVaYbT'), -- Password: jonathan123
-('Ariana Mitchell', 'ariana.mitchell@example.com', '$2a$10$O3WQ7TPG2KLMN5YJXQ9LZHPF6V3O3WBPR5F7VNpM2Z0XbLVaYbLQ'), -- Password: ariana123
-('Derek Foster', 'derek.foster@example.com', '$2a$10$N6WQ7TPG3KLMO2nYJXQ8LZHPF5O3WBPR4F7VNpM2Z0XbLVaYbLQX'), -- Password: derek123
-('Evan Parker', 'evan.parker@example.com', '$2a$10$XzT6nYQpL3WJ4K2MO9nFQ8bVZHPF5O3BR7VNpM2Xb0YLVaQb6TPW'), -- Password: evan123
-('Bella Morris', 'bella.morris@example.com', '$2a$10$N5WQ72TPG3KLMO6n7YJQ8XcLZ9HPF4O3WBPR6F5VNp7M2Z0XbLVaY'), -- Password: bella123
-('Aaron Phillips', 'aaron.phillips@example.com', '$2a$10$M4QW7TPG2KLMO5n8YJXQ9LZHPF3O3WBPR5F6VNP7M2Z0XbLVaYbT'), -- Password: aaron123
-('Isla Stewart', 'isla.stewart@example.com', '$2a$10$O3WQ7TPG2KLMN5YJXQ9LZHPF6V3O3WBPR5F7VNpM2Z0XbLVaYbLQ'), -- Password: isla123
-('Connor Evans', 'connor.evans@example.com', '$2a$10$N6WQ7TPG3KLMO2nYJXQ8LZHPF5O3WBPR4F7VNpM2Z0XbLVaYbLQX'), -- Password: connor123
-('Daniel Scott', 'daniel.scott@example.com', '$2a$10$XzT6nYQpL3WJ4K2MO9nFQ8bVZHPF5O3BR7VNpM2Xb0YLVaQb6TPW'), -- Password: daniel123
-('Olivia Carter', 'olivia.carter@example.com', '$2a$10$N5WQ72TPG3KLMO6n7YJQ8XcLZ9HPF4O3WBPR6F5VNp7M2Z0XbLVaY'), -- Password: olivia123
-('Benjamin Harris', 'benjamin.harris@example.com', '$2a$10$M4QW7TPG2KLMO5n8YJXQ9LZHPF3O3WBPR5F6VNP7M2Z0XbLVaYbT'), -- Password: benjamin123
-('Sophia Mitchell', 'sophia.mitchell@example.com', '$2a$10$O3WQ7TPG2KLMN5YJXQ9LZHPF6V3O3WBPR5F7VNpM2Z0XbLVaYbLQ'), -- Password: sophia123
-('Liam Cooper', 'liam.cooper@example.com', '$2a$10$N6WQ7TPG3KLMO2nYJXQ8LZHPF5O3WBPR4F7VNpM2Z0XbLVaYbLQX'), -- Password: liam123
-('Ethan Reynolds', 'ethan.reynolds@example.com', '$2a$10$XzT6nYQpL3WJ4K2MO9nFQ8bVZHPF5O3BR7VNpM2Xb0YLVaQb6TPW'), -- Password: ethan123
-('Mia Sullivan', 'mia.sullivan@example.com', '$2a$10$N5WQ72TPG3KLMO6n7YJQ8XcLZ9HPF4O3WBPR6F5VNp7M2Z0XbLVaY'), -- Password: mia123
-('Noah Brooks', 'noah.brooks@example.com', '$2a$10$M4QW7TPG2KLMO5n8YJXQ9LZHPF3O3WBPR5F6VNP7M2Z0XbLVaYbT'), -- Password: noah123
-('Isabella Foster', 'isabella.foster@example.com', '$2a$10$O3WQ7TPG2KLMN5YJXQ9LZHPF6V3O3WBPR5F7VNpM2Z0XbLVaYbLQ'), -- Password: isabella123
-('James Collins', 'james.collins@example.com', '$2a$10$N6WQ7TPG3KLMO2nYJXQ8LZHPF5O3WBPR4F7VNpM2Z0XbLVaYbLQX'); -- Password: james123
+('Alice Johnson', 'alice.johnson@example.com', '$2a$10$XoQH7Pv3KU3l5u1o4eGZ7eypwl7LrsYAGpH1iyA0Fk2kI8FfNoH2G', true), -- Password: alice123
+('Bob Smith', 'bob.smith@example.com', '$2a$10$7c6n7yRTiX/i5pEwI9pTqe/jmP/dQ3hjOHjdp2BOU5Nz5fdP/zqXW', true), -- Password: bob123
+('Charlie Davis', 'charlie.davis@example.com', '$2a$10$0/0Qs6Viuwm6VRmnqP.yJuCqFXV6cGklOQlWOS4W3CJzMzB5Xj2me', true), -- Password: charlie123
+('David Lee', 'david.lee@example.com', '$2a$10$Hgf5Z4wOVHQUy7Hd1yJh4.k7fYlh8bn4XJX5IhiA5Th34oE3YgFAu', true), -- Password: david123
+('Emma Watson', 'emma.watson@example.com', '$2a$10$Dqg.BgRrB2npLO6eE3aovujWZPML42wlpeogXXq23Q3t9KQ53JHBO', true), -- Password: emma123
+('Sophia Martinez', 'sophia.martinez@example.com', '$2a$10$T39EopFhPZK6BlL3yP/ruObZ/NBOItDwmUyOZbH23Gx9pY0JwGaqO', true), -- Password: sophia123
+('James Anderson', 'james.anderson@example.com', '$2a$10$W9yE5KhgXqMJr1X7zLp/7uV7Gp6lKqFtP3z6hYgfI1R.LCRUzBa0q', true), -- Password: james123
+('Olivia Wilson', 'olivia.wilson@example.com', '$2a$10$VQaXqHn4Zf3W9mRU/4Bv5uswP84RH06KbOMyN.g5GH11yH.M3/Lsm', true), -- Password: olivia123
+('Ethan Brown', 'ethan.brown@example.com', '$2a$10$XyZ7lF21B4S1HV6tIUZjNeRE0MvlV9U8XxXW.O3kg02LMQxzPi5Dq', true), -- Password: ethan123
+('Mia Thomas', 'mia.thomas@example.com', '$2a$10$RyB81eH3OeZfpI17y6i9G.u43gkHLzwdPcRAf6Ky3XGBwzUojh50y', true), -- Password: mia123
+('Liam Carter', 'liam.carter@example.com', '$2a$10$3K7d5kPZQmhf3N6vN6yfpOwG/zkBtZxOZ6WJ0Pfp1.TtN/L9M3BaW', true), -- Password: liam123
+('Ava Robinson', 'ava.robinson@example.com', '$2a$10$K9Uz41MnqP6JW3B2vXv71uF4lq82Gy8XRz9HY6/LuOeF1/0T3G7Na', true), -- Password: ava123
+('Noah Walker', 'noah.walker@example.com', '$2a$10$Xq82Rlfn6W39PTGQ8Bz5Mvg9LF4o7J/G8pON4KZ3FPLp6zN0qWzPY', true), -- Password: noah123
+('Isabella Harris', 'isabella.harris@example.com', '$2a$10$72JrV5n2Rf41PTGQO7J6Mv9XN4o3YK/G87PL5QZ3FWXx8pL3TwNzQ', true), -- Password: isabella123
+('William White', 'william.white@example.com', '$2a$10$Xq70RZfn2W36PTGQO7Bz4Mvg9LF4o7J/G89PL6KZ3FPWp5zN0YzPY', true), -- Password: william123
+('Elijah Scott', 'elijah.scott@example.com', '$2a$10$XgF7nTQpR3K2LM9nWYJ4cLzQH8kTfO3BP9R5L6FQWNp7M0Z2YbVPa', true), -- Password: elijah123
+('Amelia Adams', 'amelia.adams@example.com', '$2a$10$N5WQ72TPG3KLMO6n7YJQ8XcLZ9HPF4O3WBPR6F5VNp7M2Z0XbLVaY', true), -- Password: amelia123
+('Lucas Mitchell', 'lucas.mitchell@example.com', '$2a$10$M4QW7TPG2KLMO5n8YJXQ9LZHPF3O3WBPR5F6VNP7M2Z0XbLVaYbT', true), -- Password: lucas123
+('Harper Evans', 'harper.evans@example.com', '$2a$10$O3WQ7TPG2KLMN5YJXQ9LZHPF6V3O3WBPR5F7VNpM2Z0XbLVaYbLQ', true), -- Password: harper123
+('Benjamin Flores', 'benjamin.flores@example.com', '$2a$10$N6WQ7TPG3KLMO2nYJXQ8LZHPF5O3WBPR4F7VNpM2Z0XbLVaYbLQX', true), -- Password: benjamin123
+('Henry Parker', 'henry.parker@example.com', '$2a$10$XzT6nYQpL3WJ4K2MO9nFQ8bVZHPF5O3BR7VNpM2Xb0YLVaQb6TPW', true), -- Password: henry123
+('Victoria Reed', 'victoria.reed@example.com', '$2a$10$N5WQ72TPG3KLMO6n7YJQ8XcLZ9HPF4O3WBPR6F5VNp7M2Z0XbLVaY', true), -- Password: victoria123
+('Daniel Bennett', 'daniel.bennett@example.com', '$2a$10$M4QW7TPG2KLMO5n8YJXQ9LZHPF3O3WBPR5F6VNP7M2Z0XbLVaYbT', true), -- Password: daniel123
+('Scarlett Fisher', 'scarlett.fisher@example.com', '$2a$10$O3WQ7TPG2KLMN5YJXQ9LZHPF6V3O3WBPR5F7VNpM2Z0XbLVaYbLQ', true), -- Password: scarlett123
+('Matthew Collins', 'matthew.collins@example.com', '$2a$10$N6WQ7TPG3KLMO2nYJXQ8LZHPF5O3WBPR4F7VNpM2Z0XbLVaYbLQX', true), -- Password: matthew123
+('Natalie Cooper', 'natalie.cooper@example.com', '$2a$10$XzT6nYQpL3WJ4K2MO9nFQ8bVZHPF5O3BR7VNpM2Xb0YLVaQb6TPW', true), -- Password: natalie123
+('Samuel Turner', 'samuel.turner@example.com', '$2a$10$N5WQ72TPG3KLMO6n7YJQ8XcLZ9HPF4O3WBPR6F5VNp7M2Z0XbLVaY', true), -- Password: samuel123
+('Hannah Brooks', 'hannah.brooks@example.com', '$2a$10$M4QW7TPG2KLMO5n8YJXQ9LZHPF3O3WBPR5F6VNP7M2Z0XbLVaYbT', true), -- Password: hannah123
+('Jack Morgan', 'jack.morgan@example.com', '$2a$10$O3WQ7TPG2KLMN5YJXQ9LZHPF6V3O3WBPR5F7VNpM2Z0XbLVaYbLQ', true), -- Password: jack123
+('Emily Foster', 'emily.foster@example.com', '$2a$10$N6WQ7TPG3KLMO2nYJXQ8LZHPF5O3WBPR4F7VNpM2Z0XbLVaYbLQX', true), -- Password: emily123
+('Zachary Price', 'zachary.price@example.com', '$2a$10$XzT6nYQpL3WJ4K2MO9nFQ8bVZHPF5O3BR7VNpM2Xb0YLVaQb6TPW', true), -- Password: zachary123
+('Madison Hayes', 'madison.hayes@example.com', '$2a$10$N5WQ72TPG3KLMO6n7YJQ8XcLZ9HPF4O3WBPR6F5VNp7M2Z0XbLVaY', true), -- Password: madison123
+('Andrew Green', 'andrew.green@example.com', '$2a$10$M4QW7TPG2KLMO5n8YJXQ9LZHPF3O3WBPR5F6VNP7M2Z0XbLVaYbT', true), -- Password: andrew123
+('Samantha Bell', 'samantha.bell@example.com', '$2a$10$O3WQ7TPG2KLMN5YJXQ9LZHPF6V3O3WBPR5F7VNpM2Z0XbLVaYbLQ', true), -- Password: samantha123
+('Ethan Hall', 'ethan.hall@example.com', '$2a$10$N6WQ7TPG3KLMO2nYJXQ8LZHPF5O3WBPR4F7VNpM2Z0XbLVaYbLQX', true), -- Password: ethan123
+('Brandon Lee', 'brandon.lee@example.com', '$2a$10$XzT6nYQpL3WJ4K2MO9nFQ8bVZHPF5O3BR7VNpM2Xb0YLVaQb6TPW', true), -- Password: brandon123
+('Jessica Ward', 'jessica.ward@example.com', '$2a$10$N5WQ72TPG3KLMO6n7YJQ8XcLZ9HPF4O3WBPR6F5VNp7M2Z0XbLVaY', true), -- Password: jessica123
+('Ryan Nelson', 'ryan.nelson@example.com', '$2a$10$M4QW7TPG2KLMO5n8YJXQ9LZHPF3O3WBPR5F6VNP7M2Z0XbLVaYbT', true), -- Password: ryan123
+('Sophia Carter', 'sophia.carter@example.com', '$2a$10$O3WQ7TPG2KLMN5YJXQ9LZHPF6V3O3WBPR5F7VNpM2Z0XbLVaYbLQ', true), -- Password: sophia123
+('Dylan Rivera', 'dylan.rivera@example.com', '$2a$10$N6WQ7TPG3KLMO2nYJXQ8LZHPF5O3WBPR4F7VNpM2Z0XbLVaYbLQX', true), -- Password: dylan123
+('Logan Bennett', 'logan.bennett@example.com', '$2a$10$XzT6nYQpL3WJ4K2MO9nFQ8bVZHPF5O3BR7VNpM2Xb0YLVaQb6TPW', true), -- Password: logan123
+('Grace Sullivan', 'grace.sullivan@example.com', '$2a$10$N5WQ72TPG3KLMO6n7YJQ8XcLZ9HPF4O3WBPR6F5VNp7M2Z0XbLVaY', true), -- Password: grace123
+('Owen Patterson', 'owen.patterson@example.com', '$2a$10$M4QW7TPG2KLMO5n8YJXQ9LZHPF3O3WBPR5F6VNP7M2Z0XbLVaYbT', true), -- Password: owen123
+('Lily Ramirez', 'lily.ramirez@example.com', '$2a$10$O3WQ7TPG2KLMN5YJXQ9LZHPF6V3O3WBPR5F7VNpM2Z0XbLVaYbLQ', true), -- Password: lily123
+('Nathan Foster', 'nathan.foster@example.com', '$2a$10$N6WQ7TPG3KLMO2nYJXQ8LZHPF5O3WBPR4F7VNpM2Z0XbLVaYbLQX', true), -- Password: nathan123
+('Hailey Ross', 'hailey.ross@example.com', '$2a$10$XzT6nYQpL3WJ4K2MO9nFQ8bVZHPF5O3BR7VNpM2Xb0YLVaQb6TPW', true), -- Password: hailey123
+('Mason Kelly', 'mason.kelly@example.com', '$2a$10$N5WQ72TPG3KLMO6n7YJQ8XcLZ9HPF4O3WBPR6F5VNp7M2Z0XbLVaY', true), -- Password: mason123
+('Avery Diaz', 'avery.diaz@example.com', '$2a$10$M4QW7TPG2KLMO5n8YJXQ9LZHPF3O3WBPR5F6VNP7M2Z0XbLVaYbT', true), -- Password: avery123
+('Sebastian Cooper', 'sebastian.cooper@example.com', '$2a$10$O3WQ7TPG2KLMN5YJXQ9LZHPF6V3O3WBPR5F7VNpM2Z0XbLVaYbLQ', true), -- Password: sebastian123
+('Ella Rivera', 'ella.rivera@example.com', '$2a$10$N6WQ7TPG3KLMO2nYJXQ8LZHPF5O3WBPR4F7VNpM2Z0XbLVaYbLQX', true), -- Password: ella123
+('Eli Thompson', 'eli.thompson@example.com', '$2a$10$XzT6nYQpL3WJ4K2MO9nFQ8bVZHPF5O3BR7VNpM2Xb0YLVaQb6TPW', true), -- Password: eli123
+('Layla Hughes', 'layla.hughes@example.com', '$2a$10$N5WQ72TPG3KLMO6n7YJQ8XcLZ9HPF4O3WBPR6F5VNp7M2Z0XbLVaY', true), -- Password: layla123
+('Isaac Morgan', 'isaac.morgan@example.com', '$2a$10$M4QW7TPG2KLMO5n8YJXQ9LZHPF3O3WBPR5F6VNP7M2Z0XbLVaYbT', true), -- Password: isaac123
+('Zoe Ramirez', 'zoe.ramirez@example.com', '$2a$10$O3WQ7TPG2KLMN5YJXQ9LZHPF6V3O3WBPR5F7VNpM2Z0XbLVaYbLQ', true), -- Password: zoe123
+('Lucas Bennett', 'lucas.bennett@example.com', '$2a$10$N6WQ7TPG3KLMO2nYJXQ8LZHPF5O3WBPR4F7VNpM2Z0XbLVaYbLQX', true), -- Password: lucas123
+('Adam Carter', 'adam.carter@example.com', '$2a$10$XzT6nYQpL3WJ4K2MO9nFQ8bVZHPF5O3BR7VNpM2Xb0YLVaQb6TPW', true), -- Password: adam123
+('Chloe Sanders', 'chloe.sanders@example.com', '$2a$10$N5WQ72TPG3KLMO6n7YJQ8XcLZ9HPF4O3WBPR6F5VNp7M2Z0XbLVaY', true), -- Password: chloe123
+('Jonathan Reed', 'jonathan.reed@example.com', '$2a$10$M4QW7TPG2KLMO5n8YJXQ9LZHPF3O3WBPR5F6VNP7M2Z0XbLVaYbT', true), -- Password: jonathan123
+('Ariana Mitchell', 'ariana.mitchell@example.com', '$2a$10$O3WQ7TPG2KLMN5YJXQ9LZHPF6V3O3WBPR5F7VNpM2Z0XbLVaYbLQ', true), -- Password: ariana123
+('Derek Foster', 'derek.foster@example.com', '$2a$10$N6WQ7TPG3KLMO2nYJXQ8LZHPF5O3WBPR4F7VNpM2Z0XbLVaYbLQX', true), -- Password: derek123
+('Evan Parker', 'evan.parker@example.com', '$2a$10$XzT6nYQpL3WJ4K2MO9nFQ8bVZHPF5O3BR7VNpM2Xb0YLVaQb6TPW', true), -- Password: evan123
+('Bella Morris', 'bella.morris@example.com', '$2a$10$N5WQ72TPG3KLMO6n7YJQ8XcLZ9HPF4O3WBPR6F5VNp7M2Z0XbLVaY', true), -- Password: bella123
+('Aaron Phillips', 'aaron.phillips@example.com', '$2a$10$M4QW7TPG2KLMO5n8YJXQ9LZHPF3O3WBPR5F6VNP7M2Z0XbLVaYbT', true), -- Password: aaron123
+('Isla Stewart', 'isla.stewart@example.com', '$2a$10$O3WQ7TPG2KLMN5YJXQ9LZHPF6V3O3WBPR5F7VNpM2Z0XbLVaYbLQ', true), -- Password: isla123
+('Connor Evans', 'connor.evans@example.com', '$2a$10$N6WQ7TPG3KLMO2nYJXQ8LZHPF5O3WBPR4F7VNpM2Z0XbLVaYbLQX', true), -- Password: connor123
+('Daniel Scott', 'daniel.scott@example.com', '$2a$10$XzT6nYQpL3WJ4K2MO9nFQ8bVZHPF5O3BR7VNpM2Xb0YLVaQb6TPW', true), -- Password: daniel123
+('Olivia Carter', 'olivia.carter@example.com', '$2a$10$N5WQ72TPG3KLMO6n7YJQ8XcLZ9HPF4O3WBPR6F5VNp7M2Z0XbLVaY', true), -- Password: olivia123
+('Benjamin Harris', 'benjamin.harris@example.com', '$2a$10$M4QW7TPG2KLMO5n8YJXQ9LZHPF3O3WBPR5F6VNP7M2Z0XbLVaYbT', true), -- Password: benjamin123
+('Sophia Mitchell', 'sophia.mitchell@example.com', '$2a$10$O3WQ7TPG2KLMN5YJXQ9LZHPF6V3O3WBPR5F7VNpM2Z0XbLVaYbLQ', true), -- Password: sophia123
+('Liam Cooper', 'liam.cooper@example.com', '$2a$10$N6WQ7TPG3KLMO2nYJXQ8LZHPF5O3WBPR4F7VNpM2Z0XbLVaYbLQX', true), -- Password: liam123
+('Ethan Reynolds', 'ethan.reynolds@example.com', '$2a$10$XzT6nYQpL3WJ4K2MO9nFQ8bVZHPF5O3BR7VNpM2Xb0YLVaQb6TPW', true), -- Password: ethan123
+('Mia Sullivan', 'mia.sullivan@example.com', '$2a$10$N5WQ72TPG3KLMO6n7YJQ8XcLZ9HPF4O3WBPR6F5VNp7M2Z0XbLVaY', true), -- Password: mia123
+('Noah Brooks', 'noah.brooks@example.com', '$2a$10$M4QW7TPG2KLMO5n8YJXQ9LZHPF3O3WBPR5F6VNP7M2Z0XbLVaYbT', true), -- Password: noah123
+('Isabella Foster', 'isabella.foster@example.com', '$2a$10$O3WQ7TPG2KLMN5YJXQ9LZHPF6V3O3WBPR5F7VNpM2Z0XbLVaYbLQ', true), -- Password: isabella123
+('James Collins', 'james.collins@example.com', '$2a$10$N6WQ7TPG3KLMO2nYJXQ8LZHPF5O3WBPR4F7VNpM2Z0XbLVaYbLQX', true); -- Password: james123
 
 -- Insert sample products with reference to JSON description files
 INSERT INTO products (name, brand, category, price, images, description_file) VALUES
@@ -507,23 +519,25 @@ INSERT INTO order_items (order_id, product_id, quantity, price, total) VALUES
 (6, 11, 1, 2000.00, 2000.00); -- MacBook Pro
 
 -- Add indexes
-CREATE INDEX IF NOT EXISTS users_email_idx ON users(email);
-CREATE INDEX IF NOT EXISTS sessions_token_idx ON sessions(session_token);
-CREATE INDEX IF NOT EXISTS subscriptions_user_id_idx ON subscriptions(user_id);
-CREATE INDEX IF NOT EXISTS products_brand_idx ON products(brand);
-CREATE INDEX IF NOT EXISTS products_category_idx ON products(category);
-CREATE INDEX IF NOT EXISTS products_price_idx ON products(price);
-CREATE INDEX IF NOT EXISTS products_name_idx ON products(name);
-CREATE INDEX IF NOT EXISTS reviews_product_idx ON reviews(product_id);
-CREATE INDEX IF NOT EXISTS reviews_user_idx ON reviews(user_id);
-CREATE INDEX IF NOT EXISTS carts_user_id_idx ON carts(user_id);
-CREATE INDEX IF NOT EXISTS carts_session_id_idx ON carts(session_id);
-CREATE INDEX IF NOT EXISTS cart_items_cart_id_idx ON cart_items(cart_id);
-CREATE INDEX IF NOT EXISTS cart_items_product_id_idx ON cart_items(product_id);
-CREATE INDEX IF NOT EXISTS orders_user_id_idx ON orders(user_id);
-CREATE INDEX IF NOT EXISTS orders_session_id_idx ON orders(session_id);
-CREATE INDEX IF NOT EXISTS orders_status_idx ON orders(status);
-CREATE INDEX IF NOT EXISTS orders_payment_status_idx ON orders(payment_status);
-CREATE INDEX IF NOT EXISTS order_items_order_id_idx ON order_items(order_id);
-CREATE INDEX IF NOT EXISTS order_items_product_id_idx ON order_items(product_id);
-CREATE INDEX IF NOT EXISTS shipping_addresses_order_id_idx ON shipping_addresses(order_id);
+CREATE INDEX users_email_idx ON users(email);
+CREATE INDEX sessions_token_idx ON sessions(session_token);
+CREATE INDEX subscriptions_user_id_idx ON subscriptions(user_id);
+CREATE INDEX products_brand_idx ON products(brand);
+CREATE INDEX products_category_idx ON products(category);
+CREATE INDEX products_price_idx ON products(price);
+CREATE INDEX products_name_idx ON products(name);
+CREATE INDEX reviews_product_idx ON reviews(product_id);
+CREATE INDEX reviews_user_idx ON reviews(user_id);
+CREATE INDEX carts_user_id_idx ON carts(user_id);
+CREATE INDEX carts_session_id_idx ON carts(session_id);
+CREATE INDEX cart_items_cart_id_idx ON cart_items(cart_id);
+CREATE INDEX cart_items_product_id_idx ON cart_items(product_id);
+CREATE INDEX orders_user_id_idx ON orders(user_id);
+CREATE INDEX orders_session_id_idx ON orders(session_id);
+CREATE INDEX orders_status_idx ON orders(status);
+CREATE INDEX orders_payment_status_idx ON orders(payment_status);
+CREATE INDEX order_items_order_id_idx ON order_items(order_id);
+CREATE INDEX order_items_product_id_idx ON order_items(product_id);
+CREATE INDEX shipping_addresses_order_id_idx ON shipping_addresses(order_id);
+CREATE INDEX verification_tokens_token_idx ON verification_tokens(token);
+CREATE INDEX verification_tokens_user_id_idx ON verification_tokens(user_id);
