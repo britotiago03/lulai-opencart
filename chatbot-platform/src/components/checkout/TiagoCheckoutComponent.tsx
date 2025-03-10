@@ -145,6 +145,7 @@ export default function CheckoutPage() {
         <div className="container mx-auto p-8">
             <h1 className="text-2xl font-bold mb-4">Checkout</h1>
 
+            {/* Checkout status/progress bar */}
             <div className="mb-8">
                 <div className="flex items-center">
                     <div className={`rounded-full h-8 w-8 flex items-center justify-center ${
@@ -166,7 +167,8 @@ export default function CheckoutPage() {
                     <span>Payment</span>
                 </div>
             </div>
-
+            
+            {/* Main content: checkout form (step 1), order summary (step 2) */}
             <div className="flex flex-col lg:flex-row gap-8">
                 <div className="lg:w-2/3">
                     {checkoutStep === 1 ? (
