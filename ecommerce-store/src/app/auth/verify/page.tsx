@@ -79,7 +79,7 @@ export default function VerifyPage() {
             <div className="flex flex-col gap-4">
                 {error && (
                     <Link
-                        href="/auth/signup"
+                        href={`/auth/signup`}
                         className="w-full py-2 px-4 bg-blue-500 text-white text-center rounded hover:bg-blue-600 transition-colors"
                     >
                         Register again
@@ -87,7 +87,7 @@ export default function VerifyPage() {
                 )}
 
                 <Link
-                    href="/auth/login"
+                    href={`/auth/login`}
                     className={`w-full py-2 px-4 ${!error ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-500 hover:bg-gray-600'} text-white text-center rounded transition-colors`}
                 >
                     Go to login
