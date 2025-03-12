@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Providers from "@/components/layout/Providers";
 import Navbar from "@/components/layout/Navbar";
 import "./globals.css";
+import ChatWidget from "@/components/widget"; // Import the ChatWidget component
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -35,6 +36,7 @@ export default function RootLayout({
             <Navbar />
             <main>
                 {children}
+            <ChatWidget/>
             </main>
         </Providers>
         </body>
