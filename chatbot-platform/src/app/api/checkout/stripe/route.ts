@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
                         data.subscription.price,
                         paymentStatus,
                         new Date().toISOString(),
-                        new Date(new Date().setFullYear(new Date().getMonth() + 1)).toISOString(),
+                        new Date(new Date().setMonth(new Date().getMonth() +1)).toISOString(),
                         new Date().toISOString(),
                     ]
                 );

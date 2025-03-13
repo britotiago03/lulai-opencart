@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { RetrievedSubscription } from "@/types/subscription";
 
 interface Subscription {
     id: number;
@@ -33,7 +34,7 @@ export default function OrderConfirmationPage() {
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [subscription, setSubscription] = useState<Subscription | null>(null);
+    const [subscription, setSubscription] = useState<RetrievedSubscription | null>(null);
 
     /* Fetch Subscription Function with useCallback */
     const fetchSubscription = useCallback(async () => {
@@ -116,7 +117,7 @@ export default function OrderConfirmationPage() {
                 <div className="bg-white rounded-lg shadow-md p-6 mb-8">
                     <div className="flex justify-between items-center mb-6">
                         <div>
-                            <h2 className="text-xl font-bold">Subscription #{subscription.id}</h2>
+                            <h2 className="text-xl text-gray-500 font-bold">Subscription #{subscription.id}</h2>
                             <p className="text-gray-600">{formatDate(subscription.created_at)}</p>
                         </div>
                         <div className="bg-blue-100 text-blue-800 py-1 px-3 rounded-full text-sm font-medium">
@@ -125,12 +126,12 @@ export default function OrderConfirmationPage() {
                     </div>
 
                     <div className="border-t pt-6">
-                        <h3 className="font-medium mb-4">Subscription Details</h3>
+                        <h3 className="text-gray-500 font-medium mb-4">Subscription Details</h3>
                         <div className="border-b pb-4 mb-4">
-                            <h3 className="text-lg font-semibold mb-2">{subscription.plan_type}</h3>
-                            <p className="text-lg font-semibold mb-4">${subscription.price.toFixed(2)}</p>
-                            <p className="text-gray-600 mb-4">Start Date: {formatDate(subscription.start_date)}</p>
-                            <p className="text-gray-600 mb-4">End Date: {formatDate(subscription.end_date)}</p>
+                            <h3 className="text-gray-500 font-semibold mb-2">{subscription.plan_type}</h3>
+                            <p className="text-gray-500 font-semibold mb-4">${subscription.price.toFixed(2)}</p>
+                            <p className="text-gray-500 mb-4">Start Date: {formatDate(subscription.start_date)}</p>
+                            <p className="text-gray-500 mb-4">End Date: {formatDate(subscription.end_date)}</p>
                         </div>
                     </div>
                 </div>
@@ -140,8 +141,8 @@ export default function OrderConfirmationPage() {
                     <Link href={`/account/subscriptions`} className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition text-center">
                         View All Subscriptions
                     </Link>
-                    <Link href={`/subscriptions`} className="bg-gray-800 text-white py-2 px-4 rounded hover:bg-gray-900 transition text-center">
-                        Continue Shopping
+                    <Link href={`/dashboard`} className="bg-gray-800 text-white py-2 px-4 rounded hover:bg-gray-900 transition text-center">
+                        Back to dashboard
                     </Link>
                 </div>
             </div>
