@@ -5,28 +5,6 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { RetrievedSubscription } from "@/types/subscription";
 
-interface Subscription {
-    id: number;
-    user_id: number;
-    plan_type: string;
-    price: number;
-    status: string;
-    start_date: string;
-    end_date: string;
-    created_at: string;
-    updated_at: string;
-    customerInfo: {
-        firstName: string;
-        lastName: string;
-        email: string;
-        phone: string;
-        address: string;
-        city: string;
-        state: string;
-        zipCode: string;
-        country: string;
-    };
-}
 
 export default function OrderConfirmationPage() {
     const params = useParams<{ subscriptionId: string }>();
