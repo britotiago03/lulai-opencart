@@ -54,19 +54,22 @@ export default function SubscriptionsComponent() {
                     <SubscriptionCard
                         title="Free"
                         description="Good for side or hobby projects"
-                        price="$0/month"
+                        price_desc="$0/month"
+                        price={0}
                         type="free"
                     />
                     <SubscriptionCard
                         title="Basic"
                         description="Enhanced AI functionalities"
-                        price="$20/month"
+                        price_desc="$20/month"
+                        price={20}
                         type="basic"
                     />
                      <SubscriptionCard
                         title="Pro"
                         description="Perfect for organizations"
-                        price="$49/month"
+                        price_desc="$49/month"
+                        price={49}
                         type="pro"
                     />
                 </div>

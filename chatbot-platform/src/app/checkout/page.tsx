@@ -1,12 +1,12 @@
 "use client";
 
 import { SessionProvider } from "next-auth/react";
-import CheckoutComponent from "@/components/checkout/CheckoutComponent";
+import CheckoutPageComponent from "@/components/checkout/CheckoutPageComponent";
 
 export default function CheckoutPage() {
     return (
         <SessionProvider>
-            <CheckoutComponent/>
+            <CheckoutPageComponent/>
         </SessionProvider>
     );
 }

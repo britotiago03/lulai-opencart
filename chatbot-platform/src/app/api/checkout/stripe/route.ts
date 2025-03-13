@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { executeTransaction, calculateOrderTotals, insertShippingAddress, insertOrderItems } from '@/lib/db';
-import { OrderData } from '@/types/payment';
-import { CartItem } from '@/lib/db';
+import { executeTransaction } from '@/lib/db';
+import { SubscriptionData } from '@/types/payment';
 import stripe from '@/lib/stripe';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -9,10 +8,10 @@ import pool from '@/lib/db';
 
 export async function POST(request: NextRequest) {
     try {
-        const data: OrderData = await request.json();
+        const data: SubscriptionData = await request.json();
 
         // Validate required data
-        if (!data.customerInfo || !data.paymentData || !data.cartItems || data.cartItems.length === 0) {
+        if (!data.paymentData || !data.subscription) {
             return NextResponse.json(
                 { error: 'Missing required checkout information' },
                 { status: 400 }
@@ -53,9 +52,6 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Calculate order totals
-        const { subtotal, shippingAmount, taxAmount, totalAmount } = calculateOrderTotals(data.cartItems as CartItem[]);
-
         try {
             // Retrieve the payment intent to confirm payment status
             const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
@@ -88,55 +84,43 @@ export async function POST(request: NextRequest) {
                     }
                 }
 
-                // Insert order record - now includes user_id
-                const orderResult = await client.query(
-                    `INSERT INTO orders 
-                    (user_id, session_id, status, payment_method, payment_status, payment_details, 
-                    shipping_amount, tax_amount, subtotal_amount, total_amount)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+                // Insert subscription record
+                if (!data.subscription) {
+                    throw new Error('Subscription data is missing');
+                }
+
+                const subscriptionResult = await pool.query(
+                    `INSERT INTO subscriptions 
+                    (user_id, plan_type, price, status, current_period_start, current_period_end, created_at)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7)
                     RETURNING id`,
                     [
-                        userId, // Added user ID
-                        sessionId,
-                        'processing',
-                        'stripe',
+                        userId,
+                        data.subscription.plan_type,
+                        data.subscription.price,
                         paymentStatus,
-                        JSON.stringify({
-                            cardLast4,
-                            cardBrand,
-                            paymentIntentId,
-                            cardholderName: data.paymentData.cardholderName,
-                            stripePaymentIntentStatus: paymentIntent.status
-                        }),
-                        shippingAmount,
-                        taxAmount,
-                        subtotal,
-                        totalAmount
+                        new Date().toISOString(),
+                        new Date(new Date().setFullYear(new Date().getMonth() + 1)).toISOString(),
+                        new Date().toISOString(),
                     ]
                 );
 
-                const orderId = orderResult.rows[0].id;
-                console.log(`Created order ${orderId} for user ${userId}`);
-
-                // Insert shipping address
-                await insertShippingAddress(client, orderId, data.customerInfo);
-
-                // Insert order items
-                await insertOrderItems(client, orderId, data.cartItems as CartItem[]);
+                const subscriptionId = subscriptionResult.rows[0].id;
+                console.log(`Created subscription ${subscriptionId} for user ${userId}`);
 
                 // If the payment requires further action (like 3D Secure), return the client secret
                 if (paymentIntent.status === 'requires_action') {
                     return NextResponse.json({
                         requiresAction: true,
                         clientSecret: paymentIntent.client_secret,
-                        orderId
+                        subscriptionId
                     });
                 }
 
                 // Otherwise return success
                 return NextResponse.json({
                     success: true,
-                    orderId,
+                    subscriptionId,
                     paymentStatus
                 });
             });

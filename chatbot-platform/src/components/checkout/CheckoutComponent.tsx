@@ -1,60 +1,100 @@
 "use client";
-import { useSession } from "next-auth/react";
+
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import Image from "next/image";
-import CheckoutPage from "./TiagoCheckoutComponent";
+import { OrderSummary } from "@/components/checkout/OrderSummary";
+import { StripeProvider } from "@/components/checkout/payment/StripeProvider";
+import { StripePaymentData, SubscriptionData } from "@/types/payment";
+import { Subscription } from "@/types/subscription";
 
+interface CustomerInfo {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    address: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+}
 
-export default function CheckoutComponent() {
+interface SubscriptionComponentProps {
+    selectedSubscription: Subscription | null;
+}
+
+export default function CheckoutComponent({ selectedSubscription }: SubscriptionComponentProps) {
     const router = useRouter();
-    const { data: session, status } = useSession();
-    const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
-    
-    // Prevent users from accessing the checkout page if they are not signed in
-    useEffect(() => {
-        if (status === "loading") return;
-        
-        if (!session) {
-            router.replace("/auth/signin");
-        } else {
-            setIsLoggedIn(true);
-        }
-    }, [session, status, router]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
-    if(isLoggedIn === null || status === "loading") {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <p>Loading...</p>
-            </div>
-        );
-    }
+    const handlePaymentSubmit = async (paymentData: StripePaymentData) => {
+        setIsSubmitting(true);
+        setCheckoutError(null);
+
+        try {
+            console.log("Processing payment with data:", paymentData);
+
+            const subscriptionData : SubscriptionData = {
+                paymentMethod: "stripe",
+                paymentData,
+                subscription: selectedSubscription,
+            };
+
+            const response = await fetch("/api/checkout/stripe", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(subscriptionData),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                setCheckoutError(data.error || "Failed to process payment");
+                setIsSubmitting(false);
+                return;
+            }
+
+            console.log("Payment processed successfully:", data);
+
+            // Redirect to order confirmation
+            router.push(`/order-confirmation/${data.subscriptionId}`);
+        } catch (error) {
+            console.error("Payment error:", error);
+            setCheckoutError(error instanceof Error ? error.message : "An unexpected error occurred");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     return (
-        <div className="grid grid-rows-[auto_1fr_auto] min-h-screen p-8 pb-20 sm:p-20 font-[family-name:var(--font-geist-sans)] bg-gray-100">
-            <header className="relative flex justify-center items-start w-full">
-                <div className="absolute left-0 top-0">
-                    <Image
-                        src="/lulAI_logo.png"
-                        alt="Next.js logo"
-                        width={180}
-                        height={38}
-                        priority
-                    />
+        <div className="container mx-auto p-8">
+            {/* Checkout form */}
+            <div className="flex flex-col lg:flex-row gap-8">
+                <div className="lg:w-2/3">
+                    <div className="bg-white p-6 rounded-lg shadow-md">
+                        <h2 className="text-xl font-bold mb-4">Payment Information</h2>
+
+                        {checkoutError && (
+                            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                                {checkoutError}
+                            </div>
+                        )}
+
+                        <div className="mt-6">
+                            <StripeProvider
+                                onSubmitAction={handlePaymentSubmit}
+                                isSubmitting={isSubmitting}
+                                amount={typeof selectedSubscription?.price === "number" ? selectedSubscription.price : 0}
+                            />
+                        </div>
+                    </div>
                 </div>
-                <div className="flex flex-col items-center mt-4">
-                    <p className="font-[family-name:var(--font-geist-mono)] text-black text-center">Checkout</p>
-                    <p className="font-[family-name:var(--font-geist-mono)] text-center text-gray-500 max-w-2xl">
-                        Checkout your items here
-                    </p>
+
+                <div className="lg:w-1/3">
+                    <OrderSummary subscription={selectedSubscription} />
                 </div>
-            </header>
-            <main className="flex flex-col gap-8 items-center sm:items-center row-start-2 mt-16 text-gray-500">
-                <CheckoutPage/>
-            </main>
-            <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center text-black">
-                <p>LulAI Inc. &copy;</p>
-            </footer>
+            </div>
         </div>
     );
 }

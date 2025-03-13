@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: ecommerce_db  # Docker creates this automatically
+      POSTGRES_DB: ecommerce_db1  # Docker creates this automatically
     ports:
       - "5432:5432"
     volumes:
@@ -22,7 +22,7 @@ services:
     depends_on:
       - postgres
     environment:
-      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/ecommerce_db"
+      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/ecommerce_db1"
 
 volumes:
   postgres_data:

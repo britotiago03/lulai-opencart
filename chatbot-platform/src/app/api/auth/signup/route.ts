@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 const pool = new Pool({
     user: "postgres",
     host: "postgres", // ✅ Use "postgres" inside Docker
-    database: "ecommerce_db",
+    database: "ecommerce_db1",
     password: "postgres",
     port: 5432,
 });

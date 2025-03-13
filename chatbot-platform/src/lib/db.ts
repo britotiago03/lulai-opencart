@@ -4,7 +4,7 @@ import { CustomerInfo } from "@/types/order";
 const pool = new Pool({
     user: "postgres",
     host: "postgres", // Use the service name instead of 'localhost'
-    database: "ecommerce_db",
+    database: "ecommerce_db1",
     password: "postgres",
     port: 5432,
 });

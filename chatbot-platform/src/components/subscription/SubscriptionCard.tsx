@@ -6,18 +6,19 @@ import { useRouter } from "next/navigation";
 interface SubscriptionCardProps {
     title: string;
     description: string; 
-    price: string;
+    price_desc: string;
+    price: number;
     type: "free" | "basic" | "pro";
 }
 
-const SubscriptionCard: React.FC<SubscriptionCardProps> = ({title, description, price, type}) => {
+const SubscriptionCard: React.FC<SubscriptionCardProps> = ({title, description, price_desc, price, type}) => {
     const router = useRouter();
 
     const handleSubscribe = () => {
         if (type === "free") {
             router.push("/dashboard");
         } else {
-            router.push("/checkout");
+            router.push(`/checkout?price=${price}&type=${type}`);
         }
     }
 
@@ -25,7 +26,7 @@ const SubscriptionCard: React.FC<SubscriptionCardProps> = ({title, description, 
         <div className="flex flex-col gap-4 p-4 bg-white shadow-lg rounded-lg">
             <h2 className="text-xl text-gray-600 font-bold mb-2">{title}</h2>
             <p className="text-gray-600 mb-4">{description}</p>
-            <p className="text-gray-600 font-semibold">{price}</p>
+            <p className="text-gray-600 font-semibold">{price_desc}</p>
             
 
             {type === "free" ? (
@@ -48,7 +49,7 @@ const SubscriptionCard: React.FC<SubscriptionCardProps> = ({title, description, 
                 </ul>
             )
             : (
-                <p>something went wrong with lsiting types</p>
+                <p>something went wrong with listing types</p>
             )
             }
 

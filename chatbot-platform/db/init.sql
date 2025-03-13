@@ -1,5 +1,5 @@
 -- Ensure we are using the correct database
-\c ecommerce_db;
+\c ecommerce_db1;
 
 -- Drop existing tables if they exist (for clean initialization)
 DROP TABLE IF EXISTS users, sessions, subscriptions, products, cart;
@@ -17,7 +17,7 @@ CREATE TABLE users (
 );
 
 -- Inserting admin users with hashed passwords and API keys
-INSERT INTO users (name, email, password, is_admin, api_key) VALUES
+INSERT INTO users (name, email, password, is_admin) VALUES
 ('Admin User 1', 'admin1@example.com', '$2b$10$C2RZoMmZKZll7bOJO6lSROeBz3ntoNNABYiVA2y86/6kb1SmZTv9i', TRUE),
 ('Admin User 2', 'admin2@example.com', '$2b$10$Ty8FytGEj581KECxNkMGUuyV6qMbALivQQ9aJPHSinUqqh3ksR2Y2', TRUE);
 
@@ -35,6 +35,7 @@ CREATE TABLE subscriptions (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id),
     plan_type VARCHAR(50) NOT NULL,
+    price NUMERIC,
     status VARCHAR(50) NOT NULL,
     current_period_start TIMESTAMP WITH TIME ZONE NOT NULL,
     current_period_end TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -45,4 +46,4 @@ CREATE TABLE subscriptions (
 -- Add indexes
 CREATE INDEX IF NOT EXISTS users_email_idx ON users(email);
 CREATE INDEX IF NOT EXISTS sessions_token_idx ON sessions(session_token);
-CREATE INDEX IF NOT EXISTS subscriptions_user_id_idx ON subscriptions(user_id);
+CREATE INDEX IF NOT EXISTS subscriptions_id_idx ON subscriptions(user_id);
