@@ -75,3 +75,34 @@ export async function sendEmailChangeVerification(
 
     return transporter.sendMail(mailOptions);
 }
+
+export async function sendPasswordResetEmail(
+    email: string,
+    token: string,
+    name: string
+) {
+    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password?token=${token}`;
+
+    const mailOptions = {
+        from: `"${process.env.EMAIL_FROM_NAME || 'My App'}" <${process.env.EMAIL_FROM || 'noreply@example.com'}>`,
+        to: email,
+        subject: 'Reset your password',
+        html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2>Hello ${name},</h2>
+        <p>We received a request to reset your password. Click the button below to create a new password:</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${resetUrl}" style="background-color: #4CAF50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">
+            Reset Password
+          </a>
+        </div>
+        <p>Or copy and paste this link in your browser:</p>
+        <p>${resetUrl}</p>
+        <p>This link will expire in 24 hours.</p>
+        <p>If you did not request a password reset, please ignore this email or contact us if you have concerns.</p>
+      </div>
+    `,
+    };
+
+    return transporter.sendMail(mailOptions);
+}

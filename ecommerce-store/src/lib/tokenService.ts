@@ -7,6 +7,7 @@ import { QueryResult } from 'pg';
 export const TOKEN_TYPES = {
     EMAIL_VERIFICATION: 'email_verification',
     EMAIL_CHANGE: 'email_change',
+    PASSWORD_RESET: 'password_reset',
 };
 
 // Define a minimal interface for what we need from a database client
@@ -55,6 +56,7 @@ export async function verifyToken(token: string): Promise<{
     valid: boolean;
     userId?: number;
     newEmail?: string | null;
+    type?: string;
 }> {
     // Get the token from the database
     const result = await pool.query(
@@ -71,7 +73,8 @@ export async function verifyToken(token: string): Promise<{
     return {
         valid: true,
         userId: tokenData.user_id,
-        newEmail: tokenData.new_email
+        newEmail: tokenData.new_email,
+        type: tokenData.type
     };
 }
 

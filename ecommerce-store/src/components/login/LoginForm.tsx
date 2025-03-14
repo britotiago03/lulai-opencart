@@ -135,6 +135,11 @@ export default function LoginForm() {
                     required
                     disabled={loading}
                 />
+                <div className="flex justify-end mt-1">
+                    <Link href={`/auth/forgot-password`} className="text-sm text-blue-600 hover:text-blue-800">
+                        Forgot password?
+                    </Link>
+                </div>
             </div>
             <button
                 type="submit"
