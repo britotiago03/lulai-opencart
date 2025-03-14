@@ -128,7 +128,7 @@ CREATE TABLE shipping_addresses (
 );
 
 -- Insert sample users (for reviews)
-INSERT INTO users (name, email, password) VALUES
+INSERT INTO users (name, email, password, verified) VALUES
 ('Alice Johnson', 'alice.johnson@example.com', '$2a$10$XoQH7Pv3KU3l5u1o4eGZ7eypwl7LrsYAGpH1iyA0Fk2kI8FfNoH2G', true), -- Password: alice123
 ('Bob Smith', 'bob.smith@example.com', '$2a$10$7c6n7yRTiX/i5pEwI9pTqe/jmP/dQ3hjOHjdp2BOU5Nz5fdP/zqXW', true), -- Password: bob123
 ('Charlie Davis', 'charlie.davis@example.com', '$2a$10$0/0Qs6Viuwm6VRmnqP.yJuCqFXV6cGklOQlWOS4W3CJzMzB5Xj2me', true), -- Password: charlie123
