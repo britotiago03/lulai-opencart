@@ -52,7 +52,8 @@ CREATE TABLE products (
     category TEXT NOT NULL DEFAULT 'Uncategorized',
     price DOUBLE PRECISION NOT NULL,
     images JSONB NOT NULL,
-    description_file TEXT NOT NULL
+    description_file TEXT NOT NULL,
+    url TEXT NOT NULL
 );
 
 -- Create cart table
@@ -206,14 +207,15 @@ INSERT INTO users (name, email, password, verified) VALUES
 ('James Collins', 'james.collins@example.com', '$2a$10$N6WQ7TPG3KLMO2nYJXQ8LZHPF5O3WBPR4F7VNpM2Z0XbLVaYbLQX', true); -- Password: james123
 
 -- Insert sample products with reference to JSON description files
-INSERT INTO products (name, brand, category, price, images, description_file) VALUES
+INSERT INTO products (name, brand, category, price, images, description_file, url) VALUES
 (
     'Canon EOS 5D',
     'Canon',
     'Cameras',
     98.00,
     '["/images/products/canon_eos_5d/canon_eos_5d_1.jpg", "/images/products/canon_eos_5d/canon_eos_5d_2.jpg", "/images/products/canon_eos_5d/canon_eos_5d_3.jpg"]',
-    '/descriptions/canon_eos_5d.json'
+    '/descriptions/canon_eos_5d.json',
+    '/product/1'
 ),
 (
     'HTC Touch HD',
@@ -221,7 +223,8 @@ INSERT INTO products (name, brand, category, price, images, description_file) VA
     'Smartphones',
     122.00,
     '["/images/products/htc_touch_hd/htc_touch_hd_1.jpg", "/images/products/htc_touch_hd/htc_touch_hd_2.jpg", "/images/products/htc_touch_hd/htc_touch_hd_3.jpg"]',
-    '/descriptions/htc_touch_hd.json'
+    '/descriptions/htc_touch_hd.json',
+    '/product/2'
 ),
 (
     'iMac',
@@ -229,7 +232,8 @@ INSERT INTO products (name, brand, category, price, images, description_file) VA
     'Computers',
     122.00,
     '["/images/products/imac/imac_1.jpg", "/images/products/imac/imac_2.jpg", "/images/products/imac/imac_3.jpg"]',
-    '/descriptions/imac.json'
+    '/descriptions/imac.json',
+    '/product/3'
 ),
 (
     'iPhone',
@@ -239,7 +243,8 @@ INSERT INTO products (name, brand, category, price, images, description_file) VA
     '["/images/products/iphone/iphone_1.jpg", "/images/products/iphone/iphone_2.jpg",
     "/images/products/iphone/iphone_3.jpg", "/images/products/iphone/iphone_4.jpg",
     "/images/products/iphone/iphone_5.jpg", "/images/products/iphone/iphone_6.jpg"]',
-    '/descriptions/iphone.json'
+    '/descriptions/iphone.json',
+    '/product/4'
 ),
 (
     'iPod Classic',
@@ -248,7 +253,8 @@ INSERT INTO products (name, brand, category, price, images, description_file) VA
     122.00,
     '["/images/products/ipod_classic/ipod_classic_1.jpg", "/images/products/ipod_classic/ipod_classic_2.jpg",
      "/images/products/ipod_classic/ipod_classic_3.jpg", "/images/products/ipod_classic/ipod_classic_4.jpg"]',
-    '/descriptions/ipod_classic.json'
+    '/descriptions/ipod_classic.json',
+    '/product/5'
 ),
 (
     'iPod Nano',
@@ -258,7 +264,8 @@ INSERT INTO products (name, brand, category, price, images, description_file) VA
     '["/images/products/ipod_nano/ipod_nano_1.jpg", "/images/products/ipod_nano/ipod_nano_2.jpg",
     "/images/products/ipod_nano/ipod_nano_3.jpg", "/images/products/ipod_nano/ipod_nano_4.jpg",
     "/images/products/ipod_nano/ipod_nano_5.jpg"]',
-    '/descriptions/ipod_nano.json'
+    '/descriptions/ipod_nano.json',
+    '/product/6'
 ),
 (
     'iPod Shuffle',
@@ -268,7 +275,8 @@ INSERT INTO products (name, brand, category, price, images, description_file) VA
     '["/images/products/ipod_shuffle/ipod_shuffle_1.jpg", "/images/products/ipod_shuffle/ipod_shuffle_2.jpg",
     "/images/products/ipod_shuffle/ipod_shuffle_3.jpg", "/images/products/ipod_shuffle/ipod_shuffle_4.jpg",
      "/images/products/ipod_shuffle/ipod_shuffle_5.jpg"]',
-    '/descriptions/ipod_shuffle.json'
+    '/descriptions/ipod_shuffle.json',
+    '/product/7'
 ),
 (
     'iPod Touch',
@@ -279,7 +287,8 @@ INSERT INTO products (name, brand, category, price, images, description_file) VA
     "/images/products/ipod_touch/ipod_touch_3.jpg", "/images/products/ipod_touch/ipod_touch_4.jpg",
      "/images/products/ipod_touch/ipod_touch_5.jpg", "/images/products/ipod_touch/ipod_touch_6.jpg",
       "/images/products/ipod_touch/ipod_touch_7.jpg"]',
-    '/descriptions/ipod_touch.json'
+    '/descriptions/ipod_touch.json',
+    '/product/8'
 ),
 (
     'MacBook',
@@ -289,7 +298,8 @@ INSERT INTO products (name, brand, category, price, images, description_file) VA
     '["/images/products/macbook/macbook_1.jpg", "/images/products/macbook/macbook_2.jpg",
     "/images/products/macbook/macbook_3.jpg", "/images/products/macbook/macbook_4.jpg",
     "/images/products/macbook/macbook_5.jpg"]',
-    '/descriptions/macbook.json'
+    '/descriptions/macbook.json',
+    '/product/9'
 ),
 (
     'MacBook Air',
@@ -298,7 +308,8 @@ INSERT INTO products (name, brand, category, price, images, description_file) VA
     1202.00,
     '["/images/products/macbook_air/macbook_air_1.jpg", "/images/products/macbook_air/macbook_air_2.jpg",
     "/images/products/macbook_air/macbook_air_3.jpg", "/images/products/macbook_air/macbook_air_4.jpg"]',
-    '/descriptions/macbook_air.json'
+    '/descriptions/macbook_air.json',
+    '/product/10'
 ),
 (
     'MacBook Pro',
@@ -307,7 +318,8 @@ INSERT INTO products (name, brand, category, price, images, description_file) VA
     2000.00,
     '["/images/products/macbook_pro/macbook_pro_1.jpg", "/images/products/macbook_pro/macbook_pro_2.jpg",
     "/images/products/macbook_pro/macbook_pro_3.jpg", "/images/products/macbook_pro/macbook_pro_4.jpg"]',
-    '/descriptions/macbook_pro.json'
+    '/descriptions/macbook_pro.json',
+    '/product/11'
 ),
 (
     'Nikon D300',
@@ -317,7 +329,8 @@ INSERT INTO products (name, brand, category, price, images, description_file) VA
     '["/images/products/nikon_d300/nikon_d300_1.jpg", "/images/products/nikon_d300/nikon_d300_2.jpg",
     "/images/products/nikon_d300/nikon_d300_3.jpg", "/images/products/nikon_d300/nikon_d300_4.jpg",
      "/images/products/nikon_d300/nikon_d300_5.jpg"]',
-    '/descriptions/nikon_d300.json'
+    '/descriptions/nikon_d300.json',
+    '/product/12'
 ),
 (
     'Palm Treo Pro',
@@ -326,7 +339,8 @@ INSERT INTO products (name, brand, category, price, images, description_file) VA
     337.99,
     '["/images/products/palm_treo_pro/palm_treo_pro_1.jpg", "/images/products/palm_treo_pro/palm_treo_pro_2.jpg",
     "/images/products/palm_treo_pro/palm_treo_pro_3.jpg"]',
-    '/descriptions/palm_treo_pro.json'
+    '/descriptions/palm_treo_pro.json',
+    '/product/13'
 ),
 (
     'Samsung Galaxy Tab 10.1',
@@ -337,7 +351,8 @@ INSERT INTO products (name, brand, category, price, images, description_file) VA
     "/images/products/samsung_tab/samsung_tab_3.jpg", "/images/products/samsung_tab/samsung_tab_4.jpg",
     "/images/products/samsung_tab/samsung_tab_5.jpg", "/images/products/samsung_tab/samsung_tab_6.jpg",
     "/images/products/samsung_tab/samsung_tab_7.jpg"]',
-    '/descriptions/samsung_tab.json'
+    '/descriptions/samsung_tab.json',
+    '/product/14'
 ),
 (
     'Sony VAIO',
@@ -347,7 +362,8 @@ INSERT INTO products (name, brand, category, price, images, description_file) VA
     '["/images/products/sony_vaio/sony_vaio_1.jpg", "/images/products/sony_vaio/sony_vaio_2.jpg",
     "/images/products/sony_vaio/sony_vaio_3.jpg", "/images/products/sony_vaio/sony_vaio_4.jpg",
      "/images/products/sony_vaio/sony_vaio_5.jpg"]',
-    '/descriptions/sony_vaio.json'
+    '/descriptions/sony_vaio.json',
+    '/product/15'
 );
 
 -- Insert sample reviews
