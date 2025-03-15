@@ -56,18 +56,22 @@ export async function PUT(request: Request, context: { params: { id: string } })
     }
 }
 
-export async function DELETE(_: Request, context: { params: { id: string } }) {
+export async function DELETE(
+    request: Request,
+    { params }: { params: { id: string } }
+) {
     try {
-        const { params } = context;
+        // Use params.id directly
+        const id = params.id;
 
         // Check if the chatbot exists
-        const existing = await getChatbotById(params.id);
+        const existing = await getChatbotById(id);
         if (!existing) {
             return NextResponse.json({ error: "Chatbot not found" }, { status: 404 });
         }
 
         // Delete the chatbot
-        await deleteChatbot(params.id);
+        await deleteChatbot(id);
         return NextResponse.json({ message: "Chatbot deleted successfully" }, { status: 200 });
     } catch (error) {
         console.error("Error deleting chatbot:", error);

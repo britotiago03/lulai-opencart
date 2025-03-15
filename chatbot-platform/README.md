@@ -171,3 +171,111 @@ docker-compose up -d postgres
 
 # Then update .env.local to use:
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/chatbot_platform_db"
+
+# Analytics & Logs Features Requirements
+Conversation History - Store and display past customer interactions
+Analytics Dashboard - Show usage, interactions, and conversion rates
+Customer Feedback - Collect feedback on chatbot accuracy
+Sales Influence Tracking - Track how chatbot interactions lead to sales
+### Proposed file structure:
+```
+chatbot-platform/
+├── db/
+│   └── init.sql (Updated to include new tables for analytics & logs)
+├── src/
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── analytics/
+│   │   │   │   ├── route.ts (GET analytics data)
+│   │   │   │   ├── [chatbotId]/
+│   │   │   │   │   ├── route.ts (GET specific chatbot analytics)
+│   │   │   │   ├── feedback/
+│   │   │   │   │   ├── route.ts (POST user feedback)
+│   │   │   ├── conversations/
+│   │   │   │   ├── route.ts (GET all conversations)
+│   │   │   │   ├── [id]/
+│   │   │   │   │   ├── route.ts (GET specific conversation)
+│   │   │   ├── chatbots/
+│   │   │   │   ├── [id]/
+│   │   │   │   │   ├── interact/
+│   │   │   │   │   │   ├── route.ts (Updated to log interactions)
+│   │   │   │   │   ├── logs/
+│   │   │   │   │   │   ├── route.ts (GET chatbot logs)
+│   │   │   │   │   ├── stats/
+│   │   │   │   │   │   ├── route.ts (GET chatbot statistics)
+│   │   ├── dashboard/
+│   │   │   ├── analytics/
+│   │   │   │   ├── page.tsx (Main analytics dashboard)
+│   │   │   ├── chatbots/
+│   │   │   │   ├── [id]/
+│   │   │   │   │   ├── analytics/
+│   │   │   │   │   │   ├── page.tsx (Chatbot-specific analytics)
+│   │   │   │   │   ├── conversations/
+│   │   │   │   │   │   ├── page.tsx (Conversation history)
+│   │   │   │   │   │   ├── [conversationId]/
+│   │   │   │   │   │   │   ├── page.tsx (Specific conversation)
+│   ├── components/
+│   │   ├── analytics/
+│   │   │   ├── AnalyticsDashboard.tsx (Main dashboard component)
+│   │   │   ├── ChatbotAnalytics.tsx (Chatbot-specific analytics)
+│   │   │   ├── ConversationsList.tsx (List of conversations)
+│   │   │   ├── ConversationDetail.tsx (Single conversation view)
+│   │   │   ├── FeedbackSummary.tsx (Feedback visualization)
+│   │   │   ├── StatisticsCard.tsx (Reusable stat card component)
+│   │   │   ├── ConversionRateChart.tsx (Chart for conversion rates)
+│   │   │   ├── UsageChart.tsx (Chart for usage stats)
+│   │   │   ├── TimelineChart.tsx (Timeline visualization)
+│   │   │   ├── FilterBar.tsx (Filtering options for analytics)
+│   │   ├── chatbots/
+│   │   │   ├── ChatbotTester.tsx (Updated to collect feedback)
+│   │   │   ├── FeedbackModal.tsx (Modal for collecting feedback)
+│   ├── lib/
+│   │   ├── analytics/
+│   │   │   ├── db.ts (Database functions for analytics)
+│   │   │   ├── calculations.ts (Utility functions for calculations)
+│   │   │   ├── types.ts (Types for analytics data)
+│   │   ├── conversations/
+│   │   │   ├── db.ts (Database functions for conversations)
+│   │   │   ├── types.ts (Types for conversation data)
+│   │   ├── chatbots/
+│   │   │   ├── matcher.ts (Updated to track matching success)
+│   │   │   ├── logger.ts (Functions to log interactions)
+│   │   ├── db/
+│   │   │   ├── schema.ts (Updated with new types)
+```
+
+### How to Use
+
+1. View Analytics: Visit the /dashboard/analytics page to see the main dashboard
+2. View Conversations: Browse conversation history on the /dashboard/chatbots/[id]/conversations page
+3. Collect Feedback: Users can now provide feedback via the updated chat interface
+4. Track Conversions: Implement the conversion tracking API in your checkout flow
+
+```
+New API Endpoints
+
+/api/analytics/[chatbotId] - Get analytics data
+/api/feedback - Record user feedback
+/api/conversions - Record conversions
+/api/cron/aggregate-analytics - Run daily aggregation
+```
+
+### Test database: 
+```
+docker-compose exec postgres psql -U postgres -d chatbot_platform_db
+```
+```
+-- List all tables
+\dt
+
+-- Get detailed information about a specific table
+\d conversations
+\d conversation_messages
+\d chatbot_feedback
+
+-- Check if conversations exist
+SELECT id, session_id, started_at, ended_at FROM conversations LIMIT 10;
+
+-- Check if messages exist
+SELECT id, conversation_id, is_from_user, message_text, sent_at FROM conversation_messages LIMIT 10;
+```
