@@ -38,6 +38,12 @@ export const authOptions: NextAuthOptions = {
                     };
                 } catch (error) {
                     console.error("Authentication error:", error);
+
+                    // Handle email verification error
+                    if (error instanceof Error && error.message === 'EMAIL_NOT_VERIFIED') {
+                        throw new Error('EMAIL_NOT_VERIFIED');
+                    }
+
                     return null;
                 }
             },

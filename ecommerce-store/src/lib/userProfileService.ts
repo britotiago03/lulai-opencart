@@ -108,8 +108,13 @@ class UserProfileService {
                 }
 
                 return this.profileData;
+            } else if (response.status === 401) {
+                // User is not authenticated - this is an expected case
+                // Don't log an error for this case
+                console.log('User not authenticated, skipping profile fetch');
+                return null;
             } else {
-                console.error('Failed to fetch profile data');
+                console.error(`Failed to fetch profile data: ${response.status}`);
                 return null;
             }
         } catch (error) {
