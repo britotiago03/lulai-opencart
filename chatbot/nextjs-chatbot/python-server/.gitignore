@@ -1,0 +1,73 @@
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__
+*.pyc
+
+# Virtual environments
+env/
+venv/
+ENV/
+.venv/
+env.bak/
+venv.bak/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# IDEs and editors
+.vscode/
+.idea/
+
+# MacOS files
+.DS_Store
+
+# Windows files
+Thumbs.db
+
+# Logs
+*.log
+*.log.*
+
+# Application-specific config files
+*.sqlite3
+*.db
+
+# Flask or Django specific files
+instance/
+*.db
+*.sqlite
+
+# OpenAI API key file (never commit sensitive keys)
+api_key.txt
+
+# Distribution / packaging
+*.egg
+*.egg-info
+dist/
+build/
+sdist/
+eggs/
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Coverage reports
+.coverage
+*.coveragerc
+nosetests.xml
+coverage.xml
+*.cover
+
+# Test output
+*.out
+*.err
+
+# Pytest
+.cache/
+pytest_cache/
+
+# Environments
+*.env
