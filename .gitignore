@@ -45,6 +45,7 @@ ecommerce-store/next-env.d.ts
 
 # dependencies
 chatbot-platform/node_modules
+chatbot-platform/package-lock.json
 chatbot-platform/.pnp
 chatbot-platform/.pnp.*
 chatbot-platform/.yarn/*
@@ -82,3 +83,30 @@ chatbot-platform/.vercel
 # typescript
 chatbot-platform/*.tsbuildinfo
 chatbot-platform/next-env.d.ts
+
+# Docker related
+**/docker-compose.override.yml
+**/Dockerfile.local
+**/.dockerignore
+
+# IDE specific (beyond .idea which you already have)
+**/.vscode
+**/*.code-workspace
+
+# OS specific
+**/.DS_Store
+**/Thumbs.db
+
+# Logs
+**/logs
+**/*.log
+
+# Local env files (you have .env.local but might want to add these)
+**/.env
+**/.env.development
+**/.env.test
+**/.env.production
+
+# Cache directories
+**/.npm
+**/.eslintcache
