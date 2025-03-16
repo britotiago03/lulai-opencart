@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
         console.log("Checkout session:", session);
 
         // Get userId from session or look it up by email
-        let userId = null;
+        let userId: string | null = null;
         if (session?.user) {
             if (session.user.id) {
                 userId = session.user.id;
