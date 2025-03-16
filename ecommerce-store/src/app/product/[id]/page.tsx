@@ -1,8 +1,5 @@
-"use client";
-
 import { notFound } from "next/navigation";
-import Image from "next/image";
-import { useEffect, useState } from "react";
+import ProductDetailsClient from "@/components/product/ProductDetailsClient";
 
 interface Product {
     id: number;
@@ -11,6 +8,7 @@ interface Product {
     price: number;
     images: string[];
     description_file: string;
+    reviews: { rating: number; comment: string; reviewer: string }[];
 }
 
 interface Description {
@@ -20,110 +18,42 @@ interface Description {
     specifications: Record<string, string>;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+// ✅ Ensure we fetch the product with an absolute API URL
+async function fetchProduct(id: string): Promise<Product | null> {
+    const apiUrl = process.env.API_URL || "http://localhost:3000";
+    const res = await fetch(`${apiUrl}/api/products/${id}`, { cache: "force-cache" });
 
-export default function ProductDetails({ params }: { params: Promise<{ id: string }> }) {
-    const [productId, setProductId] = useState<string | null>(null);
-    const [product, setProduct] = useState<Product | null>(null);
-    const [description, setDescription] = useState<Description | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    if (!res.ok) return null;
+    return res.json();
+}
 
-    // ✅ Unwrap params promise
-    useEffect(() => {
-        void (async () => {
-            const resolvedParams = await params;
-            setProductId(resolvedParams.id);
-        })();
-    }, [params]);
+// ✅ Ensure correct description file URL
+async function fetchDescription(descriptionFile: string | null): Promise<Description | null> {
+    if (!descriptionFile) return null;
 
-    // ✅ Fetch product data after params are loaded
-    useEffect(() => {
-        if (!productId) return;
-        setLoading(true);
-        setError(null);
+    try {
+        const apiUrl = process.env.API_URL || "http://localhost:3000";
 
-        const fetchProduct = async () => {
-            try {
-                const productRes = await fetch(`${API_BASE_URL}/api/products/${productId}`);
-                if (!productRes.ok) {
-                    setError("Product not found.");
-                    setLoading(false);
-                    return;
-                }
+        // ✅ Convert relative paths like `/descriptions/macbook_air.json` to an absolute URL
+        const descriptionUrl = descriptionFile.startsWith("http") ? descriptionFile : `${apiUrl}${descriptionFile}`;
 
-                const productData: Product = await productRes.json();
-                setProduct(productData);
+        const res = await fetch(descriptionUrl, { cache: "no-store" }); // Don't cache in case descriptions update frequently
+        return res.ok ? await res.json() : null;
+    } catch (error) {
+        console.error("Error fetching description:", error);
+        return null;
+    }
+}
 
-                const descRes = await fetch(`${API_BASE_URL}${productData.description_file}`);
-                if (!descRes.ok) {
-                    setError("Description not found.");
-                    setLoading(false);
-                    return;
-                }
+export default async function ProductPage({ params }: { params: { id: string } }) {
+    // Await the params object before accessing it
+    const resolvedParams = await params;
+    if (!resolvedParams || !resolvedParams.id) return notFound();
 
-                const descData: Description = await descRes.json();
-                setDescription(descData);
-            } catch (error) {
-                console.error("Error fetching product:", error);
-                setError(error instanceof Error ? error.message : "Something went wrong.");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        void fetchProduct(); // ✅ Indicate intentional async call
-    }, [productId]);
-
-    if (!productId) return <p className="text-center text-gray-500">Loading product details...</p>;
-    if (loading) return <p className="text-center text-gray-500">Loading product details...</p>;
-    if (error) return <p className="text-center text-red-500">{error}</p>;
+    const product = await fetchProduct(resolvedParams.id);
     if (!product) return notFound();
 
-    return (
-        <div className="container mx-auto p-8">
-            <h1 className="text-3xl font-bold">{product.name}</h1>
-            <p className="text-gray-500">{product.brand}</p>
-            <p className="text-lg font-semibold mt-2">${product.price.toFixed(2)}</p>
+    const description = await fetchDescription(product.description_file);
 
-            {/* ✅ Image Fix */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-                {product.images.map((image, index) => (
-                    <div key={index} className="relative w-[200px] h-[150px]">
-                        <Image
-                            src={image}
-                            alt={product.name}
-                            width={200} // ✅ Fixed width
-                            height={150} // ✅ Fixed height
-                            style={{ objectFit: "contain" }}
-                            priority={index === 0}
-                        />
-                    </div>
-                ))}
-            </div>
-
-            {description && (
-                <div className="mt-4">
-                    <h2 className="text-2xl font-bold">{description.title}</h2>
-                    <p className="mt-2">{description.overview}</p>
-
-                    <h3 className="text-xl font-bold mt-4">Details</h3>
-                    <ul className="list-disc pl-5">
-                        {description.details.map((detail, index) => (
-                            <li key={index}>{detail}</li>
-                        ))}
-                    </ul>
-
-                    <h3 className="text-xl font-bold mt-4">Specifications</h3>
-                    <ul className="list-disc pl-5">
-                        {Object.entries(description.specifications).map(([key, value]) => (
-                            <li key={key}>
-                                <strong>{key}:</strong> {value}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            )}
-        </div>
-    );
+    return <ProductDetailsClient product={product} description={description} />;
 }
