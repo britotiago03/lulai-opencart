@@ -1,6 +1,8 @@
+// app/api/auth/[...nextauth]/route.ts
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { verifyUser } from "@/lib/auth.service";
+import { AdminCredentialsProvider } from "@/lib/admin-auth";
 
 // Define auth options to use both in the API route and server components
 export const authOptions: NextAuthOptions = {
@@ -9,7 +11,9 @@ export const authOptions: NextAuthOptions = {
         maxAge: 30 * 24 * 60 * 60, // 30 days
     },
     providers: [
+        // Regular user authentication
         CredentialsProvider({
+            id: "credentials",
             name: "Credentials",
             credentials: {
                 email: { label: "Email", type: "text" },
@@ -35,6 +39,7 @@ export const authOptions: NextAuthOptions = {
                         subscription_end_date: user.subscription_end_date instanceof Date
                             ? user.subscription_end_date.toISOString()
                             : user.subscription_end_date || null,
+                        isAdmin: false,
                     };
                 } catch (error) {
                     console.error("Authentication error:", error);
@@ -48,6 +53,9 @@ export const authOptions: NextAuthOptions = {
                 }
             },
         }),
+
+        // Admin authentication provider
+        AdminCredentialsProvider,
     ],
     callbacks: {
         async jwt({ token, user }) {
@@ -55,9 +63,11 @@ export const authOptions: NextAuthOptions = {
                 token.id = user.id;
                 token.email = user.email;
                 token.name = user.name;
-                token.subscription = null;
+                token.subscription = user.subscription || null;
                 token.subscription_status = user.subscription_status || null;
                 token.subscription_end_date = user.subscription_end_date || null;
+                token.isAdmin = user.isAdmin || false;
+                token.isSuperAdmin = user.isSuperAdmin || false;
             }
             return token;
         },
@@ -66,9 +76,11 @@ export const authOptions: NextAuthOptions = {
                 session.user.id = token.id;
                 session.user.email = token.email as string;
                 session.user.name = token.name as string;
-                session.user.subscription = null;
+                session.user.subscription = token.subscription || null;
                 session.user.subscription_status = token.subscription_status || null;
                 session.user.subscription_end_date = token.subscription_end_date || null;
+                session.user.isAdmin = token.isAdmin || false;
+                session.user.isSuperAdmin = token.isSuperAdmin || false;
             }
             return session;
         },

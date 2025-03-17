@@ -128,6 +128,46 @@ CREATE TABLE shipping_addresses (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Create admin users table
+CREATE TABLE admin_users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255),
+    is_super_admin BOOLEAN DEFAULT FALSE,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    last_login TIMESTAMP WITH TIME ZONE
+);
+
+-- Create table for secure admin access URLs
+CREATE TABLE admin_access_tokens (
+    id SERIAL PRIMARY KEY,
+    url_path VARCHAR(255) NOT NULL,
+    access_key VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    created_by INTEGER REFERENCES admin_users(id),
+    last_used_at TIMESTAMP WITH TIME ZONE,
+    is_active BOOLEAN DEFAULT TRUE
+);
+
+-- Create admin settings table
+CREATE TABLE admin_settings (
+    id SERIAL PRIMARY KEY,
+    setting_key VARCHAR(255) UNIQUE NOT NULL,
+    setting_value TEXT NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_by INTEGER REFERENCES admin_users(id)
+);
+
+-- Insert default settings
+INSERT INTO admin_settings (setting_key, setting_value)
+VALUES
+('access_token_renewal_frequency', 'weekly'),
+('admin_email', 'britotiago101@gmail.com'),
+('setup_completed', 'false');
+
 -- Insert sample users (for reviews)
 INSERT INTO users (name, email, password, verified) VALUES
 ('Alice Johnson', 'alice.johnson@example.com', '$2a$10$XoQH7Pv3KU3l5u1o4eGZ7eypwl7LrsYAGpH1iyA0Fk2kI8FfNoH2G', true), -- Password: alice123
