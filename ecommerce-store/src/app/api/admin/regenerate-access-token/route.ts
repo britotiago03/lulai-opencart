@@ -1,7 +1,7 @@
 // app/api/admin/regenerate-access-token/route.ts
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { userAuthOptions } from "@/lib/auth-config";
 import pool from "@/lib/db";
 import { updateAdminAccessToken } from "@/lib/adminSetup";
 import { sendAdminAccessUpdateEmail } from "@/lib/emailService";
@@ -9,7 +9,7 @@ import { sendAdminAccessUpdateEmail } from "@/lib/emailService";
 export async function POST() {
     try {
         // Check authentication and admin permission
-        const session = await getServerSession(authOptions);
+        const session = await getServerSession(userAuthOptions);
         if (!session?.user?.isAdmin) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }

@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server";
 import { Session } from "next-auth";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { adminAuthOptions } from "@/lib/auth-config";
 
 /**
  * Validates if the user is authenticated and has admin permissions
@@ -13,7 +13,7 @@ export async function validateAdminAccess(requireSuperAdmin = false): Promise<{
     session: Session | null;
     errorResponse: NextResponse | null;
 }> {
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession(adminAuthOptions);
 
     if (!session?.user?.isAdmin) {
         return {

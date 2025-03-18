@@ -1,14 +1,14 @@
 // app/api/admin/settings/route.ts
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { adminAuthOptions } from "@/lib/auth-config";
 import pool from "@/lib/db";
 
 // GET /api/admin/settings - Get admin settings
 export async function GET() {
     try {
         // Check authentication and admin permission
-        const session = await getServerSession(authOptions);
+        const session = await getServerSession(adminAuthOptions);
         if (!session?.user?.isAdmin) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
@@ -38,7 +38,7 @@ export async function GET() {
 export async function POST(req: Request) {
     try {
         // Check authentication and admin permission
-        const session = await getServerSession(authOptions);
+        const session = await getServerSession(adminAuthOptions);
         if (!session?.user?.isAdmin) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }

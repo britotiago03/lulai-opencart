@@ -4,7 +4,7 @@ import { OrderData } from '@/types/payment';
 import { CartItem } from '@/lib/db';
 import stripe from '@/lib/stripe';
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { userAuthOptions } from "@/lib/auth-config";
 import pool from '@/lib/db';
 
 export async function POST(request: NextRequest) {
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Get the current session to identify the user
-        const session = await getServerSession(authOptions);
+        const session = await getServerSession(userAuthOptions);
         console.log("Checkout session:", session);
 
         // Get userId from session or look it up by email

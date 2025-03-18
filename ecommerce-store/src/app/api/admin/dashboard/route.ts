@@ -1,14 +1,14 @@
 // app/api/admin/dashboard/route.ts
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { adminAuthOptions } from "@/lib/auth-config";
 import pool from "@/lib/db";
 
 // Route handler for fetching admin dashboard statistics
 export async function GET() {
     try {
-        // Verify admin session
-        const session = await getServerSession(authOptions);
+        // Verify admin session using admin auth options
+        const session = await getServerSession(adminAuthOptions);
 
         if (!session?.user?.isAdmin) {
             return NextResponse.json({ error: "Unauthorized access" }, { status: 403 });
@@ -41,13 +41,13 @@ export async function GET() {
             // Get recent orders (limit to 10)
             const recentOrdersResult = await client.query(
                 `SELECT o.id, o.status, o.total_amount, o.created_at, 
-                        COALESCE(u.name, 'Guest') as customer_name, 
-                        COALESCE(u.email, sa.email) as customer_email
-                 FROM orders o
-                 LEFT JOIN users u ON o.user_id = u.id
-                 LEFT JOIN shipping_addresses sa ON o.id = sa.order_id
-                 ORDER BY o.created_at DESC
-                 LIMIT 10`
+                COALESCE(u.name, 'Guest') as customer_name, 
+                COALESCE(u.email, sa.email) as customer_email
+         FROM orders o
+         LEFT JOIN users u ON o.user_id = u.id
+         LEFT JOIN shipping_addresses sa ON o.id = sa.order_id
+         ORDER BY o.created_at DESC
+         LIMIT 10`
             );
 
             await client.query("COMMIT");

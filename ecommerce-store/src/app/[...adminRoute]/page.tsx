@@ -34,8 +34,8 @@ export default async function AdminRoute({ params }: { params: { adminRoute: str
             redirect("/404");
         }
 
-        // ✅ Render login page if everything is valid
-        return <AdminLoginPage />;
+        // ✅ Render login page with the secure path
+        return <AdminLoginPage securePath={path} />;
     } catch (error) {
         console.error("Error processing admin route:", error);
         redirect("/404");

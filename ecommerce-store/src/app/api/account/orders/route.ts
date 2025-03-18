@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { userAuthOptions } from "@/lib/auth-config";
 import { getUserOrders } from "@/lib/auth.service";
 
 // In Next.js API route handlers, we need to export specific HTTP method handlers
@@ -8,7 +8,7 @@ import { getUserOrders } from "@/lib/auth.service";
 export async function GET() {
     try {
         // Get the current session
-        const session = await getServerSession(authOptions);
+        const session = await getServerSession(userAuthOptions);
 
         if (!session || !session.user?.id) {
             return NextResponse.json(

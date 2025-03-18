@@ -1,77 +1,22 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import AdminSessionProvider from "./AdminSessionProvider";
 
-export default function AdminLoginPage() {
+interface AdminLoginPageProps {
+    securePath: string;
+}
+
+// Using destructuring without assignment to ignore the parameter completely
+function AdminLoginContent({}: AdminLoginPageProps) {
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const accessKey = searchParams.get("key");
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-    const [verifyingAccess, setVerifyingAccess] = useState(true);
-    const [accessVerified, setAccessVerified] = useState(false);
-
-    // Verify access key on component mount
-    useEffect(() => {
-        let isMounted = true;
-
-        // Explicitly handle the promise to appease linters
-        (async function doVerifyAccess() {
-            if (!accessKey) {
-                // If no access key, show 404
-                router.replace("/404");
-                return;
-            }
-
-            try {
-                const response = await fetch("/api/admin/verify-access", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        accessKey,
-                        path: window.location.pathname
-                    }),
-                });
-
-                // Only update state if component is still mounted
-                if (isMounted) {
-                    if (!response.ok) {
-                        // If invalid access, redirect to 404
-                        router.replace("/404");
-                        return;
-                    }
-
-                    // Access is verified
-                    setAccessVerified(true);
-                    setVerifyingAccess(false);
-                }
-            } catch (error) {
-                // Only update state if component is still mounted
-                if (isMounted) {
-                    console.error("Error verifying access:", error);
-                    router.replace("/404");
-                    setVerifyingAccess(false);
-                }
-            }
-        })().catch(error => {
-            // Catch any unexpected errors from the IIFE
-            if (isMounted) {
-                console.error("Unexpected error in verification:", error);
-                router.replace("/404");
-                setVerifyingAccess(false);
-            }
-        });
-
-        // Cleanup function to prevent state updates after unmount
-        return () => {
-            isMounted = false;
-        };
-    }, [accessKey, router]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -83,6 +28,7 @@ export default function AdminLoginPage() {
                 redirect: false,
                 email,
                 password,
+                callbackUrl: "/admin"
             });
 
             if (result?.error) {
@@ -98,25 +44,6 @@ export default function AdminLoginPage() {
             setLoading(false);
         }
     };
-
-    // Show loading state while verifying access
-    if (verifyingAccess) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-900">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-            </div>
-        );
-    }
-
-    // If access is not verified, this would normally redirect to 404,
-    // but as a fallback, show a minimal loading screen
-    if (!accessVerified) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-900">
-                <div className="text-white">Checking access...</div>
-            </div>
-        );
-    }
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
@@ -184,5 +111,14 @@ export default function AdminLoginPage() {
                 </form>
             </div>
         </div>
+    );
+}
+
+// Wrap the login page with our custom Admin Session Provider
+export default function AdminLoginPage({ securePath }: AdminLoginPageProps) {
+    return (
+        <AdminSessionProvider>
+            <AdminLoginContent securePath={securePath} />
+        </AdminSessionProvider>
     );
 }

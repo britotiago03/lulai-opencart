@@ -1,15 +1,17 @@
+// app/admin/layout.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useSession, signOut, SessionProvider } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import AdminSessionProvider from "@/components/admin/AdminSessionProvider";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     return (
-        <SessionProvider> {/* ✅ Wrap entire layout with SessionProvider */}
+        <AdminSessionProvider>
             <AdminLayoutContent>{children}</AdminLayoutContent>
-        </SessionProvider>
+        </AdminSessionProvider>
     );
 }
 
@@ -75,7 +77,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
                     </NavLink>
                     <div className="border-t border-gray-700 my-4"></div>
                     <Link
-                        href="/ecommerce-store/public"
+                        href="/"
                         className="flex items-center px-6 py-3 text-gray-400 hover:text-white"
                         target="_blank"
                     >
