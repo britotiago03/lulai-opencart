@@ -86,9 +86,36 @@ export function CheckoutForm({ customerInfo, onSubmitAction }: CheckoutFormProps
         }
     };
 
+    // Function to fill the form with example data
+    const fillWithExampleData = () => {
+        const exampleData: CustomerInfo = {
+            firstName: "John",
+            lastName: "Doe",
+            email: "john.doe@example.com",
+            phone: "555-123-4567",
+            address: "123 Main Street",
+            city: "New York",
+            state: "NY",
+            zipCode: "10001",
+            country: "US"
+        };
+
+        setFormData(exampleData);
+        setErrors({});
+    };
+
     return (
         <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-bold mb-4">Shipping Information</h2>
+            <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">Shipping Information</h2>
+                <button
+                    type="button"
+                    onClick={fillWithExampleData}
+                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded text-sm transition"
+                >
+                    Fill with Test Data
+                </button>
+            </div>
 
             <form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
