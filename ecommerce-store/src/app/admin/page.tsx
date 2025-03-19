@@ -1,8 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useAdminEvents } from "@/hooks/admin/useAdminEvents";
+import { toast } from "react-hot-toast";
+import { OrderEventData } from "@/app/api/events/route";
 
 interface DashboardStats {
     totalProducts: number;
@@ -23,65 +26,152 @@ export default function AdminDashboard() {
     const [stats, setStats] = useState<DashboardStats | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [processedOrderIds, setProcessedOrderIds] = useState<Set<string>>(new Set());
+    const statsRef = useRef<DashboardStats | null>(null);
 
+    // Sync the ref with state for accessing in callback
     useEffect(() => {
-        let isMounted = true;
+        statsRef.current = stats;
+    }, [stats]);
 
-        // Explicitly handle the promise to appease linters
-        (async function doFetchDashboardData() {
-            try {
-                const response = await fetch("/api/admin/dashboard");
+    // Function to fetch dashboard data
+    const fetchDashboardData = useCallback(async () => {
+        try {
+            setLoading(true);
+            console.log("[Dashboard] Fetching dashboard data...");
+            const response = await fetch("/api/admin/dashboard");
 
-                // Only continue processing if component is still mounted
-                if (!isMounted) return;
-
-                if (!response.ok) {
-                    // Safely handle error response
-                    let errorMessage = "Failed to fetch dashboard data";
-                    try {
-                        const errorData = await response.json();
-                        if (errorData?.error) {
-                            errorMessage = errorData.error;
-                        }
-                    } catch (jsonError) {
-                        console.error("Error parsing error response:", jsonError);
+            if (!response.ok) {
+                // Safely handle error response
+                let errorMessage = "Failed to fetch dashboard data";
+                try {
+                    const errorData = await response.json();
+                    if (errorData?.error) {
+                        errorMessage = errorData.error;
                     }
-
-                    // Instead of throwing, directly set the error state
-                    if (isMounted) {
-                        setError(errorMessage);
-                        setLoading(false);
-                        return; // Early return to avoid proceeding further
-                    }
+                } catch (jsonError) {
+                    console.error("Error parsing error response:", jsonError);
                 }
 
-                const data = await response.json();
-
-                if (isMounted) {
-                    setStats(data);
-                    setLoading(false);
-                }
-            } catch (err) {
-                if (isMounted) {
-                    setError(err instanceof Error ? err.message : "An error occurred");
-                    console.error("Error fetching dashboard data:", err);
-                    setLoading(false);
-                }
-            }
-        })().catch(error => {
-            // Catch any unexpected errors from the IIFE
-            if (isMounted) {
-                console.error("Unexpected error in dashboard fetch:", error);
-                setError("An unexpected error occurred");
+                setError(errorMessage);
                 setLoading(false);
+                return;
             }
+
+            const data = await response.json();
+            console.log("[Dashboard] Dashboard data fetched successfully");
+            setStats(data);
+
+            // Store all existing order IDs to prevent duplicates
+            const orderIds = new Set<string>();
+            data.recentOrders.forEach((order: { id: string }) => {
+                orderIds.add(order.id);
+            });
+            setProcessedOrderIds(orderIds);
+
+            setLoading(false);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "An error occurred");
+            console.error("Error fetching dashboard data:", err);
+            setLoading(false);
+        }
+    }, []);
+
+    // Handler for new order events
+    const handleNewOrder = useCallback((orderData: OrderEventData) => {
+        console.log("[Dashboard] Received new order event:", orderData);
+
+        // Prevent duplicate processing
+        if (processedOrderIds.has(orderData.id)) {
+            console.log(`[Dashboard] Order ${orderData.id} already processed, skipping`);
+            return;
+        }
+
+        // Show a toast notification
+        toast.success(`New order #${orderData.id} received!`, {
+            duration: 5000,
+            position: 'top-right',
         });
 
-        // Cleanup function to prevent state updates after unmount
-        return () => {
-            isMounted = false;
+        // Add to processed IDs set
+        setProcessedOrderIds(prev => {
+            const newSet = new Set(prev);
+            newSet.add(orderData.id);
+            return newSet;
+        });
+
+        // Update stats with the new order
+        setStats(prevStats => {
+            if (!prevStats) return null;
+
+            // Create a new order entry to add to recent orders
+            const newOrder = {
+                id: orderData.id,
+                status: orderData.status || 'processing',
+                total_amount: orderData.total,
+                created_at: orderData.date || new Date().toISOString(),
+                customer_name: orderData.customer.name,
+                customer_email: orderData.customer.email
+            };
+
+            // Increase order count
+            const totalOrders = prevStats.totalOrders + 1;
+
+            // Add to the beginning of recent orders and keep only the first 10
+            const recentOrders = [newOrder, ...prevStats.recentOrders].slice(0, 10);
+
+            console.log(`[Dashboard] Updating dashboard with new order ${orderData.id}`);
+
+            return {
+                ...prevStats,
+                totalOrders,
+                recentOrders
+            };
+        });
+    }, [processedOrderIds]);
+
+    // Set up admin events listener with our callback
+    const { connected, error: eventError } = useAdminEvents({
+        onNewOrder: handleNewOrder
+    });
+
+    // Initial data fetch
+    useEffect(() => {
+        console.log("[Dashboard] Component mounted, fetching initial data");
+
+        let isMounted = true; // Track component mount state
+
+        const loadDashboardData = async () => {
+            try {
+                if (isMounted) {
+                    await fetchDashboardData();
+                    console.log("[Dashboard] Data loaded successfully");
+                }
+            } catch (error) {
+                if (isMounted) {
+                    console.error("[Dashboard] Error loading dashboard data:", error);
+                }
+            }
         };
-    }, []);
+
+        void loadDashboardData(); // Use void to explicitly handle the promise
+
+        return () => {
+            isMounted = false; // Prevent state updates after unmount
+            console.log("[Dashboard] Component unmounting");
+        };
+    }, [fetchDashboardData]);
+
+    // Handle manual refresh
+    const handleManualRefresh = async () => {
+        try {
+            await fetchDashboardData();
+            toast.success("Dashboard refreshed", { duration: 2000 });
+        } catch (error) {
+            console.error("[Dashboard] Error refreshing dashboard:", error);
+            toast.error("Failed to refresh dashboard", { duration: 2000 });
+        }
+    };
 
     if (loading) {
         return (
@@ -95,6 +185,12 @@ export default function AdminDashboard() {
         return (
             <div className="bg-red-800 text-white p-4 rounded-md">
                 <p>{error || "Failed to load dashboard data"}</p>
+                <button
+                    onClick={handleManualRefresh}
+                    className="mt-4 bg-white text-red-800 px-4 py-2 rounded hover:bg-gray-100"
+                >
+                    Retry
+                </button>
             </div>
         );
     }
@@ -106,7 +202,35 @@ export default function AdminDashboard() {
 
     return (
         <div className="space-y-8">
-            <h1 className="text-2xl font-bold text-white mb-6">Dashboard</h1>
+            <div className="flex justify-between items-center">
+                <h1 className="text-2xl font-bold text-white mb-6">Dashboard</h1>
+
+                <div className="flex items-center space-x-4">
+                    {/* Manual refresh button */}
+                    <button
+                        onClick={handleManualRefresh}
+                        className="flex items-center space-x-1 bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded text-sm text-white"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        <span>Refresh</span>
+                    </button>
+
+                    {/* Real-time status indicator */}
+                    <div className="flex items-center">
+                        <span className={`h-3 w-3 rounded-full mr-2 ${connected ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                        <span className="text-sm text-gray-300">
+                            {connected ? 'Real-time updates active' : 'Connecting...'}
+                        </span>
+                        {eventError && (
+                            <span className="ml-2 text-xs text-red-400">
+                                (Connection issue)
+                            </span>
+                        )}
+                    </div>
+                </div>
+            </div>
 
             {/* Welcome Message */}
             <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 shadow-lg">
@@ -179,7 +303,7 @@ export default function AdminDashboard() {
                             </thead>
                             <tbody className="divide-y divide-gray-700">
                             {stats.recentOrders.map((order) => (
-                                <tr key={order.id}>
+                                <tr key={order.id} className="transition-all">
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                                         #{order.id}
                                     </td>
@@ -194,7 +318,7 @@ export default function AdminDashboard() {
                                         ${order.total_amount.toFixed(2)}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                    {formatDate(order.created_at)}
+                                        {formatDate(order.created_at)}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <Link

@@ -1,4 +1,3 @@
-// app/admin/layout.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -6,6 +5,9 @@ import { useSession, signOut } from "next-auth/react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import AdminSessionProvider from "@/components/admin/AdminSessionProvider";
+import Toaster from "@/components/layout/Toaster";
+import { useAdminEvents } from "@/hooks/admin/useAdminEvents";
+import { toast } from "react-hot-toast";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     return (
@@ -20,6 +22,46 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
     const [loading, setLoading] = useState(true);
+    const [newOrdersCount, setNewOrdersCount] = useState(0);
+
+    // Configure admin event listeners for notifications
+    const { connected } = useAdminEvents({
+        onNewOrder: (orderData) => {
+            // Only show notifications if not on orders page
+            if (!pathname.includes('/admin/orders')) {
+                toast.success(`New order #${orderData.id} from ${orderData.customer.name}`, {
+                    position: 'top-right',
+                    duration: 5000,
+                    icon: '🛍️',
+                });
+
+                // Increment the badge counter
+                setNewOrdersCount(prev => prev + 1);
+
+                // Log that we received the event in layout
+                console.log(`[AdminLayout] Received new order event for Order #${orderData.id}`);
+            }
+        },
+        onOrderUpdated: (orderData) => {
+            // Notify about status changes
+            if (!pathname.includes(`/admin/orders/${orderData.id}`)) {
+                toast.success(`Order #${orderData.id} updated to ${orderData.status}`, {
+                    position: 'top-right',
+                    duration: 4000,
+                    icon: '🔄',
+                });
+
+                console.log(`[AdminLayout] Received order updated event for Order #${orderData.id}`);
+            }
+        }
+    });
+
+    // Reset new order counter when navigating to orders page
+    useEffect(() => {
+        if (pathname.includes('/admin/orders')) {
+            setNewOrdersCount(0);
+        }
+    }, [pathname]);
 
     useEffect(() => {
         if (status === "loading") return;
@@ -54,6 +96,9 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
     return (
         <div className="flex h-screen bg-gray-900">
+            {/* Toast Container for Notifications */}
+            <Toaster />
+
             {/* Sidebar */}
             <aside className="w-64 bg-gray-800 text-white">
                 <div className="p-6">
@@ -68,6 +113,11 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
                     </NavLink>
                     <NavLink href="/admin/orders" pathname={pathname}>
                         Orders
+                        {newOrdersCount > 0 && (
+                            <span className="ml-2 bg-red-500 text-white text-xs font-medium px-2 py-0.5 rounded-full">
+                                {newOrdersCount}
+                            </span>
+                        )}
                     </NavLink>
                     <NavLink href="/admin/users" pathname={pathname}>
                         Users
@@ -92,7 +142,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                                 strokeWidth="2"
-                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2h-4M14 4h6m0 0v6m0-6L10 14"
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
                             ></path>
                         </svg>
                     </Link>
@@ -114,6 +164,14 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
                             <span className="text-white">{pathname.split("/").pop()?.replace("-", " ") || "Dashboard"}</span>
                         </div>
                         <div className="flex items-center space-x-2">
+                            {/* Real-time connection indicator */}
+                            <div className="flex items-center mr-4">
+                                <span className={`h-2 w-2 rounded-full mr-2 ${connected ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                                <span className="text-xs text-gray-400">
+                                    {connected ? 'Live updates' : 'Connecting...'}
+                                </span>
+                            </div>
+
                             <span className="text-white">{session?.user?.name || "Admin"}</span>
                             <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
                                 {session?.user?.name?.charAt(0) || "A"}
