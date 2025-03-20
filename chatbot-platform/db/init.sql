@@ -19,26 +19,29 @@ CREATE TABLE industries (
 );
 
 -- Create chatbot_templates table
-CREATE TABLE chatbot_templates (
+/* CREATE TABLE chatbot_templates (
                                    id SERIAL PRIMARY KEY,
                                    name VARCHAR(255) NOT NULL,
                                    industry_id INTEGER REFERENCES industries(id),
                                    description TEXT,
                                    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
+); */
 
 -- Create chatbots table
 CREATE TABLE chatbots (
-                          id SERIAL PRIMARY KEY,
-                          name VARCHAR(255) NOT NULL,
-                          description TEXT,
-                          industry_id INTEGER REFERENCES industries(id),
-                          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                          updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    industry_id INTEGER NOT NULL REFERENCES industries(id) ON DELETE CASCADE,
+    platform VARCHAR(50) NOT NULL,  -- platform is mandatory
+    api_url TEXT,  -- api_url can be NULL
+    api_key TEXT,  -- api_key can be NULL
+    custom_prompt TEXT,  -- custom_prompt can be NULL
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Create chatbot_responses table
-CREATE TABLE chatbot_responses (
+/* CREATE TABLE chatbot_responses (
                                    id SERIAL PRIMARY KEY,
                                    chatbot_id INTEGER REFERENCES chatbots(id) ON DELETE CASCADE,
                                    template_id INTEGER REFERENCES chatbot_templates(id) NULL,
@@ -47,7 +50,7 @@ CREATE TABLE chatbot_responses (
                                    is_ai_enhanced BOOLEAN DEFAULT FALSE,
                                    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
+); */
 
 -- Create conversations table to track complete chat sessions
 CREATE TABLE conversations (

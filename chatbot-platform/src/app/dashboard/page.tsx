@@ -83,7 +83,7 @@ export default function DashboardPage() {
                 {/* Create New Agent Card */}
                 <Card className="cursor-pointer hover:shadow-md transition-shadow bg-[#1b2539] text-white">
                     <CardContent className="p-4 sm:p-6">
-                        <Link href="/dashboard/chatbots/create" className="flex items-center">
+                        <Link href="/dashboard/integrations" className="flex items-center">
                             <div className="bg-blue-600/20 p-2 sm:p-3 rounded-full mr-3 sm:mr-4 flex-shrink-0">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

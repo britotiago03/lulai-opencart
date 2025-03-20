@@ -1,12 +1,11 @@
-// src/components/chatbots/ChatbotEditClient.tsx
+// chatbot-platform/src/components/chatbots/ChatbotEditClient.tsx
 "use client";
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Chatbot, Industry, ChatbotResponse } from '@/lib/db/schema';
+import { Chatbot, Industry } from '@/lib/db/schema';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import ResponseEditor from '@/components/chatbots/ResponseEditor';
 
 export default function ChatbotEditClient({ id }: { id: string }) {
     const router = useRouter();
@@ -16,12 +15,13 @@ export default function ChatbotEditClient({ id }: { id: string }) {
     const [error, setError] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         name: '',
-        description: '',
         industry: 'general' as Industry,
-        responses: [] as ChatbotResponse[]
+        apiUrl: '',
+        platform: '',
+        apiKey: '',
+        customPrompt: '',
     });
 
-    // Fetch chatbot data
     useEffect(() => {
         const fetchChatbot = async () => {
             try {
@@ -35,13 +35,13 @@ export default function ChatbotEditClient({ id }: { id: string }) {
                 }
                 const data = await response.json();
                 setChatbot(data);
-
-                // Set form data
                 setFormData({
                     name: data.name,
-                    description: data.description || '',
                     industry: data.industry,
-                    responses: data.responses || []
+                    apiUrl: data.apiUrl,
+                    platform: data.platform,
+                    apiKey: data.apiKey || '',
+                    customPrompt: data.customPrompt || '',
                 });
             } catch (error) {
                 setError('Error loading chatbot details');
@@ -59,17 +59,42 @@ export default function ChatbotEditClient({ id }: { id: string }) {
         setIsSubmitting(true);
 
         try {
+            // Update the chatbot details in Postgres
             const response = await fetch(`/api/chatbots/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(formData),
+                body: JSON.stringify({
+                    ...formData,
+                    // Keep the uneditable fields unchanged
+                    industry: chatbot?.industry,
+                    apiUrl: chatbot?.apiUrl,
+                    platform: chatbot?.platform,
+                    apiKey: chatbot?.apiKey,
+                }),
             });
 
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.error || 'Failed to update chatbot');
+            }
+
+            // Now update the custom prompt in AstraDB via the storage endpoint.
+            const storageResponse = await fetch(`http://localhost:3001/api/storage`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    storeName: formData.name,      // Assuming "name" is used to identify the store in AstraDB
+                    customPrompt: formData.customPrompt,
+                }),
+            });
+
+            if (!storageResponse.ok) {
+                const storageError = await storageResponse.json();
+                throw new Error(storageError.message || 'Failed to update system prompt in AstraDB');
             }
 
             alert('Chatbot updated successfully!');
@@ -81,35 +106,6 @@ export default function ChatbotEditClient({ id }: { id: string }) {
             setIsSubmitting(false);
         }
     };
-
-    const handleDelete = async () => {
-        if (!confirm('Are you sure you want to delete this chatbot? This cannot be undone.')) {
-            return;
-        }
-
-        try {
-            const response = await fetch(`/api/chatbots/${id}`, {
-                method: 'DELETE',
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to delete chatbot');
-            }
-
-            alert('Chatbot deleted successfully!');
-            router.push('/dashboard/chatbots');
-        } catch (error) {
-            console.error('Error deleting chatbot:', error);
-            alert(`Failed to delete chatbot: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        }
-    };
-
-    const handleResponsesChange = (responses: ChatbotResponse[]) => {
-        setFormData(prev => ({ ...prev, responses }));
-    };
-
-    const industries: Industry[] = ['fashion', 'electronics', 'general', 'food', 'beauty'];
 
     if (loading) {
         return <div className="text-center py-8">Loading chatbot details...</div>;
@@ -124,10 +120,7 @@ export default function ChatbotEditClient({ id }: { id: string }) {
                     </CardHeader>
                     <CardContent>
                         <p className="text-red-500 mb-4">{error || 'Could not load chatbot'}</p>
-                        <Link
-                            href="/dashboard/chatbots"
-                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                        >
+                        <Link href="/dashboard/chatbots" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
                             Back to Chatbots
                         </Link>
                     </CardContent>
@@ -138,24 +131,10 @@ export default function ChatbotEditClient({ id }: { id: string }) {
 
     return (
         <div className="max-w-4xl mx-auto p-6">
-            <div className="mb-6 flex justify-between items-center">
-                <h1 className="text-2xl font-bold">Edit Chatbot: {chatbot.name}</h1>
-                <div className="flex gap-2">
-                    <Link
-                        href={`/dashboard/chatbots/${id}`}
-                        className="px-4 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 transition-colors"
-                    >
-                        Cancel
-                    </Link>
-                    <button
-                        onClick={handleDelete}
-                        className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-                    >
-                        Delete Chatbot
-                    </button>
-                </div>
-            </div>
-
+            <h1 className="text-2xl font-bold mb-6">Edit Chatbot: {chatbot.name}</h1>
+            <p className="mb-4 text-sm text-gray-600">
+                Note: Only the Chatbot Name and Custom Prompt can be edited. To change fields like API URL, platform, or API key, please create a new chatbot.
+            </p>
             <form onSubmit={handleSubmit} className="space-y-6">
                 <Card>
                     <CardHeader>
@@ -163,71 +142,64 @@ export default function ChatbotEditClient({ id }: { id: string }) {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div>
-                            <label htmlFor="name" className="block text-sm font-medium mb-2">
-                                Chatbot Name
-                            </label>
+                            <label className="block text-sm font-medium mb-2">Chatbot Name</label>
                             <input
                                 type="text"
-                                id="name"
                                 value={formData.name}
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                className="w-full p-2 border rounded-md"
+                                className="w-full p-2 border rounded-md text-black"
                                 required
                             />
                         </div>
-
                         <div>
-                            <label htmlFor="description" className="block text-sm font-medium mb-2">
-                                Description
-                            </label>
+                            <label className="block text-sm font-medium mb-2">Industry</label>
+                            <input
+                                type="text"
+                                value={formData.industry}
+                                disabled
+                                className="w-full p-2 border rounded-md bg-gray-100 text-gray-600"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Product API URL</label>
+                            <input
+                                type="url"
+                                value={formData.apiUrl}
+                                disabled
+                                className="w-full p-2 border rounded-md bg-gray-100 text-gray-600"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Platform</label>
+                            <input
+                                type="text"
+                                value={formData.platform}
+                                disabled
+                                className="w-full p-2 border rounded-md bg-gray-100 text-gray-600"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-2">API Key (Optional)</label>
+                            <input
+                                type="text"
+                                value={formData.apiKey}
+                                disabled
+                                className="w-full p-2 border rounded-md bg-gray-100 text-gray-600"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Custom Prompt (Optional)</label>
                             <textarea
-                                id="description"
-                                value={formData.description}
-                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                className="w-full p-2 border rounded-md"
+                                value={formData.customPrompt}
+                                onChange={(e) => setFormData({ ...formData, customPrompt: e.target.value })}
+                                className="w-full p-2 border rounded-md text-black"
                                 rows={3}
                             />
                         </div>
-
-                        <div>
-                            <label htmlFor="industry" className="block text-sm font-medium mb-2">
-                                Industry
-                            </label>
-                            <select
-                                id="industry"
-                                value={formData.industry}
-                                onChange={(e) => setFormData({ ...formData, industry: e.target.value as Industry })}
-                                className="w-full p-2 border rounded-md"
-                            >
-                                {industries.map((industry) => (
-                                    <option key={industry} value={industry}>
-                                        {industry.charAt(0).toUpperCase() + industry.slice(1)}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
                     </CardContent>
                 </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Chatbot Responses</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <ResponseEditor
-                            responses={formData.responses}
-                            onChange={handleResponsesChange}
-                            industry={formData.industry}
-                        />
-                    </CardContent>
-                </Card>
-
                 <div className="flex justify-end">
-                    <button
-                        type="submit"
-                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                        disabled={isSubmitting}
-                    >
+                    <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors" disabled={isSubmitting}>
                         {isSubmitting ? 'Saving...' : 'Save Changes'}
                     </button>
                 </div>

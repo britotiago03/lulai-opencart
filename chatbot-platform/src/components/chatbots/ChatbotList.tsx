@@ -1,4 +1,4 @@
-// src/components/chatbots/ChatbotList.tsx
+// chatbot-platform/src/components/chatbots/ChatbotList.tsx
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -67,18 +67,10 @@ export default function ChatbotList() {
                             <CardTitle>{chatbot.name}</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-gray-600 dark:text-gray-300 mb-2">
-                                {chatbot.description || 'No description provided'}
-                            </p>
                             <div className="flex flex-wrap gap-2">
-                <span
-                    className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100 px-2 py-0.5 rounded-full">
-                  {chatbot.industry}
-                </span>
-                                <span
-                                    className="text-xs bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200 px-2 py-0.5 rounded-full">
-                  {chatbot.responses.length} responses
-                </span>
+                                <span className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100 px-2 py-0.5 rounded-full">
+                                    {chatbot.industry}
+                                </span>
                             </div>
                             <div className="mt-3 text-xs text-gray-500">
                                 Created: {chatbot.createdAt ? new Date(chatbot.createdAt).toLocaleDateString() : 'Unknown date'}
