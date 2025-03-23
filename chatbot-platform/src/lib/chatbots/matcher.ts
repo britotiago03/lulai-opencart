@@ -6,6 +6,9 @@ interface MatchResult {
     matched: boolean;
     response?: string;
     isAI?: boolean;
+    responseId?: string;
+    matchedTriggers?: string[];
+    confidenceScore?: number;
 }
 
 /**
@@ -21,7 +24,10 @@ export function matchUserInput(userInput: string, responses: ChatbotResponse[]):
             return {
                 matched: true,
                 response: response.response,
-                isAI: response.isAI
+                isAI: response.isAI,
+                responseId: response.id,
+                matchedTriggers: [response.trigger],
+                confidenceScore: 100 // 100% confidence for exact match
             };
         }
     }
@@ -35,11 +41,19 @@ export function matchUserInput(userInput: string, responses: ChatbotResponse[]):
             .filter(keyword => keyword.length > 2); // Only use keywords with more than 2 characters
 
         // Check if any of the keywords are in the user input
-        if (keywords.some(keyword => inputLower.includes(keyword))) {
+        const matchedKeywords = keywords.filter(keyword => inputLower.includes(keyword));
+
+        if (matchedKeywords.length > 0) {
+            // Calculate a simple confidence score based on matched keywords ratio
+            const confidenceScore = (matchedKeywords.length / keywords.length) * 100;
+
             return {
                 matched: true,
                 response: response.response,
-                isAI: response.isAI
+                isAI: response.isAI,
+                responseId: response.id,
+                matchedTriggers: matchedKeywords,
+                confidenceScore: Math.min(confidenceScore, 95) // Cap at 95% for keyword matches
             };
         }
     }
@@ -89,7 +103,10 @@ export function enhancedMatchUserInput(userInput: string, responses: ChatbotResp
                 return {
                     matched: true,
                     response: response.response,
-                    isAI: response.isAI
+                    isAI: response.isAI,
+                    responseId: response.id,
+                    matchedTriggers: ['order', 'new order'],
+                    confidenceScore: 85 // Intent match confidence
                 };
             }
         }
@@ -103,7 +120,10 @@ export function enhancedMatchUserInput(userInput: string, responses: ChatbotResp
                 return {
                     matched: true,
                     response: response.response,
-                    isAI: response.isAI
+                    isAI: response.isAI,
+                    responseId: response.id,
+                    matchedTriggers: ['order status', 'track order'],
+                    confidenceScore: 85 // Intent match confidence
                 };
             }
         }

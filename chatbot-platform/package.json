@@ -12,11 +12,14 @@
     "db:init": "docker-compose up -d postgres"
   },
   "dependencies": {
+    "lucide-react": "^0.477.0",
     "next": "15.1.7",
     "openai": "^4.85.4",
     "pg": "^8.13.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "recharts": "^2.15.1",
+    "tailwindcss-animate": "^1.0.7",
     "zod": "^3.24.2"
   },
   "devDependencies": {

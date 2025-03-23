@@ -1,6 +1,5 @@
 /* chatbot-platform/src/app/dashboard/chatbots/page.tsx */
 import Link from "next/link";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import ChatbotList from "@/components/chatbots/ChatbotList";
 
 export default function ChatbotsPage() {
@@ -14,19 +13,6 @@ export default function ChatbotsPage() {
                 >
                     Create New Chatbot
                 </Link>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Welcome!</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-gray-600 dark:text-gray-300">
-                            Create your first chatbot by clicking the button above.
-                        </p>
-                    </CardContent>
-                </Card>
             </div>
             <ChatbotList />
         </div>
