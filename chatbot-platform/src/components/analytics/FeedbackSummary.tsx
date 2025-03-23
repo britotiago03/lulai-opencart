@@ -51,6 +51,7 @@ export default function FeedbackSummaryComponent({ data }: FeedbackSummaryCompon
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
+
                     <p className="text-sm text-gray-400">Average Rating</p>
                     <div className="flex items-center mt-1">
                         <p className="text-3xl font-semibold mr-2">{averageRating.toFixed(1)}</p>
@@ -87,6 +88,7 @@ export default function FeedbackSummaryComponent({ data }: FeedbackSummaryCompon
                             ></div>
                         </div>
                         <div className="w-16 text-right">
+
                             <span className="text-sm text-gray-400">
                                 {ratingDistribution[rating.toString()] || 0} ({Math.round(ratingPercentages[rating.toString()])}%)
                             </span>
@@ -97,6 +99,7 @@ export default function FeedbackSummaryComponent({ data }: FeedbackSummaryCompon
 
             <div className="mt-8">
                 <h3 className="text-lg font-medium mb-4">Recent Feedback</h3>
+
                 {data.recentFeedback && data.recentFeedback.length > 0 ? (
                     <div className="space-y-4">
                         {data.recentFeedback.map((item) => (
@@ -112,6 +115,7 @@ export default function FeedbackSummaryComponent({ data }: FeedbackSummaryCompon
                                             />
                                         ))}
                                     </div>
+
                                     <span className="text-sm text-gray-400">
                                         {new Date(item.submittedAt).toLocaleDateString('en-US', {
                                             month: 'short',
@@ -121,6 +125,7 @@ export default function FeedbackSummaryComponent({ data }: FeedbackSummaryCompon
                                         })}
                                     </span>
                                 </div>
+
 
                                 <div className="mb-2 p-2 bg-gray-800 rounded text-sm">
                                     <p className="font-medium text-xs text-gray-400 mb-1">User asked:</p>

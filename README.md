@@ -47,7 +47,7 @@ docker-compose down -v
 After the app is running, you can access the database inside Docker with:
 
 ```sh
-docker exec -it postgres_db psql -U postgres -d ecommerce_db
+docker exec -it postgres_db1 psql -U postgres -d ecommerce_db
 ```
 
 This will open the PostgreSQL interactive shell where you can run SQL queries.

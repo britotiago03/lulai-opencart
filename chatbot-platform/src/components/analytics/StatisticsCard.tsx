@@ -17,6 +17,7 @@ import {
 // Update the icon type to match what you're actually passing from AnalyticsDashboard
 type IconName = 'message-square' | 'shopping-cart' | 'star' | 'zap' | 'activity' | 'clock' | ReactNode;
 
+
 interface StatisticsCardProps {
     title: string;
     value: string | number;

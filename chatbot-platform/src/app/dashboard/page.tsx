@@ -43,7 +43,7 @@ export default function DashboardPage() {
                 if (!response.ok) {
                     throw new Error('Failed to fetch chatbots');
                 }
-
+              
                 const allChatbots = await response.json();
 
                 // Filter to only include chatbots owned by the current user
