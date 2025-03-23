@@ -4,8 +4,9 @@ import { OrderData } from '@/types/payment';
 import { CartItem } from '@/lib/db';
 import stripe from '@/lib/stripe';
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { userAuthOptions } from "@/lib/auth-config";
 import pool from '@/lib/db';
+import { sendEventToAll, OrderEventData } from '@/app/api/events/route';
 
 export async function POST(request: NextRequest) {
     try {
@@ -20,7 +21,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Get the current session to identify the user
-        const session = await getServerSession(authOptions);
+        const session = await getServerSession(userAuthOptions);
         console.log("Checkout session:", session);
 
         // Get userId from session or look it up by email
@@ -123,6 +124,35 @@ export async function POST(request: NextRequest) {
 
                 // Insert order items
                 await insertOrderItems(client, orderId, data.cartItems as CartItem[]);
+
+                // Create order event data for real-time updates
+                const orderEventData: OrderEventData = {
+                    id: orderId,
+                    status: 'processing',
+                    customer: {
+                        name: `${data.customerInfo.firstName} ${data.customerInfo.lastName}`,
+                        email: data.customerInfo.email
+                    },
+                    total: totalAmount,
+                    date: new Date().toISOString()
+                };
+
+                // Log that we're sending the event
+                console.log(`[Checkout] Sending new order event for Order #${orderId}`);
+
+                // Send the event with a small delay to ensure clients are connected
+                setTimeout(() => {
+                    try {
+                        // Log connection info before sending event
+                        console.log(`[Checkout] Ready to send new order event for Order #${orderId}`);
+
+                        // Send the event
+                        sendEventToAll('new-order', orderEventData);
+                        console.log(`[Checkout] Successfully sent event for Order #${orderId}`);
+                    } catch (eventError) {
+                        console.error(`[Checkout] Error sending event for Order #${orderId}:`, eventError);
+                    }
+                }, 500); // Small delay to ensure clients are connected
 
                 // If the payment requires further action (like 3D Secure), return the client secret
                 if (paymentIntent.status === 'requires_action') {
