@@ -1,7 +1,7 @@
 // app/api/account/change-email/route.ts
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { userAuthOptions } from "@/lib/auth-config";
 import pool from "@/lib/db";
 import { checkUserPassword, isEmailTaken } from "@/lib/auth.service";
 import { createVerificationToken, TOKEN_TYPES } from "@/lib/tokenService";
@@ -10,7 +10,7 @@ import { sendEmailChangeVerification } from "@/lib/emailService";
 export async function POST(req: Request) {
     try {
         // Get current user from session
-        const session = await getServerSession(authOptions);
+        const session = await getServerSession(userAuthOptions);
 
         if (!session?.user?.id) {
             return NextResponse.json({ error: "You must be logged in" }, { status: 401 });

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeTransaction } from '@/lib/db';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { userAuthOptions } from "@/lib/auth-config";
 
 /**
  * Lightweight endpoint to only fetch the current status of an order
@@ -22,7 +22,7 @@ export async function GET(
         }
 
         // Get the current session
-        const session = await getServerSession(authOptions);
+        const session = await getServerSession(userAuthOptions);
 
         return await executeTransaction(async (client) => {
             let query = `

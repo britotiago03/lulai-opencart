@@ -1,14 +1,12 @@
-version: '3.8'
-
 services:
   postgres:
-    image: postgres:15.0
-    container_name: chatbot_postgres_db
+    image: postgres:latest
+    container_name: postgres_db1
     restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: chatbot_platform_db  # Docker creates this automatically
+      POSTGRES_DB: ecommerce_db1  # Docker creates this automatically
     ports:
       - "5432:5432"
     volumes:
@@ -17,17 +15,14 @@ services:
 
   nextjs:
     build: .
-    container_name: chatbot_nextjs_app
+    container_name: nextjs_app1
     restart: always
     ports:
       - "3000:3000"
     depends_on:
       - postgres
     environment:
-      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/chatbot_platform_db"
-    volumes:
-      - .:/app
-      - /app/node_modules
+      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/ecommerce_db1"
 
 volumes:
   postgres_data:

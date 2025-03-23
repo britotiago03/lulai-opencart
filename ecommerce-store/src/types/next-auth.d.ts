@@ -18,6 +18,8 @@ declare module "next-auth" {
             subscription: Subscription | null;
             subscription_status: string | null;
             subscription_end_date: string | null;
+            isAdmin?: boolean;
+            isSuperAdmin?: boolean;
         };
     }
 
@@ -28,6 +30,8 @@ declare module "next-auth" {
         subscription: Subscription | null;
         subscription_status?: string | null;
         subscription_end_date?: string | null;
+        isAdmin?: boolean;
+        isSuperAdmin?: boolean;
     }
 }
 
@@ -37,5 +41,37 @@ declare module "next-auth/jwt" {
         subscription: Subscription | null;
         subscription_status?: string | null;
         subscription_end_date?: string | null;
+        isAdmin?: boolean;
+        isSuperAdmin?: boolean;
     }
+}
+
+// Admin-specific types
+export interface AdminUser {
+    id: number;
+    name: string;
+    email: string;
+    is_super_admin: boolean;
+    is_active: boolean;
+    created_at: Date;
+    last_login: Date | null;
+}
+
+export interface AdminAccessToken {
+    id: number;
+    url_path: string;
+    access_key: string;
+    created_at: Date;
+    expires_at: Date;
+    created_by: number;
+    last_used_at: Date | null;
+    is_active: boolean;
+}
+
+export interface AdminSettings {
+    id: number;
+    setting_key: string;
+    setting_value: string;
+    updated_at: Date;
+    updated_by: number | null;
 }

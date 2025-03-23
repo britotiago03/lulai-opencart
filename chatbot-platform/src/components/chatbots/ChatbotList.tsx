@@ -3,54 +3,111 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Chatbot } from '@/lib/db/schema';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
+import { Edit, Trash2, MessageSquare, BarChart3, ExternalLink } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+
+interface Chatbot {
+    id: string;
+    name: string;
+    description: string;
+    industry: string;
+    userId?: string; // Added userId field for filtering
+    created_at: string;
+    updated_at: string;
+    responses: any[];
+}
 
 export default function ChatbotList() {
     const [chatbots, setChatbots] = useState<Chatbot[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const { user, isAdmin } = useAuth();
 
     useEffect(() => {
         const fetchChatbots = async () => {
             try {
+                setLoading(true);
+
                 const response = await fetch('/api/chatbots');
+
                 if (!response.ok) {
                     throw new Error('Failed to fetch chatbots');
                 }
-                const data = await response.json();
+
+                let data = await response.json();
+
+                // If user is not admin, filter chatbots to only show their own
+                if (!isAdmin && user) {
+                    data = data.filter((chatbot: Chatbot) => chatbot.userId === user.id);
+                }
+
                 setChatbots(data);
             } catch (error) {
-                setError('Error loading chatbots');
                 console.error('Error fetching chatbots:', error);
+                setError('Failed to load chatbots. Please try again.');
             } finally {
                 setLoading(false);
             }
         };
 
         fetchChatbots();
-    }, []);
+    }, [user, isAdmin]);
+
+    const handleDelete = async (id: string) => {
+        if (!window.confirm('Are you sure you want to delete this chatbot?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/chatbots/${id}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete chatbot');
+            }
+
+            // Update state to remove the deleted chatbot
+            setChatbots(chatbots.filter(chatbot => chatbot.id !== id));
+        } catch (error) {
+            console.error('Error deleting chatbot:', error);
+            alert('Failed to delete chatbot');
+        }
+    };
 
     if (loading) {
-        return <div className="text-center py-8">Loading chatbots...</div>;
+        return (
+            <div className="text-center py-12">
+                <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+                <p className="mt-4">Loading chatbots...</p>
+            </div>
+        );
     }
 
     if (error) {
-        return <div className="text-center py-8 text-red-500">{error}</div>;
+        return (
+            <div className="text-center py-12">
+                <p className="text-red-500">{error}</p>
+            </div>
+        );
     }
 
     if (chatbots.length === 0) {
         return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>No Chatbots Found</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-gray-600 dark:text-gray-300">
-                        Create your first chatbot by clicking the Create New Chatbot button above.
-                    </p>
-                </CardContent>
-            </Card>
+            <div className="text-center py-12">
+                <MessageSquare className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                <h3 className="text-xl font-medium mb-2">No Chatbots Yet</h3>
+                <p className="text-gray-500 mb-6">
+                    Create your first chatbot to get started
+                </p>
+                <Link
+                    href="/dashboard/chatbots/create"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                >
+                    Create New Chatbot
+                </Link>
+            </div>
         );
     }
 
@@ -72,12 +129,34 @@ export default function ChatbotList() {
                                     {chatbot.industry}
                                 </span>
                             </div>
-                            <div className="mt-3 text-xs text-gray-500">
-                                Created: {chatbot.createdAt ? new Date(chatbot.createdAt).toLocaleDateString() : 'Unknown date'}
+                            <div>
+                                <p className="text-xs text-gray-500">Responses</p>
+                                <p className="font-medium">{chatbot.responses?.length || 0}</p>
                             </div>
-                        </CardContent>
-                    </Card>
-                </Link>
+                        </div>
+
+                        <div className="flex space-x-2">
+                            <Link
+                                href={`/dashboard/chatbots/${chatbot.id}`}
+                                className="flex-1 text-center px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm"
+                            >
+                                Details
+                            </Link>
+                            <Link
+                                href={`/dashboard/chatbots/${chatbot.id}/test`}
+                                className="flex-1 text-center px-3 py-2 border border-gray-600 text-gray-300 rounded-md hover:bg-gray-800 transition-colors text-sm"
+                            >
+                                Test
+                            </Link>
+                            <Link
+                                href={`/dashboard/analytics?chatbotId=${chatbot.id}`}
+                                className="px-3 py-2 border border-gray-600 text-gray-300 rounded-md hover:bg-gray-800 transition-colors"
+                            >
+                                <BarChart3 className="h-5 w-5" />
+                            </Link>
+                        </div>
+                    </CardContent>
+                </Card>
             ))}
         </div>
     );
