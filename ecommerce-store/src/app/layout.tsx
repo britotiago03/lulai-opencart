@@ -1,10 +1,11 @@
 import React from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Providers from "@/components/layout/Providers";
-import Navbar from "@/components/layout/Navbar";
+import { PathnameProvider } from "@/components/layout/PathnameProvider";
+import ClientLayout from "@/components/layout/ClientLayout"; // ✅ Import the new client layout
 import "./globals.css";
-import ChatWidget from "@/components/widget"; // Import the ChatWidget component
+import { initializeAdminSystem } from "@/lib/admin-init"; // ✅ Import admin system initializer
+
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -21,24 +22,20 @@ export const metadata: Metadata = {
     description: "A fully functional Next.js authentication system",
 };
 
-// Enable static generation of the layout shell
-export const dynamic = 'force-static';
+// ✅ Ensure the admin system initializes only once
+let initialized = false;
+if (typeof window === "undefined" && !initialized) {
+    initializeAdminSystem();
+    initialized = true;
+}
 
-export default function RootLayout({
-                                       children,
-                                   }: {
-    children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
         <html lang="en">
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Providers>
-            <Navbar />
-            <main>
-                {children}
-            <ChatWidget/>
-            </main>
-        </Providers>
+          <PathnameProvider>
+              <ClientLayout>{children}</ClientLayout> {/* ✅ Now inside a client component */}
+          </PathnameProvider>
         </body>
         </html>
     );

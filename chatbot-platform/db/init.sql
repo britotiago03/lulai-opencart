@@ -49,6 +49,7 @@ CREATE INDEX IF NOT EXISTS sessions_token_idx ON sessions(session_token);
 CREATE INDEX IF NOT EXISTS subscriptions_id_idx ON subscriptions(user_id);
 
 -- Drop existing tables if they exist (for clean initialization)
+
 DROP TABLE IF EXISTS chatbot_feedback CASCADE;
 DROP TABLE IF EXISTS conversation_messages CASCADE;
 DROP TABLE IF EXISTS conversations CASCADE;

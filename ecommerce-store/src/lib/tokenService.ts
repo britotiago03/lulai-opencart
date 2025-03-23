@@ -8,6 +8,7 @@ export const TOKEN_TYPES = {
     EMAIL_VERIFICATION: 'email_verification',
     EMAIL_CHANGE: 'email_change',
     PASSWORD_RESET: 'password_reset',
+    ADMIN_SETUP: 'admin_setup'
 };
 
 // Define a minimal interface for what we need from a database client

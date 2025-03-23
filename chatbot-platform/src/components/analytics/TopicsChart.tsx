@@ -14,12 +14,21 @@ import {
 import { PopularTopic } from '@/lib/analytics/types';
 
 interface TopicsChartProps {
-    topics: PopularTopic[];
+    data?: PopularTopic[] | null;
 }
 
-export default function TopicsChart({ topics }: TopicsChartProps) {
+export default function TopicsChart({ data }: TopicsChartProps) {
+    // Ensure data is an array before processing
+    if (!data || !Array.isArray(data) || data.length === 0) {
+        return (
+            <div className="h-80 flex items-center justify-center text-gray-400">
+                No topics data available
+            </div>
+        );
+    }
+
     // Limit to top 10 topics and sort by count
-    const topTopics = [...topics]
+    const topTopics = [...data]
         .sort((a, b) => b.count - a.count)
         .slice(0, 10)
         .map(topic => ({
@@ -59,10 +68,11 @@ export default function TopicsChart({ topics }: TopicsChartProps) {
                     />
                     <Tooltip
                         contentStyle={{
-                            backgroundColor: 'white',
+                            backgroundColor: '#232b3c',
                             borderRadius: '8px',
-                            borderColor: '#e2e8f0',
+                            borderColor: '#374151',
                             boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+                            color: 'white'
                         }}
                         formatter={(value: number, name: string, props: any) => {
                             return [value, props.payload.fullName];
