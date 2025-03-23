@@ -7,14 +7,21 @@ export default function Integrate() {
     storeName: "",
     productApiUrl: "",
     platform: "opencart", // Default platform
-    apiKey: "",
+    apiKey: "", // Optional
+    customPrompt: "", // Added custom prompt input
   });
   const [responseMsg, setResponseMsg] = useState("");
   const [progress, setProgress] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+
+    // Handle input changes for different types of elements (input, select, textarea)
+    setFormData((prevState) => ({
+      ...prevState,
+      [name]: value,  // Update the correct field based on the `name` attribute
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -88,7 +95,7 @@ export default function Integrate() {
             <option value="opencart">OpenCart</option>
             <option value="shopify">Shopify</option>
             <option value="magento">Magento</option>
-            <option value="customstore">Custom Store</option> {/* Added custom store */}
+            <option value="customstore">Custom Store</option>
           </select>
         </div>
         <div>
@@ -97,6 +104,14 @@ export default function Integrate() {
             name="apiKey"
             type="text"
             value={formData.apiKey}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <label>Custom System Prompt (Optional):</label>
+          <textarea
+            name="customPrompt"
+            value={formData.customPrompt}
             onChange={handleChange}
           />
         </div>

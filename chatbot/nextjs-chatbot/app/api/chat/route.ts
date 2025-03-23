@@ -38,11 +38,13 @@ export async function POST(req: Request) {
       throw new Error("No message content provided.");
     }
 
-    // Derive the collection name based on the store name (for example "Kitchen" => "store_kitchen", so just writing Kitchen will be enough)
-    const collectionName = `store_${storeName.replace(/\s+/g, "_").toLowerCase()}`;
-    console.log(`Using collection: ${collectionName}`);
-
-    // Get embedding from OpenAI
+    // Derive dynamic database names
+    const dynamicDatabaseName = storeName.replace(/\s+/g, "_").toLowerCase();
+    const productCollectionName = `${dynamicDatabaseName}_productlist`;
+    const promptCollectionName = `${dynamicDatabaseName}_prompt`;
+    console.log(`Using product collection: ${productCollectionName}`);
+    
+    // Get embedding for the latest message from OpenAI
     const embedding = await openai.embeddings.create({
       model: "text-embedding-ada-002",
       input: latestMessage,
@@ -53,12 +55,12 @@ export async function POST(req: Request) {
     let db = initializeDB(); // fresh DB connection per request
 
     try {
-      const collection = await db.collection(collectionName);
+      const collection = await db.collection(productCollectionName);
       if (!collection) {
         throw new Error("Failed to retrieve collection");
       }
 
-      // Perform query with a retry mechanism
+      // Query documents with a retry mechanism
       let documents = [];
       let retries = 2;
       while (retries > 0) {
@@ -69,7 +71,7 @@ export async function POST(req: Request) {
           });
           documents = await cursor.toArray();
           break;
-        } catch (dbError) {
+        } catch (dbError: any) {
           console.error("Database query error:", dbError);
           if (dbError.message.includes("The session has been destroyed")) {
             console.warn("Reinitializing database connection...");
@@ -86,23 +88,36 @@ export async function POST(req: Request) {
         docContext = "No relevant products found.";
       } else {
         docContext = documents.map(doc => 
-          `**Product Name**: ${doc.product_name}\n**Price**: ${doc.price || "Not available"}\n` +
-          `**Model**: ${doc.model || "Not available"}\n**Category**: ${doc.category || "Not available"}\n` +
+          `**Product Name**: ${doc.product_name}\n` +
+          `**Price**: ${doc.price || "Not available"}\n` +
+          `**Model**: ${doc.model || "Not available"}\n` +
+          `**Category**: ${doc.category || "Not available"}\n` +
           `**Availability**: ${doc.availability || "Not available"}\n` +
           `**Description**: ${doc.text || "No description available"}\n` +
+          `**Details**: ${doc.description_details || "No details available"}\n` +
           `**Specifications**: ${doc.description_specifications || "No specifications available"}\n` +
           `**URL**: [Link to Product](${doc.url || "#"})\n-----------------------------------\n`
         ).join("\n");
       }
-    } catch (dbError) {
+    } catch (dbError: any) {
       console.error("Final DB error:", dbError);
       docContext = "Error retrieving product data.";
     }
 
-    // Construct system prompt including the document context
-const template = {
-  role: "system",
-  content: `You are a customer service chatbot designed to assist customers with questions related to the store and its products. 
+    // Try to load a custom system prompt from the store's prompt collection
+    let customPrompt: string | null = null;
+    try {
+      const promptCollection = await db.collection(promptCollectionName);
+      const promptDoc = await promptCollection.findOne({ id: "system_prompt" });
+      if (promptDoc && promptDoc.content) {
+        customPrompt = promptDoc.content;
+      }
+    } catch (error) {
+      console.error("Error retrieving custom prompt:", error);
+    }
+
+    // Default system prompt guidelines if no custom prompt exists
+    const defaultSystemPrompt = `You are a customer service chatbot designed to assist customers with questions related to the store and its products. 
 Follow these guidelines:
 
 1. Focus on Product and Store Information:
@@ -142,24 +157,30 @@ Follow these guidelines:
    - If a user asks for something outside of the store’s context, provide a general answer based on knowledge, but gently guide the conversation back to store-related matters.
 
 10. Privacy and Data Security:
-    - Always prioritize the customer’s privacy. If any sensitive data (like passwords or credit card information) is mentioned, advise the customer not to share such details in the chat for their own safety.
+    - Always prioritize the customer’s privacy. If any sensitive data (like passwords or credit card information) is mentioned, advise the customer not to share such details in the chat for their own safety.`;
 
+    // Build the final system prompt, appending the product context and the latest question.
+    const finalSystemPrompt = `${customPrompt || defaultSystemPrompt}
+    
 --------------
 START CONTEXT:
 ${docContext}
 END CONTEXT
 --------------
 QUESTION: ${latestMessage}
---------------
-`
-};
+--------------`;
 
+    // Construct the system message template
+    const template = {
+      role: "system",
+      content: finalSystemPrompt,
+    };
 
     // OpenAI streaming response
     const openaiResponse = await openai.chat.completions.create({
       model: "gpt-4o",
       stream: true,
-      messages: [template, ...messages]
+      messages: [template, ...messages],
     });
 
     // Stream the response back to the frontend

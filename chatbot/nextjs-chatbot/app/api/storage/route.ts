@@ -1,54 +1,97 @@
+// storage.ts
 import { NextRequest, NextResponse } from "next/server";
-import { loadProductDataForStore } from "@/scripts/loadDb";
+import { loadProductDataForStore, updateSystemPrompt } from "@/scripts/loadDb";
+
+const ALLOWED_ORIGIN = "http://localhost:3000";
+
+// CORS headers setup for OPTIONS, POST, and now PUT
+export async function OPTIONS(req: NextRequest) {
+  return new NextResponse(null, {
+    headers: {
+      "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
+      "Access-Control-Allow-Methods": "POST, PUT, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      "Access-Control-Allow-Credentials": "true",
+    },
+  });
+}
 
 // POST request to start the integration process
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { storeName, productApiUrl, platform, apiKey } = body;
+    const { storeName, productApiUrl, platform, apiKey, customPrompt } = body;
 
     if (!storeName || !productApiUrl || !platform) {
       return NextResponse.json({ message: "Missing required fields." }, { status: 400 });
     }
 
-    // Check for the platform type and call the appropriate function
-    if (platform === "customstore") {
-      // Handle custom store logic here
-      await loadProductDataForStore({ storeName, productApiUrl, platform, apiKey });
-    } else {
-      // Existing platforms handling
-      await loadProductDataForStore({ storeName, productApiUrl, platform, apiKey });
-    }
+    const finalApiKey = apiKey || undefined;
 
-    return NextResponse.json({ message: "Integration started." }, { status: 202 });
+    await loadProductDataForStore({ storeName, productApiUrl, platform, apiKey: finalApiKey, customPrompt });
 
+    return NextResponse.json(
+      { message: "Integration started." },
+      {
+        status: 202,
+        headers: {
+          "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
+          "Access-Control-Allow-Methods": "POST, PUT, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type, Authorization",
+          "Access-Control-Allow-Credentials": "true",
+        },
+      }
+    );
   } catch (error: any) {
     return NextResponse.json({ message: `Error: ${error.message}` }, { status: 500 });
   }
 }
 
-// Server-sent events (for streaming progress updates)
+// PUT endpoint to update only the custom prompt in AstraDB
+export async function PUT(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { storeName, customPrompt } = body;
+    if (!storeName || !customPrompt) {
+      return NextResponse.json({ message: "Missing required fields." }, { status: 400 });
+    }
+
+    await updateSystemPrompt(storeName, customPrompt);
+    return NextResponse.json(
+      { message: "Prompt updated successfully" },
+      {
+        status: 200,
+        headers: {
+          "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
+          "Access-Control-Allow-Methods": "POST, PUT, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type, Authorization",
+          "Access-Control-Allow-Credentials": "true",
+        },
+      }
+    );
+  } catch (error: any) {
+    return NextResponse.json({ message: `Error: ${error.message}` }, { status: 500 });
+  }
+}
+
+// Server-sent events for streaming progress updates
 export async function GET(req: NextRequest) {
   const progressStream = new ReadableStream({
     start(controller) {
       try {
-        // Function to send progress update
         const sendUpdate = (status: string) => {
           controller.enqueue(`data: { "status": "${status}" }\n\n`);
         };
 
-        // Simulate progress steps
         sendUpdate("Fetching product data...");
 
         setTimeout(() => {
           sendUpdate("Processing and storing data...");
-          
           setTimeout(() => {
             sendUpdate("Integration complete!");
-            controller.close();  // Close the stream after completion
-          }, 4000); // Simulate some processing delay
-        }, 3000); // Simulate fetch delay
-
+            controller.close();
+          }, 4000);
+        }, 3000);
       } catch (error: any) {
         controller.enqueue(`data: { "status": "Error: ${error.message}" }\n\n`);
         controller.close();
@@ -60,7 +103,11 @@ export async function GET(req: NextRequest) {
     headers: {
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache",
-      "Connection": "keep-alive",           
+      "Connection": "keep-alive",
+      "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
+      "Access-Control-Allow-Methods": "POST, PUT, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      "Access-Control-Allow-Credentials": "true",
     },
   });
 }

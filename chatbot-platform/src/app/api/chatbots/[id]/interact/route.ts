@@ -1,7 +1,7 @@
-// src/app/api/chatbots/[id]/interact/route.ts
+// chatbot-platform/src/app/api/chatbots/%5Bid%5D/interact/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getChatbotById } from '@/lib/chatbots/db';
-import { matchUserInput, getAIResponse } from '@/lib/chatbots/matcher';
+import { getAIResponse } from '@/lib/chatbots/matcher';
 import { logConversation, logMessage } from '@/lib/analytics/db';
 
 export async function POST(request: NextRequest, context: { params: { id: string } }) {
@@ -10,101 +10,52 @@ export async function POST(request: NextRequest, context: { params: { id: string
         const { message, sessionId, visitorId, sourceUrl, platform } = await request.json();
 
         if (!message) {
-            return NextResponse.json(
-                { error: 'Message is required' },
-                { status: 400 }
-            );
+            return NextResponse.json({ error: 'Message is required' }, { status: 400 });
         }
 
-        // Get the chatbot
+        // Retrieve the chatbot using its id
         const chatbot = await getChatbotById(id);
         if (!chatbot) {
-            return NextResponse.json(
-                { error: 'Chatbot not found' },
-                { status: 404 }
-            );
+            return NextResponse.json({ error: 'Chatbot not found' }, { status: 404 });
         }
 
-        // Match the user input against chatbot responses
-        const matchResult = matchUserInput(message, chatbot.responses);
-        //const matchResult = enhancedMatchUserInput(message, chatbot.responses);
+        // Generate AI response using the chatbot's data
+        const response = await getAIResponse(message, chatbot.industry, chatbot.name);
 
-        // Log the conversation and message
-        let conversationId;
-
-        // If sessionId is provided, use it to track the conversation
+        let conversationId: string | undefined = undefined;
         if (sessionId) {
-            // Get or create conversation
+            // Create or retrieve a conversation for the given session
             conversationId = await logConversation({
                 chatbotId: id,
                 sessionId,
                 visitorId,
                 sourceUrl,
-                platform
+                platform,
             });
 
-            // Log user message
+            // Log the user message
             await logMessage({
                 conversationId,
                 isFromUser: true,
                 messageText: message,
-                responseId: null,
-                isAiGenerated: false,
-                matchedTriggers: null,
-                confidenceScore: null
             });
-        }
 
-        let response;
-        let isAI = false;
-        let isGeneralAI = false;
-        let responseId: string | null = null;
-        let matchedTriggers: string[] | null = null;
-        let confidenceScore: number | null = null;
-
-        if (matchResult.matched) {
-            response = matchResult.response;
-            isAI = matchResult.isAI || false;
-
-            // If we have a direct match, get the response ID and matched triggers
-            if (matchResult.responseId) {
-                responseId = matchResult.responseId;
-                matchedTriggers = matchResult.matchedTriggers || [];
-                confidenceScore = matchResult.confidenceScore || null;
-            }
-        } else {
-            // No match found, use OpenAI to generate a response
-            response = await getAIResponse(message, chatbot.industry, chatbot.name);
-            isAI = true;
-            isGeneralAI = true;
-        }
-
-        // Log the bot response if we're tracking this conversation
-        if (sessionId && conversationId) {
+            // Log the AI-generated response
             await logMessage({
                 conversationId,
                 isFromUser: false,
                 messageText: response,
-                responseId,
-                isAiGenerated: isGeneralAI,
-                matchedTriggers,
-                confidenceScore: confidenceScore
+                isAiGenerated: true,
             });
         }
 
         return NextResponse.json({
             response,
-            matched: matchResult.matched,
-            isAI,
-            isGeneralAI,
-            conversationId
+            conversationId,
         });
 
     } catch (error) {
         console.error('Error processing chatbot interaction:', error);
-        return NextResponse.json(
-            { error: 'Failed to process your message' },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: 'Failed to process your message' }, { status: 500 });
     }
 }

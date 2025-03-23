@@ -29,9 +29,11 @@ export type ChatbotTemplate = z.infer<typeof chatbotTemplateSchema>;
 export const chatbotSchema = z.object({
     id: z.string().optional(), // Optional for new chatbots
     name: z.string().min(1, "Chatbot name is required"),
-    description: z.string().optional(),
-    industry: industrySchema,
-    responses: z.array(chatbotResponseSchema).default([]),
+    industry: industrySchema,  // Industry will be an enum from the Zod schema
+    platform: z.string().min(1, "Platform is required"),  // Make sure 'platform' is validated
+    apiUrl: z.string().url().nullable().optional(),  // apiUrl is nullable and optional
+    apiKey: z.string().nullable().optional(),  // apiKey is nullable and optional
+    customPrompt: z.string().nullable().optional(),  // customPrompt is nullable and optional
     createdAt: z.date().optional(),
     updatedAt: z.date().optional(),
 });

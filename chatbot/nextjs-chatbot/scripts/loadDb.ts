@@ -1,3 +1,4 @@
+// loadDb.ts
 import { DataAPIClient } from "@datastax/astra-db-ts";
 import OpenAI from "openai";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
@@ -5,6 +6,11 @@ import fetch from "node-fetch";
 import "dotenv/config";
 
 const { ASTRA_DB_NAMESPACE, ASTRA_DB_API_ENDPOINT, ASTRA_DB_APPLICATION_TOKEN, OPENAI_API_KEY } = process.env;
+
+// Function to get a fresh DB client to prevent session expiration issues
+const getDbClient = () => {
+  return new DataAPIClient(ASTRA_DB_APPLICATION_TOKEN).db(ASTRA_DB_API_ENDPOINT, { namespace: ASTRA_DB_NAMESPACE });
+};
 
 // Initialize OpenAI and AstraDB clients
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
@@ -32,39 +38,62 @@ export interface ProductData {
   description?: {
     title?: string;
     overview?: string;
-    details?: string[];
-    specifications?: { [key: string]: string };
+    details?: string;
+    specifications?: string;
   };
 }
 
-// Create collection dynamically for each store (ensuring uniqueness)
-const createCollection = async (collectionName: string, similarityMetric: "dot_product" | "cosine" | "euclidean" = "dot_product") => {
-  const res = await db.createCollection(collectionName, {
-    vector: {
-      dimension: 1536,
-      metric: similarityMetric,
-    },
-  });
+// Helper function to format specifications object to a plain text string
+const formatSpecifications = (specs: any): string => {
+  if (!specs || typeof specs !== "object") return "";
+  return Object.entries(specs)
+    .map(([key, value]) => `${key}: ${value}`)
+    .join("; ");
+};
+
+// Helper function to format details (array or other) into a plain text string
+const formatDetails = (details: any): string => {
+  if (!details) return "";
+  if (Array.isArray(details)) {
+    return details.join("; ");
+  }
+  return details.toString();
+};
+
+// Ensure absolute URLs
+const resolveUrl = (baseUrl: string, relativeUrl: string): string => {
+  if (!relativeUrl) return "";
+  if (relativeUrl.startsWith("http")) return relativeUrl;
+  return new URL(relativeUrl, baseUrl).toString();
+};
+
+// Create collection dynamically for each store.
+const createCollection = async (
+  collectionName: string,
+  isVectorCollection: boolean = true,
+  similarityMetric: "dot_product" | "cosine" | "euclidean" = "dot_product"
+) => {
+  const db = getDbClient();
+  const options = isVectorCollection ? { vector: { dimension: 1536, metric: similarityMetric } } : {};
+  const res = await db.createCollection(collectionName, options);
   console.log(`Collection created: ${collectionName}`, res);
 };
 
-// Fetch product data dynamically based on platform
+// Fetch product data dynamically
 const fetchProductData = async (url: string, platform: string, apiKey?: string): Promise<ProductData[]> => {
   console.log(`Fetching product data from ${platform} at ${url}...`);
 
+  // OpenCart, CustomStore don't require an API key
   if (platform === "opencart") return await fetchOpenCartData(url, apiKey);
   if (platform === "shopify") return await fetchShopifyData(url, apiKey);
-  if (platform === "magento") return await fetchMagentoData(url, apiKey);
-  if (platform === "customstore") return await fetchCustomStoreData(url); // Handle our custom store that we are maknig right now
-  
+  if (platform === "customstore") return await fetchCustomStoreData(url);
+
   throw new Error("Unsupported platform");
 };
 
-// Fetch OpenCart product data
+// OpenCart
 const fetchOpenCartData = async (url: string, apiKey?: string): Promise<ProductData[]> => {
-  if (!url.startsWith("http://") && !url.startsWith("https://")) throw new Error("Invalid URL");
-
-  const fetchUrl = apiKey ? `${url}&api_key=${apiKey}` : url;
+  const fetchUrl = apiKey ? `${url}&api_key=${apiKey}` : url; // Optional API key
   const response = await fetch(fetchUrl);
   if (!response.ok) throw new Error("Failed to fetch OpenCart data");
 
@@ -73,6 +102,7 @@ const fetchOpenCartData = async (url: string, apiKey?: string): Promise<ProductD
     id: product.id,
     name: product.name,
     price: product.price,
+    special: product.special || "",
     quantity: product.quantity,
     sku: product.sku,
     model: product.model,
@@ -84,147 +114,111 @@ const fetchOpenCartData = async (url: string, apiKey?: string): Promise<ProductD
   }));
 };
 
-// Fetch Shopify product data
+// Shopify
 const fetchShopifyData = async (url: string, apiKey?: string): Promise<ProductData[]> => {
+  // Shopify requires an API key
   if (!apiKey) throw new Error("Shopify requires an API key!");
 
   const response = await fetch(url, { headers: { "X-Shopify-Access-Token": apiKey } });
   if (!response.ok) throw new Error("Failed to fetch Shopify data");
 
   const data = await response.json();
+  const baseUrl = new URL(url).origin;
+
   return data.products.map((product: any) => ({
-    id: product.id,
+    id: product.id.toString(),
     name: product.title,
-    price: product.variants[0].price,
-    quantity: product.variants[0].inventory_quantity,
-    sku: product.variants[0].sku,
-    model: product.variants[0].option1,
-    image: product.image.src,
-    category: product.product_type,
-    url: product.handle,
-    availability: product.variants[0].available ? "In Stock" : "Out of Stock",
-    description: product.body_html,
+    price: product.variants[0]?.price || "0",
+    quantity: product.variants[0]?.inventory_quantity?.toString() || "Unknown",
+    sku: product.variants[0]?.sku || "",
+    model: product.variants[0]?.option1 || "",
+    image: resolveUrl("https:", product.image?.src),
+    category: product.product_type || "Unknown",
+    url: resolveUrl(baseUrl, `/products/${product.handle}`),
+    availability: product.variants[0]?.available ? "In Stock" : "Out of Stock",
+    description: {
+      title: product.title,
+      overview: product.body_html,
+      details: formatDetails([`Vendor: ${product.vendor}`, `Type: ${product.type}`]),
+      specifications: formatSpecifications({ Tags: product.tags.join(", ") }),
+    },
   }));
 };
 
-// Fetch Magento product data
-const fetchMagentoData = async (url: string, apiKey?: string): Promise<ProductData[]> => {
-  if (!apiKey) throw new Error("Magento requires an API key!");
-
-  const response = await fetch(url, { headers: { Authorization: `Bearer ${apiKey}` } });
-  if (!response.ok) throw new Error("Failed to fetch Magento data");
+// Custom Store
+const fetchCustomStoreData = async (url: string): Promise<ProductData[]> => {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error("Failed to fetch Custom Store data");
 
   const data = await response.json();
-  return data.items.map((product: any) => ({
-    id: product.id,
-    name: product.name,
-    price: product.price,
-    quantity: product.stock_status,
-    sku: product.sku,
-    model: product.model,
-    image: product.image_url,
-    category: product.category,
-    url: product.url,
-    availability: product.is_in_stock ? "In Stock" : "Out of Stock",
-    description: product.description,
+  const baseUrl = new URL(url).origin;
+
+  return await Promise.all(data.map(async (product: any) => {
+    const formattedDescription = {
+      title: product.name,
+      overview: `${product.name} by ${product.brand}`,
+      details: formatDetails([`Category: ${product.category}`, `Brand: ${product.brand}`]),
+      specifications: formatSpecifications({ Price: `$${product.price}` }),
+    };
+
+    try {
+      const descriptionUrl = resolveUrl(baseUrl, product.description_file);
+      const descriptionResponse = await fetch(descriptionUrl);
+      if (descriptionResponse.ok) {
+        const descriptionData = await descriptionResponse.json();
+        formattedDescription.title = descriptionData.title || formattedDescription.title;
+        formattedDescription.overview = descriptionData.overview || formattedDescription.overview;
+        formattedDescription.details = descriptionData.details ? formatDetails(descriptionData.details) : formattedDescription.details;
+        formattedDescription.specifications = descriptionData.specifications ? formatSpecifications(descriptionData.specifications) : formattedDescription.specifications;
+      }
+    } catch {
+      console.warn(`Failed to fetch description for ${product.name}, using fallback.`);
+    }
+
+    return {
+      id: product.id.toString(),
+      name: product.name,
+      price: product.price.toString(),
+      quantity: "Unknown",
+      sku: "",
+      model: product.brand,
+      image: resolveUrl(baseUrl, product.images[0]),
+      category: product.category,
+      url: resolveUrl(baseUrl, `/product/${product.id}`),
+      availability: "In Stock",
+      description: formattedDescription,
+    };
   }));
 };
 
-// Fetch Custom Store product data
-const fetchCustomStoreData = async (url: string): Promise<ProductData[]> => {
-  if (!url.startsWith("http://") && !url.startsWith("https://")) throw new Error("Invalid URL");
-
-  try {
-    console.log(`Fetching products from ${url}`);
-    const response = await fetch(url);
-    
-    if (!response.ok) {
-      console.error(`Failed to fetch Custom Store data: ${response.status} ${response.statusText}`);
-      throw new Error(`Failed to fetch Custom Store data: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    console.log(`Successfully fetched ${data.length} products`);
-    
-    // Create a baseUrl from the product URL for relative path resolution
-    const baseUrl = new URL(url);
-    baseUrl.pathname = '/'; // Reset to root
-    
-    return Promise.all(data.map(async (product: any) => {
-      // Format description without fetching the file
-      const formattedDescription = {
-        title: product.name,
-        overview: `${product.name} by ${product.brand}`,
-        details: `${product.category} product with ID ${product.id}`,
-        specifications: `Brand: ${product.brand}\nCategory: ${product.category}\nPrice: $${product.price}`
-      };
-      
-      // Try to fetch description, but don't fail if it doesn't work
-      try {
-        // Resolve relative URL if needed
-        const descriptionUrl = new URL(product.description_file, baseUrl.toString()).toString();
-        console.log(`Trying to fetch description from ${descriptionUrl}`);
-        
-        const descriptionResponse = await fetch(descriptionUrl);
-        if (descriptionResponse.ok) {
-          const descriptionData = await descriptionResponse.json();
-          // Replace with actual description if successfully fetched
-          formattedDescription.title = descriptionData.title || formattedDescription.title;
-          formattedDescription.overview = descriptionData.overview || formattedDescription.overview;
-          formattedDescription.details = descriptionData.details?.join("\n") || formattedDescription.details;
-          formattedDescription.specifications = Object.entries(descriptionData.specifications || {})
-            .map(([key, value]) => `${key}: ${value}`).join("\n") || formattedDescription.specifications;
-        }
-      } catch (descError) {
-        console.warn(`Could not fetch description for ${product.name}, using fallback: ${descError.message}`);
-        // Continue with the fallback description created above
-      }
-
-      return {
-        id: product.id.toString(),
-        name: product.name,
-        price: product.price.toString(),
-        quantity: "Unknown",
-        sku: "",
-        model: product.brand,
-        image: product.images[0],
-        category: product.category,
-        url: `/product/${product.id}`,
-        availability: "In Stock",
-        description: formattedDescription,
-      };
-    }));
-  } catch (error) {
-    console.error("Error in fetchCustomStoreData:", error);
-    throw error;
-  }
-};
-
-// Store products into AstraDB
+// Store products in AstraDB
 const storeProductData = async (products: ProductData[], collectionName: string) => {
   try {
-    console.log("Creating collection if not exists...");
-    await createCollection(collectionName);
-    const collection = await db.collection(collectionName);
+    console.log("Ensuring collection exists...");
+    await createCollection(collectionName); // This creates a vector-enabled collection
+    let db = getDbClient();
+    let collection = await db.collection(collectionName);
 
     for (const product of products) {
       console.log(`Processing product: ${product.name}`);
 
-      // Split product description into chunks for embedding
-      const chunks = await splitter.splitText(product.name);
-      for (const chunk of chunks) {
-        // Generate embeddings
+      let vector;
+      try {
         const embeddings = await openai.embeddings.create({
           model: "text-embedding-ada-002",
-          input: chunk,
+          input: product.description?.overview || "",
           encoding_format: "float",
         });
-        const vector = embeddings.data[0].embedding;
+        vector = embeddings.data[0].embedding;
+      } catch (error: any) {
+        console.error(`Embedding generation failed for ${product.name}: ${error.message}`);
+        continue;
+      }
 
-        // Store product with structured description
+      try {
         await collection.insertOne({
           $vector: vector,
-          text: chunk,
+          text: product.description?.overview || "",
           product_id: product.id,
           product_name: product.name,
           price: product.price,
@@ -237,11 +231,19 @@ const storeProductData = async (products: ProductData[], collectionName: string)
           availability: product.availability,
           description_title: product.description?.title,
           description_overview: product.description?.overview,
-          description_details: product.description?.details,
-          description_specifications: product.description?.specifications,
+          description_details: product.description?.details || "",
+          description_specifications: product.description?.specifications || "",
         });
-
         console.log(`Stored product: ${product.name}`);
+      } catch (error: any) {
+        if (error.message.includes("session has been destroyed")) {
+          console.warn("Session expired, reconnecting...");
+          db = getDbClient();
+          collection = await db.collection(collectionName);
+        } else {
+          console.error(`Error inserting product: ${product.name} - ${error.message}`);
+          continue;
+        }
       }
     }
     console.log("All products stored successfully!");
@@ -251,34 +253,73 @@ const storeProductData = async (products: ProductData[], collectionName: string)
   }
 };
 
+// Store custom system prompt (if provided) in its own collection (non-vector)
+const storeSystemPrompt = async (storeName: string, customPrompt: string) => {
+  // Use the same dynamic naming convention as the product list collection
+  const promptCollectionName = `${storeName.replace(/\s+/g, "_").toLowerCase()}_prompt`;
 
-// Main function to load products
+  // Create a collection for the custom prompt without vector configuration
+  await createCollection(promptCollectionName, false);
+  const db = getDbClient();
+  const promptCollection = await db.collection(promptCollectionName);
+
+  // Insert a document with a fixed id so that the prompt can be updated later if needed
+  await promptCollection.insertOne({
+    id: "system_prompt",
+    content: customPrompt,
+  });
+
+  console.log(`Stored custom prompt for store: ${storeName}`);
+};
+
+
+// Main function – now accepts an optional customPrompt parameter.
 export const loadProductDataForStore = async ({
   storeName,
   productApiUrl,
   platform,
   apiKey,
+  customPrompt, // optional custom system prompt provided by the client
 }: {
   storeName: string;
   productApiUrl: string;
   platform: string;
   apiKey?: string;
+  customPrompt?: string;
 }) => {
+  console.log(`Starting integration for ${storeName}...`);
+
+  // Use a consistent naming convention for the product list collection
+  const collectionName = `${storeName.replace(/\s+/g, "_").toLowerCase()}_productlist`;
+  const products = await fetchProductData(productApiUrl, platform, apiKey);
+  await storeProductData(products, collectionName);
+
+  // If a custom prompt is provided, store it separately
+  if (customPrompt) {
+    await storeSystemPrompt(storeName, customPrompt);
+  }
+
+  console.log(`Integration complete for ${storeName}!`);
+};
+
+
+// Update custom system prompt in AstraDB
+export const updateSystemPrompt = async (storeName: string, customPrompt: string) => {
+  // Compute collection name based on your naming convention
+  const promptCollectionName = `${storeName.replace(/\s+/g, "_").toLowerCase()}_prompt`;
+  const db = getDbClient();
+  const promptCollection = await db.collection(promptCollectionName);
+
   try {
-    console.log(`Starting integration for ${storeName}...`);
-    
-    // Define collection name dynamically using storeName to ensure uniqueness
-    const collectionName = `store_${storeName.replace(/\s+/g, "_").toLowerCase()}`;
-
-    console.log("Fetching product data...");
-    const products = await fetchProductData(productApiUrl, platform, apiKey);
-
-    console.log("Storing product data...");
-    await storeProductData(products, collectionName);
-
-    console.log(`Integration complete for ${storeName}!`);
-  } catch (error) {
-    console.error(`Error loading product data: ${error.message}`);
+    // Update only the content field of the document with id "system_prompt"
+    await promptCollection.updateOne(
+      { id: "system_prompt" },
+      { $set: { content: customPrompt } }
+    );
+    console.log(`Updated custom prompt for store: ${storeName}`);
+  } catch (error: any) {
+    console.error(`Error updating custom prompt for store ${storeName}: ${error.message}`);
     throw error;
   }
 };
+

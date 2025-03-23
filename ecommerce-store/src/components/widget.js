@@ -10,7 +10,7 @@ const ChatWidget = () => {
         document.body.appendChild(script);
     }, []);
 
-    return <lulai-chat-widget store-name="Power"></lulai-chat-widget>;
+    return <lulai-chat-widget store-name="custom"></lulai-chat-widget>;
 };
 
 export default ChatWidget;

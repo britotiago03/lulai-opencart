@@ -1,4 +1,4 @@
-// src/components/chatbots/ChatbotList.tsx
+// chatbot-platform/src/components/chatbots/ChatbotList.tsx
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -114,33 +114,20 @@ export default function ChatbotList() {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {chatbots.map((chatbot) => (
-                <Card key={chatbot.id} className="bg-[#1b2539] border-0 hover:shadow-md transition-shadow">
-                    <CardContent className="p-6">
-                        <div className="flex justify-between items-start mb-4">
-                            <h3 className="text-xl font-medium">{chatbot.name}</h3>
-                            <div className="flex space-x-2">
-                                <Link href={`/dashboard/chatbots/${chatbot.id}/edit`}>
-                                    <button className="p-1 rounded hover:bg-gray-700 transition-colors">
-                                        <Edit className="h-5 w-5 text-gray-400 hover:text-white" />
-                                    </button>
-                                </Link>
-                                <button
-                                    className="p-1 rounded hover:bg-gray-700 transition-colors"
-                                    onClick={() => handleDelete(chatbot.id)}
-                                >
-                                    <Trash2 className="h-5 w-5 text-gray-400 hover:text-white" />
-                                </button>
-                            </div>
-                        </div>
-
-                        <p className="text-gray-400 mb-6 line-clamp-2">
-                            {chatbot.description || 'No description provided'}
-                        </p>
-
-                        <div className="grid grid-cols-2 gap-4 mb-6">
-                            <div>
-                                <p className="text-xs text-gray-500">Industry</p>
-                                <p className="font-medium">{chatbot.industry}</p>
+                <Link
+                    href={`/dashboard/chatbots/${chatbot.id}`}
+                    key={chatbot.id}
+                    className="block transition-transform hover:scale-102"
+                >
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>{chatbot.name}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex flex-wrap gap-2">
+                                <span className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100 px-2 py-0.5 rounded-full">
+                                    {chatbot.industry}
+                                </span>
                             </div>
                             <div>
                                 <p className="text-xs text-gray-500">Responses</p>

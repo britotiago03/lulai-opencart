@@ -1,18 +1,14 @@
-// src/app/api/chatbots/[id]/route.ts
+// chatbot-platform/src/app/api/chatbots/[id]/route.ts
 import { NextResponse } from "next/server";
 import { getChatbotById, updateChatbot, deleteChatbot } from "@/lib/chatbots/db";
 import { chatbotSchema } from "@/lib/db/schema";
 
 export async function GET(_: Request, context: { params: { id: string } }) {
     try {
-        const { params } = context;
-
-        const chatbot = await getChatbotById(params.id);
-
+        const chatbot = await getChatbotById(context.params.id);
         if (!chatbot) {
             return NextResponse.json({ error: "Chatbot not found" }, { status: 404 });
         }
-
         return NextResponse.json(chatbot, { status: 200 });
     } catch (error) {
         console.error("Error fetching chatbot:", error);
@@ -25,12 +21,10 @@ export async function GET(_: Request, context: { params: { id: string } }) {
 
 export async function PUT(request: Request, context: { params: { id: string } }) {
     try {
-        const { params } = context;
         const body = await request.json();
 
-        // Validate request body against schema
+        // Validate the request body against the schema
         const result = chatbotSchema.safeParse(body);
-
         if (!result.success) {
             return NextResponse.json(
                 { error: 'Invalid request', details: result.error.format() },
@@ -38,14 +32,14 @@ export async function PUT(request: Request, context: { params: { id: string } })
             );
         }
 
-        // Check if the chatbot exists
-        const existing = await getChatbotById(params.id);
+        // Ensure the chatbot exists before updating
+        const existing = await getChatbotById(context.params.id);
         if (!existing) {
             return NextResponse.json({ error: "Chatbot not found" }, { status: 404 });
         }
 
-        // Update the chatbot
-        const updated = await updateChatbot(params.id, body);
+        // Update the chatbot using the new updateChatbot function
+        const updated = await updateChatbot(context.params.id, body);
         return NextResponse.json(updated, { status: 200 });
     } catch (error) {
         console.error("Error updating chatbot:", error);
@@ -56,22 +50,16 @@ export async function PUT(request: Request, context: { params: { id: string } })
     }
 }
 
-export async function DELETE(
-    request: Request,
-    { params }: { params: { id: string } }
-) {
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
     try {
-        // Use params.id directly
-        const id = params.id;
-
-        // Check if the chatbot exists
-        const existing = await getChatbotById(id);
+        // Ensure the chatbot exists before deletion
+        const existing = await getChatbotById(params.id);
         if (!existing) {
             return NextResponse.json({ error: "Chatbot not found" }, { status: 404 });
         }
 
         // Delete the chatbot
-        await deleteChatbot(id);
+        await deleteChatbot(params.id);
         return NextResponse.json({ message: "Chatbot deleted successfully" }, { status: 200 });
     } catch (error) {
         console.error("Error deleting chatbot:", error);
