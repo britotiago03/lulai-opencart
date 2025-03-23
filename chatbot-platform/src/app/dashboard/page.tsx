@@ -133,7 +133,8 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 gap-6">
                 {/* Welcome Card */}
                 <Card className="bg-[#1b2539] border-0">
-                    <CardContent className="p-4 sm:p-6">
+                <CardContent className="p-4 sm:p-6">
+                    <div className="flex items-center">
                         <Link href="/dashboard/integrations" className="flex items-center">
                             <div className="bg-blue-600/20 p-2 sm:p-3 rounded-full mr-3 sm:mr-4 flex-shrink-0">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -144,24 +145,19 @@ export default function DashboardPage() {
                                 <h2 className="text-xl sm:text-2xl font-semibold">Welcome back, {user?.name || 'User'}</h2>
                                 <p className="text-gray-400 mt-1">Here's an overview of your chatbots and their performance</p>
                             </div>
-                            {chatbots.length === 0 ? (
-                                <Link
-                                    href="/dashboard/chatbots/create"
-                                    className="mt-4 md:mt-0 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                                >
-                                    Create Your First Chatbot
-                                </Link>
-                            ) : (
-                                <Link
-                                    href="/dashboard/chatbots/create"
-                                    className="mt-4 md:mt-0 px-4 py-2 border border-blue-600 text-blue-500 rounded-md hover:bg-blue-900/20 transition-colors"
-                                >
-                                    Create New Chatbot
-                                </Link>
-                            )}
-                        </div>
-                    </CardContent>
-                </Card>
+                        </Link>
+                        {chatbots.length === 0 ? (
+                            <Link href="/dashboard/chatbots/create" className="mt-4 md:mt-0 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                                Create Your First Chatbot
+                            </Link>
+                        ) : (
+                            <Link href="/dashboard/chatbots/create" className="mt-4 md:mt-0 px-4 py-2 border border-blue-600 text-blue-500 rounded-md hover:bg-blue-900/20 transition-colors">
+                                Create New Chatbot
+                            </Link>
+                        )}
+                    </div>
+                </CardContent>
+            </Card>
 
                 {/* Key Stats */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
