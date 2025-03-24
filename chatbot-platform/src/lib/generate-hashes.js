@@ -1,7 +1,7 @@
 // generate-hashes.js
 const bcrypt = require('bcryptjs');
 
-const passwords = ['admin1password', 'admin2password']; // Replace with your chosen passwords
+const passwords = ['admin1password', 'admin2password', 'testy1234']; // Replace with your chosen passwords
 
 passwords.forEach(async (password) => {
     const salt = await bcrypt.genSalt(10);

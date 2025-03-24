@@ -1,7 +1,7 @@
 // app/[...adminRoute]/page.tsx
 import { redirect } from "next/navigation";
 import pool from "@/lib/db";
-import AdminLoginForm from "@/components/admin/AdminLoginForm";
+import AdminLoginPage from "@/components/admin/AdminLoginPage";
 
 export default async function AdminRoute({ params }: { params: { adminRoute: string[] } }) {
     // Ensure params.adminRoute is properly awaited
@@ -35,7 +35,7 @@ export default async function AdminRoute({ params }: { params: { adminRoute: str
         }
 
         // Render login page with the secure path
-        return <AdminLoginForm securePath={path} />;
+        return <AdminLoginPage securePath={path} />;
     } catch (error) {
         console.error("Error processing admin route:", error);
         redirect("/404");

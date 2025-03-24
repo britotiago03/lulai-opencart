@@ -90,6 +90,10 @@ CREATE INDEX subscriptions_user_id_idx ON subscriptions(user_id);
 CREATE INDEX verification_tokens_token_idx ON verification_tokens(token);
 CREATE INDEX verification_tokens_user_id_idx ON verification_tokens(user_id);
 
+-- inserting users
+INSERT INTO users (name, email, password, verified) VALUES 
+('BossLeModern', 'test@hotmail.com', '$2b$10$c6N89mld2qWN/qS.kQptP.5hcn.nRFVkCG1AkermebvKPDCUZlmg2', true); -- pass: testy1234
+
 -- Insert default settings
 INSERT INTO admin_settings (setting_key, setting_value)
 VALUES
