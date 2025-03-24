@@ -1,0 +1,66 @@
+services:
+  # PostgreSQL Database with pgvector extension
+  db:
+    image: pgvector/pgvector:pg14
+    container_name: lulai-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-lulai}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - lulai-network
+
+  # Next.js application
+  web:
+    build:
+      context: ./lulai-website
+      dockerfile: Dockerfile
+    container_name: lulai-web
+    depends_on:
+      - db
+      - python-api
+    environment:
+      - DATABASE_URL=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-lulai}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - NEXT_PUBLIC_BACKEND_URL=http://localhost:3000
+      - PYTHON_API_URL=http://python-api:8000
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_PORT=${EMAIL_PORT}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./uploads:/app/uploads
+    networks:
+      - lulai-network
+
+  # Python API server for TTS and STT
+  python-api:
+    build:
+      context: ./python-server
+      dockerfile: Dockerfile
+    container_name: lulai-python-api
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    ports:
+      - "8000:8000"
+    networks:
+      - lulai-network
+
+networks:
+  lulai-network:
+    driver: bridge
+
+volumes:
+  postgres-data:

@@ -2,6 +2,8 @@
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+node_modules
+.env
 # dependencies
 ecommerce-store/node_modules
 ecommerce-store/.pnp
@@ -101,8 +103,7 @@ chatbot-platform/next-env.d.ts
 **/logs
 **/*.log
 
-# Local env files (you have .env.local but might want to add these)
-**/.env
+# Local env files (you have .env.local.local but might want to add these)
 **/.env.development
 **/.env.test
 **/.env.production
@@ -110,3 +111,152 @@ chatbot-platform/next-env.d.ts
 # Cache directories
 **/.npm
 **/.eslintcache
+
+chatbot/lulai-website/node_modules
+chatbot/lulai-website/.pnp
+chatbot/lulai-website/.pnp.*
+chatbot/lulai-website/.yarn/*
+chatbot/lulai-website/!.yarn/patches
+chatbot/lulai-website/!.yarn/plugins
+chatbot/lulai-website/!.yarn/releases
+chatbot/lulai-website/!.yarn/versions
+
+# testing
+chatbot/lulai-website/coverage
+
+# next.js
+chatbot/lulai-website/.next/
+chatbot/lulai-website/out/
+
+# production
+chatbot/lulai-website/build
+
+# misc
+chatbot/lulai-website/.DS_Store
+chatbot/lulai-website/*.pem
+
+# debug
+chatbot/lulai-website/npm-debug.log*
+chatbot/lulai-website/yarn-debug.log*
+chatbot/lulai-website/yarn-error.log*
+chatbot/lulai-website/.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+chatbot/lulai-website/.env*
+
+# vercel
+chatbot/lulai-website/.vercel
+
+# typescript
+chatbot/lulai-website/*.tsbuildinfo
+chatbot/lulai-website/next-env.d.ts
+chatbot/uploads
+chatbot/.env*
+
+# Python
+chatbot/python-server/*.pyc
+chatbot/python-server/*.pyo
+chatbot/python-server/*.pyd
+chatbot/python-server/__pycache__
+
+# Virtual environments
+chatbot/python-server/env/
+chatbot/python-server/venv/
+chatbot/python-server/ENV/
+chatbot/python-server/.venv/
+chatbot/python-server/env.bak/
+chatbot/python-server/venv.bak/
+
+# Jupyter Notebook checkpoints
+chatbot/python-server/.ipynb_checkpoints
+
+# IDEs and editors
+chatbot/python-server/.vscode/
+chatbot/python-server/.idea/
+
+# MacOS files
+chatbot/python-server/.DS_Store
+
+# Windows files
+chatbot/python-server/Thumbs.db
+
+# Logs
+chatbot/python-server/*.log
+chatbot/python-server/*.log.*
+
+# Application-specific config files
+chatbot/python-server/*.sqlite3
+chatbot/python-server/*.db
+
+# Flask or Django specific files
+chatbot/python-server/instance/
+chatbot/python-server/*.sqlite
+
+# OpenAI API key file (never commit sensitive keys)
+chatbot/python-server/api_key.txt
+
+# Distribution / packaging
+chatbot/python-server/*.egg
+chatbot/python-server/*.egg-info
+chatbot/python-server/dist/
+chatbot/python-server/build/
+chatbot/python-server/sdist/
+chatbot/python-server/eggs/
+
+# PyInstaller
+chatbot/python-server/*.manifest
+chatbot/python-server/*.spec
+
+# Coverage reports
+chatbot/python-server/.coverage
+chatbot/python-server/*.coveragerc
+chatbot/python-server/nosetests.xml
+chatbot/python-server/coverage.xml
+chatbot/python-server/*.cover
+
+# Test output
+chatbot/python-server/*.out
+chatbot/python-server/*.err
+
+# Pytest
+chatbot/python-server/.cache/
+chatbot/python-server/pytest_cache/
+
+# Environments
+chatbot/python-server/*.env
+
+chatbot/frontend/node_modules
+chatbot/frontend/.pnp
+chatbot/frontend/.pnp.*
+chatbot/frontend/.yarn/*
+chatbot/frontend/!.yarn/patches
+chatbot/frontend/!.yarn/plugins
+chatbot/frontend/!.yarn/releases
+chatbot/frontend/!.yarn/versions
+
+# testing
+chatbot/frontend/coverage
+
+# next.js
+chatbot/frontend/.next/
+chatbot/frontend/out/
+
+# production
+chatbot/frontend/build
+
+# misc
+chatbot/frontend/.DS_Store
+chatbot/frontend/*.pem
+
+# debug
+chatbot/frontend/npm-debug.log*
+chatbot/frontend/yarn-debug.log*
+chatbot/frontend/yarn-error.log*
+chatbot/frontend/.pnpm-debug.log*
+
+# vercel
+chatbot/frontend/.vercel
+
+# typescript
+chatbot/frontend/*.tsbuildinfo
+chatbot/frontend/next-env.d.ts

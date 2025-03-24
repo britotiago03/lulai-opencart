@@ -1,0 +1,697 @@
+{
+    "products": [
+        {
+            "productId": "e74814a6-bcd8-482c-9590-4a9cf4f576b3",
+            "retailerProductId": "13493CS",
+            "type": "REGULAR",
+            "name": "Longo's Natural Spring Water 24 x 500 ml (bottles)",
+            "brand": "Longo's",
+            "packSizeDescription": "24 x 500ml",
+            "price": {
+                "amount": "3.49",
+                "currency": "CAD"
+            },
+            "unitPrice": {
+                "price": {
+                    "amount": "0.03",
+                    "currency": "CAD"
+                },
+                "unit": "fop.price.per.100ml"
+            },
+            "available": true,
+            "isVerifiedPurchase": false,
+            "quantityInBasket": 0,
+            "maxQuantityReached": false,
+            "quantityRestrictionGroup": {
+                "quantityRestrictionGroupId": "94a90737-010c-4f5d-8455-944eba5e4e7b",
+                "contribution": 50.0
+            },
+            "imageConfig": {
+                "availableFormats": [
+                    "jpg",
+                    "webp"
+                ],
+                "availableResolutions": [
+                    "100x100",
+                    "150x150",
+                    "200x200",
+                    "300x300",
+                    "350x350",
+                    "410x410",
+                    "500x500",
+                    "640x640",
+                    "800x800",
+                    "960x960",
+                    "1120x1120",
+                    "1280x1280"
+                ]
+            },
+            "image": {
+                "src": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/300x300.jpg",
+                "description": "Longo's Natural Spring Water 24 x 500 ml (bottles)",
+                "fopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/100x100.webp 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/150x150.webp 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/200x200.webp 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/350x350.webp 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/410x410.webp 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/100x100.jpg 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/150x150.jpg 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/200x200.jpg 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/350x350.jpg 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/410x410.jpg 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/500x500.jpg 500w",
+                "bopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/640x640.webp 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/800x800.webp 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/960x960.webp 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/1120x1120.webp 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/1280x1280.webp 1280w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/500x500.jpg 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/640x640.jpg 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/800x800.jpg 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/960x960.jpg 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/1120x1120.jpg 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/1280x1280.jpg 1280w",
+                "imageId": "a37765e1-5491-4736-9d46-4f63784a9331"
+            },
+            "images": [
+                {
+                    "src": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/500x500.jpg",
+                    "description": "Longo's Natural Spring Water 24 x 500 ml (bottles)",
+                    "fopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/100x100.webp 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/150x150.webp 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/200x200.webp 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/350x350.webp 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/410x410.webp 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/100x100.jpg 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/150x150.jpg 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/200x200.jpg 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/350x350.jpg 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/410x410.jpg 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/500x500.jpg 500w",
+                    "bopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/640x640.webp 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/800x800.webp 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/960x960.webp 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/1120x1120.webp 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/1280x1280.webp 1280w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/500x500.jpg 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/640x640.jpg 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/800x800.jpg 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/960x960.jpg 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/1120x1120.jpg 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331/1280x1280.jpg 1280w",
+                    "imageId": "a37765e1-5491-4736-9d46-4f63784a9331"
+                }
+            ],
+            "imageIds": [
+                "a37765e1-5491-4736-9d46-4f63784a9331"
+            ],
+            "imagePaths": [
+                "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/a37765e1-5491-4736-9d46-4f63784a9331"
+            ],
+            "iconAttributes": [
+                {
+                    "label": "Shop Canada",
+                    "file": "local"
+                }
+            ],
+            "icons": [],
+            "basketLines": [],
+            "timeRestricted": false,
+            "alternatives": [],
+            "isInShoppingList": false,
+            "isInCurrentCatalog": true,
+            "retailerFinancingPlanIds": [],
+            "alcohol": false,
+            "categoryPath": [
+                "Longo's",
+                "Longo's Beverages"
+            ]
+        },
+        {
+            "productId": "c18f55aa-01f4-46d9-b7d6-5a6912f37d70",
+            "retailerProductId": "19185EA",
+            "type": "REGULAR",
+            "name": "Longo's Brown Eggs Free Run Large 12 Count",
+            "brand": "Longo's",
+            "packSizeDescription": "12 per pack",
+            "price": {
+                "amount": "6.79",
+                "currency": "CAD"
+            },
+            "unitPrice": {
+                "price": {
+                    "amount": "0.57",
+                    "currency": "CAD"
+                },
+                "unit": "fop.price.per.each"
+            },
+            "available": true,
+            "isVerifiedPurchase": false,
+            "quantityInBasket": 0,
+            "maxQuantityReached": false,
+            "imageConfig": {
+                "availableFormats": [
+                    "jpg",
+                    "webp"
+                ],
+                "availableResolutions": [
+                    "100x100",
+                    "150x150",
+                    "200x200",
+                    "300x300",
+                    "350x350",
+                    "410x410",
+                    "500x500",
+                    "640x640",
+                    "800x800",
+                    "960x960",
+                    "1120x1120",
+                    "1280x1280"
+                ]
+            },
+            "image": {
+                "src": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/300x300.jpg",
+                "description": "Longo's Brown Eggs Free Run Large 12 Count",
+                "fopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/100x100.webp 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/150x150.webp 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/200x200.webp 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/350x350.webp 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/410x410.webp 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/100x100.jpg 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/150x150.jpg 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/200x200.jpg 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/350x350.jpg 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/410x410.jpg 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/500x500.jpg 500w",
+                "bopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/640x640.webp 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/800x800.webp 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/960x960.webp 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/1120x1120.webp 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/1280x1280.webp 1280w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/500x500.jpg 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/640x640.jpg 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/800x800.jpg 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/960x960.jpg 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/1120x1120.jpg 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/1280x1280.jpg 1280w",
+                "imageId": "87efc506-5618-495a-996f-0db751863e5c"
+            },
+            "images": [
+                {
+                    "src": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/500x500.jpg",
+                    "description": "Longo's Brown Eggs Free Run Large 12 Count",
+                    "fopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/100x100.webp 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/150x150.webp 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/200x200.webp 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/350x350.webp 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/410x410.webp 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/100x100.jpg 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/150x150.jpg 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/200x200.jpg 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/350x350.jpg 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/410x410.jpg 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/500x500.jpg 500w",
+                    "bopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/640x640.webp 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/800x800.webp 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/960x960.webp 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/1120x1120.webp 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/1280x1280.webp 1280w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/500x500.jpg 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/640x640.jpg 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/800x800.jpg 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/960x960.jpg 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/1120x1120.jpg 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c/1280x1280.jpg 1280w",
+                    "imageId": "87efc506-5618-495a-996f-0db751863e5c"
+                }
+            ],
+            "imageIds": [
+                "87efc506-5618-495a-996f-0db751863e5c"
+            ],
+            "imagePaths": [
+                "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/87efc506-5618-495a-996f-0db751863e5c"
+            ],
+            "iconAttributes": [
+                {
+                    "label": "Shop Canada",
+                    "file": "local"
+                }
+            ],
+            "icons": [],
+            "basketLines": [],
+            "timeRestricted": false,
+            "guaranteedProductLife": {
+                "quantity": 3,
+                "unit": "DAY"
+            },
+            "alternatives": [],
+            "isInShoppingList": false,
+            "isInCurrentCatalog": true,
+            "retailerFinancingPlanIds": [],
+            "alcohol": false,
+            "categoryPath": [
+                "Longo's",
+                "Longo's Dairy & Eggs"
+            ]
+        },
+        {
+            "productId": "96490c20-c0bd-4e64-98b2-9faa99b8affa",
+            "retailerProductId": "18625EA",
+            "type": "REGULAR",
+            "name": "Longo's Sliced White Mushrooms 227 g",
+            "brand": "Longo's",
+            "packSizeDescription": "227g",
+            "price": {
+                "amount": "3.49",
+                "currency": "CAD"
+            },
+            "unitPrice": {
+                "price": {
+                    "amount": "1.54",
+                    "currency": "CAD"
+                },
+                "unit": "fop.price.per.100gram"
+            },
+            "available": true,
+            "isVerifiedPurchase": false,
+            "quantityInBasket": 0,
+            "maxQuantityReached": false,
+            "imageConfig": {
+                "availableFormats": [
+                    "jpg",
+                    "webp"
+                ],
+                "availableResolutions": [
+                    "100x100",
+                    "150x150",
+                    "200x200",
+                    "300x300",
+                    "350x350",
+                    "410x410",
+                    "500x500",
+                    "640x640",
+                    "800x800",
+                    "960x960",
+                    "1120x1120",
+                    "1280x1280"
+                ]
+            },
+            "image": {
+                "src": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/300x300.jpg",
+                "description": "Longo's Sliced White Mushrooms 227 g",
+                "fopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/100x100.webp 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/150x150.webp 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/200x200.webp 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/350x350.webp 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/410x410.webp 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/100x100.jpg 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/150x150.jpg 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/200x200.jpg 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/350x350.jpg 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/410x410.jpg 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/500x500.jpg 500w",
+                "bopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/640x640.webp 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/800x800.webp 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/960x960.webp 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/1120x1120.webp 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/1280x1280.webp 1280w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/500x500.jpg 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/640x640.jpg 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/800x800.jpg 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/960x960.jpg 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/1120x1120.jpg 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/1280x1280.jpg 1280w",
+                "imageId": "d8d0251c-b00c-44c3-af58-db2f6eb2e410"
+            },
+            "images": [
+                {
+                    "src": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/500x500.jpg",
+                    "description": "Longo's Sliced White Mushrooms 227 g",
+                    "fopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/100x100.webp 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/150x150.webp 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/200x200.webp 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/350x350.webp 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/410x410.webp 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/100x100.jpg 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/150x150.jpg 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/200x200.jpg 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/350x350.jpg 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/410x410.jpg 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/500x500.jpg 500w",
+                    "bopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/640x640.webp 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/800x800.webp 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/960x960.webp 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/1120x1120.webp 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/1280x1280.webp 1280w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/500x500.jpg 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/640x640.jpg 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/800x800.jpg 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/960x960.jpg 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/1120x1120.jpg 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410/1280x1280.jpg 1280w",
+                    "imageId": "d8d0251c-b00c-44c3-af58-db2f6eb2e410"
+                }
+            ],
+            "imageIds": [
+                "d8d0251c-b00c-44c3-af58-db2f6eb2e410"
+            ],
+            "imagePaths": [
+                "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/d8d0251c-b00c-44c3-af58-db2f6eb2e410"
+            ],
+            "iconAttributes": [
+                {
+                    "label": "Shop Canada",
+                    "file": "local"
+                }
+            ],
+            "icons": [],
+            "basketLines": [],
+            "timeRestricted": false,
+            "alternatives": [],
+            "isInShoppingList": false,
+            "isInCurrentCatalog": true,
+            "retailerFinancingPlanIds": [],
+            "alcohol": false,
+            "categoryPath": [
+                "Longo's",
+                "Longo's Fresh Fruits & Vegetables"
+            ]
+        },
+        {
+            "productId": "b8262846-a1e7-4ac3-8906-bd69e941d035",
+            "retailerProductId": "13770EA",
+            "type": "REGULAR",
+            "name": "Longo's Essentials Chick Peas 540 ml",
+            "brand": "Longo's Essentials",
+            "packSizeDescription": "540ml",
+            "price": {
+                "amount": "1.49",
+                "currency": "CAD"
+            },
+            "unitPrice": {
+                "price": {
+                    "amount": "0.28",
+                    "currency": "CAD"
+                },
+                "unit": "fop.price.per.100ml"
+            },
+            "available": true,
+            "isVerifiedPurchase": false,
+            "quantityInBasket": 0,
+            "maxQuantityReached": false,
+            "imageConfig": {
+                "availableFormats": [
+                    "jpg",
+                    "webp"
+                ],
+                "availableResolutions": [
+                    "100x100",
+                    "150x150",
+                    "200x200",
+                    "300x300",
+                    "350x350",
+                    "410x410",
+                    "500x500",
+                    "640x640",
+                    "800x800",
+                    "960x960",
+                    "1120x1120",
+                    "1280x1280"
+                ]
+            },
+            "image": {
+                "src": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/300x300.jpg",
+                "description": "Longo's Essentials Chick Peas 540 ml",
+                "fopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/100x100.webp 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/150x150.webp 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/200x200.webp 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/350x350.webp 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/410x410.webp 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/100x100.jpg 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/150x150.jpg 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/200x200.jpg 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/350x350.jpg 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/410x410.jpg 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/500x500.jpg 500w",
+                "bopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/640x640.webp 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/800x800.webp 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/960x960.webp 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/1120x1120.webp 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/1280x1280.webp 1280w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/500x500.jpg 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/640x640.jpg 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/800x800.jpg 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/960x960.jpg 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/1120x1120.jpg 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/1280x1280.jpg 1280w",
+                "imageId": "443ee6e8-fc9b-43d9-8956-4ecddddfaeb2"
+            },
+            "images": [
+                {
+                    "src": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/500x500.jpg",
+                    "description": "Longo's Essentials Chick Peas 540 ml",
+                    "fopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/100x100.webp 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/150x150.webp 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/200x200.webp 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/350x350.webp 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/410x410.webp 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/100x100.jpg 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/150x150.jpg 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/200x200.jpg 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/350x350.jpg 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/410x410.jpg 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/500x500.jpg 500w",
+                    "bopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/640x640.webp 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/800x800.webp 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/960x960.webp 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/1120x1120.webp 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/1280x1280.webp 1280w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/500x500.jpg 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/640x640.jpg 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/800x800.jpg 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/960x960.jpg 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/1120x1120.jpg 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2/1280x1280.jpg 1280w",
+                    "imageId": "443ee6e8-fc9b-43d9-8956-4ecddddfaeb2"
+                }
+            ],
+            "imageIds": [
+                "443ee6e8-fc9b-43d9-8956-4ecddddfaeb2"
+            ],
+            "imagePaths": [
+                "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/443ee6e8-fc9b-43d9-8956-4ecddddfaeb2"
+            ],
+            "iconAttributes": [
+                {
+                    "label": "Shop Canada",
+                    "file": "local"
+                }
+            ],
+            "icons": [],
+            "basketLines": [],
+            "timeRestricted": false,
+            "alternatives": [],
+            "isInShoppingList": false,
+            "isInCurrentCatalog": true,
+            "retailerFinancingPlanIds": [],
+            "alcohol": false,
+            "categoryPath": [
+                "Pantry",
+                "Rice, Grains & Legumes",
+                "Canned Beans"
+            ]
+        },
+        {
+            "productId": "888ae018-dfdf-46ef-9d2d-f69170e57e48",
+            "retailerProductId": "13340EA",
+            "type": "REGULAR",
+            "name": "Longo's Essentials Chicken Broth No Salt Added 946 ml",
+            "brand": "Longo's Essentials",
+            "packSizeDescription": "946ml",
+            "price": {
+                "amount": "1.99",
+                "currency": "CAD"
+            },
+            "unitPrice": {
+                "price": {
+                    "amount": "0.21",
+                    "currency": "CAD"
+                },
+                "unit": "fop.price.per.100ml"
+            },
+            "available": true,
+            "isVerifiedPurchase": false,
+            "quantityInBasket": 0,
+            "maxQuantityReached": false,
+            "imageConfig": {
+                "availableFormats": [
+                    "jpg",
+                    "webp"
+                ],
+                "availableResolutions": [
+                    "100x100",
+                    "150x150",
+                    "200x200",
+                    "300x300",
+                    "350x350",
+                    "410x410",
+                    "500x500",
+                    "640x640",
+                    "800x800",
+                    "960x960",
+                    "1120x1120",
+                    "1280x1280"
+                ]
+            },
+            "image": {
+                "src": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/300x300.jpg",
+                "description": "Longo's Essentials Chicken Broth No Salt Added 946 ml",
+                "fopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/100x100.webp 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/150x150.webp 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/200x200.webp 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/350x350.webp 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/410x410.webp 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/100x100.jpg 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/150x150.jpg 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/200x200.jpg 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/350x350.jpg 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/410x410.jpg 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/500x500.jpg 500w",
+                "bopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/640x640.webp 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/800x800.webp 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/960x960.webp 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/1120x1120.webp 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/1280x1280.webp 1280w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/500x500.jpg 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/640x640.jpg 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/800x800.jpg 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/960x960.jpg 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/1120x1120.jpg 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/1280x1280.jpg 1280w",
+                "imageId": "b77a1f29-c6db-471b-bc6d-5eb2da52193d"
+            },
+            "images": [
+                {
+                    "src": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/500x500.jpg",
+                    "description": "Longo's Essentials Chicken Broth No Salt Added 946 ml",
+                    "fopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/100x100.webp 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/150x150.webp 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/200x200.webp 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/350x350.webp 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/410x410.webp 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/100x100.jpg 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/150x150.jpg 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/200x200.jpg 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/350x350.jpg 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/410x410.jpg 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/500x500.jpg 500w",
+                    "bopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/640x640.webp 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/800x800.webp 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/960x960.webp 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/1120x1120.webp 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/1280x1280.webp 1280w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/500x500.jpg 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/640x640.jpg 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/800x800.jpg 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/960x960.jpg 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/1120x1120.jpg 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d/1280x1280.jpg 1280w",
+                    "imageId": "b77a1f29-c6db-471b-bc6d-5eb2da52193d"
+                }
+            ],
+            "imageIds": [
+                "b77a1f29-c6db-471b-bc6d-5eb2da52193d"
+            ],
+            "imagePaths": [
+                "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/b77a1f29-c6db-471b-bc6d-5eb2da52193d"
+            ],
+            "iconAttributes": [
+                {
+                    "label": "Shop Canada",
+                    "file": "local"
+                }
+            ],
+            "icons": [],
+            "basketLines": [],
+            "timeRestricted": false,
+            "alternatives": [],
+            "isInShoppingList": false,
+            "isInCurrentCatalog": true,
+            "retailerFinancingPlanIds": [],
+            "alcohol": false,
+            "categoryPath": [
+                "Pantry",
+                "Soup & Broth",
+                "Broth & Bouillon"
+            ]
+        },
+        {
+            "productId": "766ffd22-10f4-42ad-8b95-2291746cd439",
+            "retailerProductId": "18624EA",
+            "type": "REGULAR",
+            "name": "Longo's Whole White Mushrooms 227 g",
+            "brand": "Longo's",
+            "packSizeDescription": "227g",
+            "price": {
+                "amount": "3.49",
+                "currency": "CAD"
+            },
+            "unitPrice": {
+                "price": {
+                    "amount": "1.54",
+                    "currency": "CAD"
+                },
+                "unit": "fop.price.per.100gram"
+            },
+            "available": true,
+            "isVerifiedPurchase": false,
+            "quantityInBasket": 0,
+            "maxQuantityReached": false,
+            "imageConfig": {
+                "availableFormats": [
+                    "jpg",
+                    "webp"
+                ],
+                "availableResolutions": [
+                    "100x100",
+                    "150x150",
+                    "200x200",
+                    "300x300",
+                    "350x350",
+                    "410x410",
+                    "500x500",
+                    "640x640",
+                    "800x800",
+                    "960x960",
+                    "1120x1120",
+                    "1280x1280"
+                ]
+            },
+            "image": {
+                "src": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/300x300.jpg",
+                "description": "Longo's Whole White Mushrooms 227 g",
+                "fopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/100x100.webp 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/150x150.webp 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/200x200.webp 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/350x350.webp 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/410x410.webp 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/100x100.jpg 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/150x150.jpg 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/200x200.jpg 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/350x350.jpg 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/410x410.jpg 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/500x500.jpg 500w",
+                "bopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/640x640.webp 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/800x800.webp 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/960x960.webp 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/1120x1120.webp 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/1280x1280.webp 1280w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/500x500.jpg 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/640x640.jpg 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/800x800.jpg 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/960x960.jpg 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/1120x1120.jpg 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/1280x1280.jpg 1280w",
+                "imageId": "661e47bc-c7cc-478a-81ac-2f3a76937d62"
+            },
+            "images": [
+                {
+                    "src": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/500x500.jpg",
+                    "description": "Longo's Whole White Mushrooms 227 g",
+                    "fopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/100x100.webp 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/150x150.webp 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/200x200.webp 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/350x350.webp 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/410x410.webp 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/100x100.jpg 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/150x150.jpg 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/200x200.jpg 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/350x350.jpg 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/410x410.jpg 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/500x500.jpg 500w",
+                    "bopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/640x640.webp 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/800x800.webp 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/960x960.webp 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/1120x1120.webp 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/1280x1280.webp 1280w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/500x500.jpg 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/640x640.jpg 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/800x800.jpg 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/960x960.jpg 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/1120x1120.jpg 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62/1280x1280.jpg 1280w",
+                    "imageId": "661e47bc-c7cc-478a-81ac-2f3a76937d62"
+                }
+            ],
+            "imageIds": [
+                "661e47bc-c7cc-478a-81ac-2f3a76937d62"
+            ],
+            "imagePaths": [
+                "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/661e47bc-c7cc-478a-81ac-2f3a76937d62"
+            ],
+            "iconAttributes": [
+                {
+                    "label": "Shop Canada",
+                    "file": "local"
+                }
+            ],
+            "icons": [],
+            "basketLines": [],
+            "timeRestricted": false,
+            "alternatives": [],
+            "isInShoppingList": false,
+            "isInCurrentCatalog": true,
+            "retailerFinancingPlanIds": [],
+            "alcohol": false,
+            "categoryPath": [
+                "Longo's",
+                "Longo's Fresh Fruits & Vegetables"
+            ]
+        },
+        {
+            "productId": "424978bd-aa7d-4b3a-ab4f-9619848fd5a4",
+            "retailerProductId": "18628EA",
+            "type": "REGULAR",
+            "name": "Longo's Sliced Mushrooms Cremini 227 g",
+            "brand": "Longo's",
+            "packSizeDescription": "227g",
+            "price": {
+                "amount": "3.49",
+                "currency": "CAD"
+            },
+            "unitPrice": {
+                "price": {
+                    "amount": "1.54",
+                    "currency": "CAD"
+                },
+                "unit": "fop.price.per.100gram"
+            },
+            "available": true,
+            "isVerifiedPurchase": false,
+            "quantityInBasket": 0,
+            "maxQuantityReached": false,
+            "imageConfig": {
+                "availableFormats": [
+                    "jpg",
+                    "webp"
+                ],
+                "availableResolutions": [
+                    "100x100",
+                    "150x150",
+                    "200x200",
+                    "300x300",
+                    "350x350",
+                    "410x410",
+                    "500x500",
+                    "640x640",
+                    "800x800",
+                    "960x960",
+                    "1120x1120",
+                    "1280x1280"
+                ]
+            },
+            "image": {
+                "src": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/300x300.jpg",
+                "description": "Longo's Sliced Mushrooms Cremini 227 g",
+                "fopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/100x100.webp 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/150x150.webp 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/200x200.webp 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/350x350.webp 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/410x410.webp 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/100x100.jpg 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/150x150.jpg 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/200x200.jpg 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/350x350.jpg 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/410x410.jpg 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/500x500.jpg 500w",
+                "bopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/640x640.webp 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/800x800.webp 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/960x960.webp 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/1120x1120.webp 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/1280x1280.webp 1280w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/500x500.jpg 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/640x640.jpg 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/800x800.jpg 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/960x960.jpg 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/1120x1120.jpg 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/1280x1280.jpg 1280w",
+                "imageId": "e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2"
+            },
+            "images": [
+                {
+                    "src": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/500x500.jpg",
+                    "description": "Longo's Sliced Mushrooms Cremini 227 g",
+                    "fopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/100x100.webp 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/150x150.webp 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/200x200.webp 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/350x350.webp 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/410x410.webp 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/100x100.jpg 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/150x150.jpg 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/200x200.jpg 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/350x350.jpg 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/410x410.jpg 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/500x500.jpg 500w",
+                    "bopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/640x640.webp 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/800x800.webp 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/960x960.webp 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/1120x1120.webp 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/1280x1280.webp 1280w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/500x500.jpg 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/640x640.jpg 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/800x800.jpg 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/960x960.jpg 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/1120x1120.jpg 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2/1280x1280.jpg 1280w",
+                    "imageId": "e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2"
+                }
+            ],
+            "imageIds": [
+                "e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2"
+            ],
+            "imagePaths": [
+                "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/e927f7c2-3f91-41c1-82a3-2ad1b1ad3ed2"
+            ],
+            "iconAttributes": [
+                {
+                    "label": "Organic",
+                    "file": "organic"
+                },
+                {
+                    "label": "Shop Canada",
+                    "file": "local"
+                }
+            ],
+            "icons": [],
+            "basketLines": [],
+            "timeRestricted": false,
+            "alternatives": [],
+            "isInShoppingList": false,
+            "isInCurrentCatalog": true,
+            "retailerFinancingPlanIds": [],
+            "alcohol": false,
+            "categoryPath": [
+                "Longo's",
+                "Longo's Fresh Fruits & Vegetables"
+            ]
+        },
+        {
+            "productId": "855d3710-3fe3-404c-b544-a799b261a38d",
+            "retailerProductId": "20375KG",
+            "type": "CATCHWEIGHT",
+            "name": "Longo's Certified Angus Beef Stew Beef Boneless ",
+            "brand": "Longo's",
+            "packSizeDescription": "0.4kg - 0.55kg",
+            "price": {
+                "amount": "9.41",
+                "currency": "CAD"
+            },
+            "unitPrice": {
+                "price": {
+                    "amount": "19.82",
+                    "currency": "CAD"
+                },
+                "unit": "fop.price.per.kg"
+            },
+            "available": true,
+            "isVerifiedPurchase": false,
+            "quantityInBasket": 0,
+            "maxQuantityReached": false,
+            "imageConfig": {
+                "availableFormats": [
+                    "jpg",
+                    "webp"
+                ],
+                "availableResolutions": [
+                    "100x100",
+                    "150x150",
+                    "200x200",
+                    "300x300",
+                    "350x350",
+                    "410x410",
+                    "500x500",
+                    "640x640",
+                    "800x800",
+                    "960x960",
+                    "1120x1120",
+                    "1280x1280"
+                ]
+            },
+            "image": {
+                "src": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/300x300.jpg",
+                "description": "Longo's Certified Angus Beef Stew Beef Boneless ",
+                "fopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/100x100.webp 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/150x150.webp 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/200x200.webp 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/350x350.webp 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/410x410.webp 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/100x100.jpg 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/150x150.jpg 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/200x200.jpg 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/350x350.jpg 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/410x410.jpg 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/500x500.jpg 500w",
+                "bopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/640x640.webp 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/800x800.webp 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/960x960.webp 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/1120x1120.webp 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/1280x1280.webp 1280w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/500x500.jpg 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/640x640.jpg 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/800x800.jpg 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/960x960.jpg 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/1120x1120.jpg 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/1280x1280.jpg 1280w",
+                "imageId": "f925d983-7188-4d04-b6bb-526138889c2e"
+            },
+            "images": [
+                {
+                    "src": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/500x500.jpg",
+                    "description": "Longo's Certified Angus Beef Stew Beef Boneless ",
+                    "fopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/100x100.webp 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/150x150.webp 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/200x200.webp 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/350x350.webp 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/410x410.webp 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/100x100.jpg 100w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/150x150.jpg 150w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/200x200.jpg 200w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/350x350.jpg 350w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/410x410.jpg 410w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/500x500.jpg 500w",
+                    "bopSrcset": "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/300x300.webp 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/500x500.webp 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/640x640.webp 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/800x800.webp 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/960x960.webp 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/1120x1120.webp 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/1280x1280.webp 1280w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/300x300.jpg 300w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/500x500.jpg 500w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/640x640.jpg 640w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/800x800.jpg 800w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/960x960.jpg 960w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/1120x1120.jpg 1120w, https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e/1280x1280.jpg 1280w",
+                    "imageId": "f925d983-7188-4d04-b6bb-526138889c2e"
+                }
+            ],
+            "imageIds": [
+                "f925d983-7188-4d04-b6bb-526138889c2e"
+            ],
+            "imagePaths": [
+                "https://voila.ca/images-v3/2d92d19c-0354-49c0-8a91-5260ed0bf531/f925d983-7188-4d04-b6bb-526138889c2e"
+            ],
+            "iconAttributes": [],
+            "icons": [],
+            "basketLines": [],
+            "catchweight": {
+                "minQuantity": {
+                    "value": "0.4",
+                    "uom": "KG"
+                },
+                "typicalQuantity": {
+                    "value": "0.475",
+                    "uom": "KG"
+                },
+                "maxQuantity": {
+                    "value": "0.55",
+                    "uom": "KG"
+                }
+            },
+            "timeRestricted": false,
+            "guaranteedProductLife": {
+                "quantity": 2,
+                "unit": "DAY"
+            },
+            "alternatives": [],
+            "isInShoppingList": false,
+            "isInCurrentCatalog": true,
+            "retailerFinancingPlanIds": [],
+            "alcohol": false,
+            "categoryPath": [
+                "Longo's",
+                "Longo's Meat & Seafood"
+            ]
+        }
+    ],
+    "missedPromotions": [],
+    "restrictedGroups": {}
+}

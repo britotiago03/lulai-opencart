@@ -1,0 +1,141 @@
+services:
+  # Ecommerce Store Services
+  ecommerce_postgres:
+    image: postgres:15.0
+    container_name: ecommerce_postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ecommerce_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ecommerce_postgres_data:/var/lib/postgresql/data
+      - ./ecommerce-store/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  ecommerce_nextjs:
+    build:
+      context: ./ecommerce-store
+    container_name: ecommerce_nextjs_app
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - ecommerce_postgres
+    environment:
+      # Database connection
+      DB_HOST: "ecommerce_postgres"
+      DB_USER: "postgres"
+      DB_PASSWORD: "postgres"
+      DB_NAME: "ecommerce_db"
+      DB_PORT: "5432"
+      # Next.js configuration
+      NEXTAUTH_URL: "http://localhost:3000"
+      NEXT_PUBLIC_APP_URL: "http://localhost:3000"
+      API_URL: "http://localhost:3000"
+
+  # Chatbot Platform Services
+  chatbot_platform_postgres:
+    image: postgres:latest
+    container_name: chatbot_platform_postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ecommerce_db1
+    ports:
+      - "5433:5432"  # Changed port to avoid conflict
+    volumes:
+      - chatbot_platform_postgres_data:/var/lib/postgresql/data
+      - ./chatbot-platform/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  chatbot_platform_nextjs:
+    build:
+      context: ./chatbot-platform
+    container_name: chatbot_platform_nextjs_app
+    restart: always
+    ports:
+      - "3001:3000"  # Changed port to avoid conflict
+    depends_on:
+      - chatbot_platform_postgres
+    environment:
+      # Database connection
+      DB_HOST: "chatbot_platform_postgres"
+      DB_USER: "postgres"
+      DB_PASSWORD: "postgres"
+      DB_NAME: "ecommerce_db1"
+      DB_PORT: "5432"
+      # Next.js configuration
+      NEXTAUTH_URL: "http://localhost:3001"
+      NEXT_PUBLIC_APP_URL: "http://localhost:3001"
+      API_URL: "http://localhost:3001"
+
+  # Lulai Chatbot Services
+  lulai_db:
+    image: pgvector/pgvector:pg14
+    container_name: lulai-db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-lulai}
+    volumes:
+      - lulai_postgres_data:/var/lib/postgresql/data
+      - ./chatbot/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    ports:
+      - "5434:5432"  # Changed port to avoid conflict
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - lulai-network
+
+  lulai_web:
+    build:
+      context: ./chatbot/lulai-website
+      dockerfile: Dockerfile
+    container_name: lulai-web
+    restart: always
+    depends_on:
+      - lulai_db
+      - lulai_python_api
+    environment:
+      - DATABASE_URL=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-lulai}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - NEXT_PUBLIC_BACKEND_URL=http://localhost:3002
+      - PYTHON_API_URL=http://lulai_python_api:8000
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_PORT=${EMAIL_PORT}
+    ports:
+      - "3002:3000"  # Changed port to avoid conflict
+    volumes:
+      - ./chatbot/uploads:/app/uploads
+    networks:
+      - lulai-network
+
+  lulai_python_api:
+    build:
+      context: ./chatbot/python-server
+      dockerfile: Dockerfile
+    container_name: lulai-python-api
+    restart: always
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    ports:
+      - "8000:8000"
+    networks:
+      - lulai-network
+
+networks:
+  lulai-network:
+    driver: bridge
+
+volumes:
+  ecommerce_postgres_data:
+  chatbot_platform_postgres_data:
+  lulai_postgres_data:
