@@ -116,11 +116,11 @@ CREATE TABLE industries (
 
 -- Create chatbot_templates table
 CREATE TABLE chatbot_templates (
-                                   id SERIAL PRIMARY KEY,
-                                   name VARCHAR(255) NOT NULL,
-                                   industry_id INTEGER REFERENCES industries(id),
-                                   description TEXT,
-                                   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    industry_id INTEGER REFERENCES industries(id),
+    description TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Create chatbots table
@@ -135,14 +135,14 @@ CREATE TABLE chatbots (
 
 -- Create chatbot_responses table
 CREATE TABLE chatbot_responses (
-                                   id SERIAL PRIMARY KEY,
-                                   chatbot_id INTEGER REFERENCES chatbots(id) ON DELETE CASCADE,
-                                   template_id INTEGER REFERENCES chatbot_templates(id) NULL,
-                                   trigger_phrase TEXT NOT NULL,
-                                   response_text TEXT NOT NULL,
-                                   is_ai_enhanced BOOLEAN DEFAULT FALSE,
-                                   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                                   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    id SERIAL PRIMARY KEY,
+    chatbot_id INTEGER REFERENCES chatbots(id) ON DELETE CASCADE,
+    template_id INTEGER REFERENCES chatbot_templates(id) NULL,
+    trigger_phrase TEXT NOT NULL,
+    response_text TEXT NOT NULL,
+    is_ai_enhanced BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Create conversations table to track complete chat sessions
