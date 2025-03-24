@@ -1,0 +1,77 @@
+services:
+  # Ecommerce Store Services
+  ecommerce_postgres:
+    image: postgres:15.0
+    container_name: ecommerce_postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ecommerce_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ecommerce_postgres_data:/var/lib/postgresql/data
+      - ./ecommerce-store/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  ecommerce_nextjs:
+    build:
+      context: ./ecommerce-store
+    container_name: ecommerce_nextjs_app
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - ecommerce_postgres
+    environment:
+      # Database connection
+      DB_HOST: "ecommerce_postgres"
+      DB_USER: "postgres"
+      DB_PASSWORD: "postgres"
+      DB_NAME: "ecommerce_db"
+      DB_PORT: "5432"
+      # Next.js configuration
+      NEXTAUTH_URL: "http://localhost:3000"
+      NEXT_PUBLIC_APP_URL: "http://localhost:3000"
+      API_URL: "http://localhost:3000"
+
+  # Chatbot Platform Services
+  chatbot_platform_postgres:
+    image: postgres:latest
+    container_name: chatbot_platform_postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ecommerce_db1
+    ports:
+      - "5433:5432"  # Changed port to avoid conflict
+    volumes:
+      - chatbot_platform_postgres_data:/var/lib/postgresql/data
+      - ./chatbot-platform/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  chatbot_platform_nextjs:
+    build:
+      context: ./chatbot-platform
+    container_name: chatbot_platform_nextjs_app
+    restart: always
+    ports:
+      - "3001:3000"  # Changed port to avoid conflict
+    depends_on:
+      - chatbot_platform_postgres
+    environment:
+      # Database connection
+      DB_HOST: "chatbot_platform_postgres"
+      DB_USER: "postgres"
+      DB_PASSWORD: "postgres"
+      DB_NAME: "ecommerce_db1"
+      DB_PORT: "5432"
+      # Next.js configuration
+      NEXTAUTH_URL: "http://localhost:3001"
+      NEXT_PUBLIC_APP_URL: "http://localhost:3001"
+      API_URL: "http://localhost:3001"
+
+volumes:
+  ecommerce_postgres_data:
+  chatbot_platform_postgres_data:
+  chatbot_postgres_data:
