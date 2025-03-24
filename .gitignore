@@ -223,3 +223,38 @@ chatbot/python-server/pytest_cache/
 # Environments
 chatbot/python-server/*.env
 
+chatbot/frontend/node_modules
+chatbot/frontend/.pnp
+chatbot/frontend/.pnp.*
+chatbot/frontend/.yarn/*
+chatbot/frontend/!.yarn/patches
+chatbot/frontend/!.yarn/plugins
+chatbot/frontend/!.yarn/releases
+chatbot/frontend/!.yarn/versions
+
+# testing
+chatbot/frontend/coverage
+
+# next.js
+chatbot/frontend/.next/
+chatbot/frontend/out/
+
+# production
+chatbot/frontend/build
+
+# misc
+chatbot/frontend/.DS_Store
+chatbot/frontend/*.pem
+
+# debug
+chatbot/frontend/npm-debug.log*
+chatbot/frontend/yarn-debug.log*
+chatbot/frontend/yarn-error.log*
+chatbot/frontend/.pnpm-debug.log*
+
+# vercel
+chatbot/frontend/.vercel
+
+# typescript
+chatbot/frontend/*.tsbuildinfo
+chatbot/frontend/next-env.d.ts
