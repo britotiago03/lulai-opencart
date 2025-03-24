@@ -148,3 +148,78 @@ chatbot/lulai-website/.vercel
 # typescript
 chatbot/lulai-website/*.tsbuildinfo
 chatbot/lulai-website/next-env.d.ts
+chatbot/uploads
+chatbot/.env*
+
+# Python
+chatbot/python-server/*.pyc
+chatbot/python-server/*.pyo
+chatbot/python-server/*.pyd
+chatbot/python-server/__pycache__
+
+# Virtual environments
+chatbot/python-server/env/
+chatbot/python-server/venv/
+chatbot/python-server/ENV/
+chatbot/python-server/.venv/
+chatbot/python-server/env.bak/
+chatbot/python-server/venv.bak/
+
+# Jupyter Notebook checkpoints
+chatbot/python-server/.ipynb_checkpoints
+
+# IDEs and editors
+chatbot/python-server/.vscode/
+chatbot/python-server/.idea/
+
+# MacOS files
+chatbot/python-server/.DS_Store
+
+# Windows files
+chatbot/python-server/Thumbs.db
+
+# Logs
+chatbot/python-server/*.log
+chatbot/python-server/*.log.*
+
+# Application-specific config files
+chatbot/python-server/*.sqlite3
+chatbot/python-server/*.db
+
+# Flask or Django specific files
+chatbot/python-server/instance/
+chatbot/python-server/*.sqlite
+
+# OpenAI API key file (never commit sensitive keys)
+chatbot/python-server/api_key.txt
+
+# Distribution / packaging
+chatbot/python-server/*.egg
+chatbot/python-server/*.egg-info
+chatbot/python-server/dist/
+chatbot/python-server/build/
+chatbot/python-server/sdist/
+chatbot/python-server/eggs/
+
+# PyInstaller
+chatbot/python-server/*.manifest
+chatbot/python-server/*.spec
+
+# Coverage reports
+chatbot/python-server/.coverage
+chatbot/python-server/*.coveragerc
+chatbot/python-server/nosetests.xml
+chatbot/python-server/coverage.xml
+chatbot/python-server/*.cover
+
+# Test output
+chatbot/python-server/*.out
+chatbot/python-server/*.err
+
+# Pytest
+chatbot/python-server/.cache/
+chatbot/python-server/pytest_cache/
+
+# Environments
+chatbot/python-server/*.env
+
