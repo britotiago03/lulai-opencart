@@ -1,9 +1,9 @@
+// "/api/auth/signup" route
 import { NextResponse } from "next/server";
 import pool from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { createVerificationToken, TOKEN_TYPES } from "@/lib/tokenService";
 import { sendVerificationEmail } from "@/lib/emailService";
-import { use } from "react";
 
 export async function POST(req: Request) {
     try {
