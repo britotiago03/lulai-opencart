@@ -4,7 +4,7 @@ import fs from "fs/promises";
 import path from "path";
 import { v4 as uuidv4 } from "uuid"; // Assuming you have uuid installed
 
-const ALLOWED_ORIGIN = "http://localhost:3000";
+const ALLOWED_ORIGIN = "http://localhost:3002";
 
 export async function POST(req: Request) {
   try {
