@@ -101,8 +101,7 @@ chatbot-platform/next-env.d.ts
 **/logs
 **/*.log
 
-# Local env files (you have .env.local but might want to add these)
-**/.env
+# Local env files (you have .env.local.local but might want to add these)
 **/.env.development
 **/.env.test
 **/.env.production
@@ -110,3 +109,42 @@ chatbot-platform/next-env.d.ts
 # Cache directories
 **/.npm
 **/.eslintcache
+
+lulai-website/node_modules
+lulai-website/.pnp
+lulai-website/.pnp.*
+lulai-website/.yarn/*
+lulai-website/!.yarn/patches
+lulai-website/!.yarn/plugins
+lulai-website/!.yarn/releases
+lulai-website/!.yarn/versions
+
+# testing
+lulai-website/coverage
+
+# next.js
+lulai-website/.next/
+lulai-website/out/
+
+# production
+lulai-website/build
+
+# misc
+lulai-website/.DS_Store
+lulai-website/*.pem
+
+# debug
+lulai-website/npm-debug.log*
+lulai-website/yarn-debug.log*
+lulai-website/yarn-error.log*
+lulai-website/.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+lulai-website/.env*
+
+# vercel
+lulai-website/.vercel
+
+# typescript
+lulai-website/*.tsbuildinfo
+lulai-website/next-env.d.ts
