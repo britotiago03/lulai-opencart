@@ -110,41 +110,41 @@ chatbot-platform/next-env.d.ts
 **/.npm
 **/.eslintcache
 
-lulai-website/node_modules
-lulai-website/.pnp
-lulai-website/.pnp.*
-lulai-website/.yarn/*
-lulai-website/!.yarn/patches
-lulai-website/!.yarn/plugins
-lulai-website/!.yarn/releases
-lulai-website/!.yarn/versions
+chatbot/lulai-website/node_modules
+chatbot/lulai-website/.pnp
+chatbot/lulai-website/.pnp.*
+chatbot/lulai-website/.yarn/*
+chatbot/lulai-website/!.yarn/patches
+chatbot/lulai-website/!.yarn/plugins
+chatbot/lulai-website/!.yarn/releases
+chatbot/lulai-website/!.yarn/versions
 
 # testing
-lulai-website/coverage
+chatbot/lulai-website/coverage
 
 # next.js
-lulai-website/.next/
-lulai-website/out/
+chatbot/lulai-website/.next/
+chatbot/lulai-website/out/
 
 # production
-lulai-website/build
+chatbot/lulai-website/build
 
 # misc
-lulai-website/.DS_Store
-lulai-website/*.pem
+chatbot/lulai-website/.DS_Store
+chatbot/lulai-website/*.pem
 
 # debug
-lulai-website/npm-debug.log*
-lulai-website/yarn-debug.log*
-lulai-website/yarn-error.log*
-lulai-website/.pnpm-debug.log*
+chatbot/lulai-website/npm-debug.log*
+chatbot/lulai-website/yarn-debug.log*
+chatbot/lulai-website/yarn-error.log*
+chatbot/lulai-website/.pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
-lulai-website/.env*
+chatbot/lulai-website/.env*
 
 # vercel
-lulai-website/.vercel
+chatbot/lulai-website/.vercel
 
 # typescript
-lulai-website/*.tsbuildinfo
-lulai-website/next-env.d.ts
+chatbot/lulai-website/*.tsbuildinfo
+chatbot/lulai-website/next-env.d.ts
