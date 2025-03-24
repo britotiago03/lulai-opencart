@@ -1,7 +1,7 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 
-export default function GoogleLoginButton() {
+export default function GoogleSignupButton() {
   const { data: session } = useSession();
 
   return (
@@ -27,7 +27,7 @@ export default function GoogleLoginButton() {
             priority
             className="mr-2"
           />  
-          Sign In with Google
+          Sign Up with Google
         </button>
       )}
     </div>

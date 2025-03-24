@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -9,6 +10,7 @@ export default function SignupForm() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -22,12 +24,37 @@ export default function SignupForm() {
         });
 
         if (res.ok) {
+            setSuccessMessage("Thanks for signing up! Please check your email to verify your account.");
             router.push("/auth/signin");
         } else {
             const data = await res.json();
             setError(data.error || "Signup failed");
         }
     };
+
+    if (successMessage) {
+        return (
+            <div className="bg-white p-6 rounded-lg shadow-md">
+                <div className="text-center">
+                    <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+                        <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <h3 className="mt-2 text-lg font-medium text-gray-900">Check your email!</h3>
+                    <p className="mt-1 text-sm text-gray-500">{successMessage}</p>
+
+                    <div className="mt-6">
+                        <p className="text-sm text-gray-500">
+                            Already verified? <Link href={`/auth/signin`} className="font-medium text-blue-600 hover:text-blue-500">
+                            Log in here
+                        </Link>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">

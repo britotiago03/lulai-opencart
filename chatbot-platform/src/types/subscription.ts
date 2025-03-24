@@ -10,6 +10,6 @@ export interface RetrievedSubscription {
     price: number;
     status: string;
     start_date: string;
-    end_date: string;
+    renewal_date: string;
     created_at: string;
 }

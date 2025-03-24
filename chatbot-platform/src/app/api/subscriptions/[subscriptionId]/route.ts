@@ -19,7 +19,7 @@ export async function GET(
 
         return await executeTransaction(async (client) => {
             const subscriptionResult = await client.query(
-                `SELECT id, user_id, plan_type, price, status, current_period_start, current_period_end, created_at
+                `SELECT id, user_id, plan_type, price, status, current_period_start, current_period_renewal, created_at
                 FROM subscriptions
                 WHERE id = $1`,
                 [subscriptionId]
@@ -41,7 +41,7 @@ export async function GET(
                 price: parseFloat(subscriptionData.price),
                 status: subscriptionData.status,
                 start_date: subscriptionData.current_period_start,
-                end_date: subscriptionData.current_period_end,
+                renewal_date: subscriptionData.current_period_renewal,
                 created_at: subscriptionData.created_at,
             };
 
