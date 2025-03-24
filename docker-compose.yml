@@ -71,7 +71,72 @@ services:
       NEXT_PUBLIC_APP_URL: "http://localhost:3001"
       API_URL: "http://localhost:3001"
 
+  # Lulai Chatbot Services
+  lulai_db:
+    image: pgvector/pgvector:pg14
+    container_name: lulai-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: YourSecurePassword
+      POSTGRES_DB: lulai
+    volumes:
+      - lulai_postgres_data:/var/lib/postgresql/data
+      - ./chatbot/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    ports:
+      - "5434:5432"  # Changed port to avoid conflict
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - lulai-network
+
+  lulai_web:
+    build:
+      context: ./chatbot/lulai-website
+      dockerfile: Dockerfile
+    container_name: lulai-web
+    restart: always
+    depends_on:
+      - lulai_db
+      - lulai_python_api
+    environment:
+      - DATABASE_URL=postgres://postgres:YourSecurePassword@lulai_db:5432/lulai
+      - OPENAI_API_KEY=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
+      - NEXT_PUBLIC_BACKEND_URL=http://localhost:3002
+      - PYTHON_API_URL=http://lulai_python_api:8000
+      - EMAIL_USER=britotiago101@gmail.com
+      - EMAIL_PASS=fzib rizt sqah kmak
+      - EMAIL_HOST=smtp.gmail.com
+      - EMAIL_PORT=587
+      - NODE_ENV=production
+    ports:
+      - "3002:3000"  # Changed port to avoid conflict
+    volumes:
+      - ./chatbot/uploads:/app/uploads
+    networks:
+      - lulai-network
+
+  lulai_python_api:
+    build:
+      context: ./chatbot/python-server
+      dockerfile: Dockerfile
+    container_name: lulai-python-api
+    restart: always
+    environment:
+      - OPENAI_API_KEY=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
+    ports:
+      - "8000:8000"
+    networks:
+      - lulai-network
+
+networks:
+  lulai-network:
+    driver: bridge
+
 volumes:
   ecommerce_postgres_data:
   chatbot_platform_postgres_data:
-  chatbot_postgres_data:
+  lulai_postgres_data:
