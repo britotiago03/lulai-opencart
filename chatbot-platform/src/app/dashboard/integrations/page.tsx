@@ -1,3 +1,4 @@
+// chatbot-platform/src/app/dashboard/integrations/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -36,6 +37,7 @@ export default function Integrate() {
   const [widgetBuilt, setWidgetBuilt] = useState(false);
   const [widgetUrl, setWidgetUrl] = useState("");
   const [step, setStep] = useState(1); // Tracks the current step
+  const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -100,9 +102,11 @@ export default function Integrate() {
 
   const handleBuildWidget = async () => {
     setBuildingWidget(true);
+    setResponseMsg(""); // Clear previous messages
   
     try {
       // Create a combined object with all configuration
+      const payload = { widgetConfig: widgetConfig };
       const config = {
         widgetConfig
       };
@@ -111,19 +115,21 @@ export default function Integrate() {
       const res = await fetch("/api/build-widget", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(config),
+        body: JSON.stringify(payload),
       });
   
-      if (!res.ok) {
-        throw new Error("Failed to build widget");
-      }
-  
       const data = await res.json();
+  
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to build widget");
+      }
       setWidgetUrl(data.downloadUrl);
+      setDownloadUrl(data.downloadUrl);
       setWidgetBuilt(true);
+      setResponseMsg("Widget successfully built!");
     } catch (error) {
       console.error("Error building widget:", error);
-      setResponseMsg("Error building widget, please try again.");
+      setResponseMsg(error instanceof Error ? error.message : "Error building widget");
     } finally {
       setBuildingWidget(false);
     }
@@ -510,24 +516,34 @@ export default function Integrate() {
               </div>
             </div>
             
-            {widgetBuilt && (
-              <div className="mt-6 p-4 border rounded-md bg-green-50">
-                <h3 className="font-medium text-green-800 flex items-center">
-                  <Download className="h-5 w-5 mr-2" /> 
-                  Widget Successfully Built!
-                </h3>
-                <p className="mt-2 text-sm text-gray-600">
-                  Your custom widget is ready. You can download it now or continue with the integration.
-                </p>
-                <a 
-                  href={widgetUrl} 
-                  download="lulai-widget.js"
-                  className="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                >
-                  <Download className="h-4 w-4 mr-2" /> Download Widget
-                </a>
-              </div>
-            )}
+            {widgetBuilt && downloadUrl && (
+      <div className="mt-6 p-4 border rounded-md bg-green-50">
+        <h3 className="font-medium text-green-800 flex items-center">
+          <Download className="h-5 w-5 mr-2" /> 
+          Widget Successfully Built!
+        </h3>
+        <p className="mt-2 text-sm text-gray-600">
+          Your custom widget is ready. You can download it now.
+        </p>
+        <a 
+          href={downloadUrl} 
+          download="lulai-widget.js"
+          className="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+        >
+          <Download className="h-4 w-4 mr-2" /> Download Widget
+        </a>
+        <div className="mt-2 text-sm text-gray-600">
+          <strong>Embed Code:</strong>
+          <pre className="bg-gray-100 p-2 rounded mt-1 overflow-x-auto">
+            {`<script src="${downloadUrl}"></script>
+<lulai-chat-widget 
+  api-endpoint="http://your-backend-url/api/chat"
+  store-name="${formData.storeName}"
+></lulai-chat-widget>`}
+          </pre>
+        </div>
+      </div>
+    )}
           </div>
         )}
 
