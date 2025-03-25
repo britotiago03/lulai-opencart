@@ -10,16 +10,55 @@ CREATE TABLE users (
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
-    subscription_status VARCHAR(50) DEFAULT 'free',
-    subscription_end_date TIMESTAMP WITH TIME ZONE,
-    is_admin BOOLEAN DEFAULT FALSE,
+    subscription_status VARCHAR(50) DEFAULT 'none',
+    subscription_renewal_date TIMESTAMP WITH TIME ZONE,
+    verified BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Inserting admin users with hashed passwords and API keys
-INSERT INTO users (name, email, password, is_admin) VALUES
-('Admin User 1', 'admin1@example.com', '$2b$10$C2RZoMmZKZll7bOJO6lSROeBz3ntoNNABYiVA2y86/6kb1SmZTv9i', TRUE),
-('Admin User 2', 'admin2@example.com', '$2b$10$Ty8FytGEj581KECxNkMGUuyV6qMbALivQQ9aJPHSinUqqh3ksR2Y2', TRUE);
+CREATE TABLE verification_tokens (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    token VARCHAR(255) NOT NULL,
+    type VARCHAR(50) NOT NULL, -- 'email_verification' or 'email_change'
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    new_email VARCHAR(255) NULL, -- Only used for email change
+    UNIQUE(token)
+);
+
+-- Create admin users table
+CREATE TABLE admin_users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255),
+    is_super_admin BOOLEAN DEFAULT FALSE,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    last_login TIMESTAMP WITH TIME ZONE
+);
+
+-- Create table for secure admin access URLs
+CREATE TABLE admin_access_tokens (
+    id SERIAL PRIMARY KEY,
+    url_path VARCHAR(255) NOT NULL,
+    access_key VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    created_by INTEGER REFERENCES admin_users(id),
+    last_used_at TIMESTAMP WITH TIME ZONE,
+    is_active BOOLEAN DEFAULT TRUE
+);
+
+-- Create admin settings table
+CREATE TABLE admin_settings (
+    id SERIAL PRIMARY KEY,
+    setting_key VARCHAR(255) UNIQUE NOT NULL,
+    setting_value TEXT NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_by INTEGER REFERENCES admin_users(id)
+);
 
 -- Create sessions table
 CREATE TABLE sessions (
@@ -34,22 +73,35 @@ CREATE TABLE sessions (
 CREATE TABLE subscriptions (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id),
+    user_email VARCHAR(255) REFERENCES users(email),
     plan_type VARCHAR(50) NOT NULL,
     price NUMERIC,
     status VARCHAR(50) NOT NULL,
     current_period_start TIMESTAMP WITH TIME ZONE NOT NULL,
-    current_period_end TIMESTAMP WITH TIME ZONE NOT NULL,
+    current_period_renewal TIMESTAMP WITH TIME ZONE NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 
 -- Add indexes
-CREATE INDEX IF NOT EXISTS users_email_idx ON users(email);
-CREATE INDEX IF NOT EXISTS sessions_token_idx ON sessions(session_token);
-CREATE INDEX IF NOT EXISTS subscriptions_id_idx ON subscriptions(user_id);
+CREATE INDEX users_email_idx ON users(email);
+CREATE INDEX sessions_token_idx ON sessions(session_token);
+CREATE INDEX subscriptions_user_id_idx ON subscriptions(user_id);
+CREATE INDEX verification_tokens_token_idx ON verification_tokens(token);
+CREATE INDEX verification_tokens_user_id_idx ON verification_tokens(user_id);
+
+-- inserting users
+INSERT INTO users (name, email, password, verified) VALUES 
+('BossLeModern', 'test@hotmail.com', '$2b$10$c6N89mld2qWN/qS.kQptP.5hcn.nRFVkCG1AkermebvKPDCUZlmg2', true); -- pass: testy1234
+
+-- Insert default settings
+INSERT INTO admin_settings (setting_key, setting_value)
+VALUES
+('access_token_renewal_frequency', 'weekly'),
+('admin_email', 'boss2909@hotmail.com'),
+('setup_completed', 'false');
 
 -- Drop existing tables if they exist (for clean initialization)
-
 DROP TABLE IF EXISTS chatbot_feedback CASCADE;
 DROP TABLE IF EXISTS conversation_messages CASCADE;
 DROP TABLE IF EXISTS conversations CASCADE;
@@ -77,15 +129,12 @@ CREATE TABLE chatbot_templates (
 
 -- Create chatbots table
 CREATE TABLE chatbots (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    industry_id INTEGER NOT NULL REFERENCES industries(id) ON DELETE CASCADE,
-    platform VARCHAR(50) NOT NULL,  -- platform is mandatory
-    api_url TEXT,  -- api_url can be NULL
-    api_key TEXT,  -- api_key can be NULL
-    custom_prompt TEXT,  -- custom_prompt can be NULL
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                          id SERIAL PRIMARY KEY,
+                          name VARCHAR(255) NOT NULL,
+                          description TEXT,
+                          industry_id INTEGER REFERENCES industries(id),
+                          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                          updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Create chatbot_responses table

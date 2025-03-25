@@ -109,15 +109,15 @@ export default function OrderConfirmationPage() {
                             <h3 className="text-gray-500 font-semibold mb-2">{subscription.plan_type}</h3>
                             <p className="text-gray-500 font-semibold mb-4">${subscription.price.toFixed(2)}</p>
                             <p className="text-gray-500 mb-4">Start Date: {formatDate(subscription.start_date)}</p>
-                            <p className="text-gray-500 mb-4">End Date: {formatDate(subscription.end_date)}</p>
+                            <p className="text-gray-500 mb-4">Renewal Date: {formatDate(subscription.renewal_date)}</p>
                         </div>
                     </div>
                 </div>
 
                 <div className="flex flex-col md:flex-row justify-between gap-4">
                      {/* TODO: Create a view for all Subscriptions page */}
-                    <Link href={`/account/subscriptions`} className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition text-center">
-                        View All Subscriptions
+                    <Link href={`/subscriptions/${subscriptionId}/overview`} className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition text-center">
+                        View your Subscription
                     </Link>
                     <Link href={`/dashboard`} className="bg-gray-800 text-white py-2 px-4 rounded hover:bg-gray-900 transition text-center">
                         Back to dashboard

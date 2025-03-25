@@ -5,8 +5,8 @@ import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import SignupForm from "@/components/authentication/signup/SignupForm";
 import SigninForm from "@/components/authentication/signin/SigninForm";
-import GoogleLoginButton from "@/components/google/GoogleLoginButton";
 import { SessionProvider } from "next-auth/react";
+import GoogleSignupButton from "@/components/google/GoogleSignupButton";
 
 export default function AuthPage() {
     const router = useRouter();
@@ -63,7 +63,7 @@ export default function AuthPage() {
                         </div>
                         <div className="relative w-full">
                             <SessionProvider>
-                                <GoogleLoginButton/>
+                                <GoogleSignupButton/>
                             </SessionProvider>
                         </div>
                     </div>

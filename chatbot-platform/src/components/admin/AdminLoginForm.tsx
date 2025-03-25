@@ -1,17 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import AdminSessionProvider from "./AdminSessionProvider";
 
-export default function AdminLoginForm() {
+interface AdminLoginPageProps {
+    securePath: string;
+}
+
+function AdminLoginFormContent({}: AdminLoginPageProps) {
     const router = useRouter();
-    const searchParams = useSearchParams();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-
     
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -19,17 +22,22 @@ export default function AdminLoginForm() {
         setError("");
         setLoading(true);
 
-        try {
-            const result = await signIn("credentials", {
+        try {    
+            const result = await signIn("admin-credentials", {
                 redirect: false,
                 email,
                 password,
+                callbackUrl: "/admin"
             });
+            
+
+            console.log("Signin result:", result);
+
 
             if (result?.error) {
-                setError("Invalid email, password, or API key");
+                setError("Invalid email or password");
             } else {
-                router.push("/admin/dashboard");
+                router.push("/admin");
                 router.refresh();
             }
         } catch (err) {
@@ -75,5 +83,13 @@ export default function AdminLoginForm() {
             </button>
             {error && <p className="text-red-500">{error}</p>}
         </form>
+    );
+}
+
+export default function AdminLoginForm({ securePath }: AdminLoginPageProps) {
+    return (
+        <AdminSessionProvider>
+            <AdminLoginFormContent securePath={securePath} />
+        </AdminSessionProvider>
     );
 }

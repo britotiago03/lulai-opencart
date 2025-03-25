@@ -5,23 +5,23 @@ import bcrypt from "bcryptjs";
 const pool = new Pool({
     user: "postgres",
     host: "postgres", // Use "postgres" inside Docker
-    database: "ecommerce_db",
+    database: "ecommerce_db1",
     password: "postgres",
     port: 5432,
 });
 
 export async function POST(req: Request) {
     try {
-        const { email, password} = await req.json();
+        const { email, password } = await req.json();
 
         // Find user by email
-        const userResult = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+        const userResult = await pool.query("SELECT * FROM admin_users WHERE email = $1", [email]);
         if (userResult.rows.length === 0) {
             return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
         }
 
         const user = userResult.rows[0];
-
+        
         // Verify password
         const isValidPassword = await bcrypt.compare(password, user.password);
         if (!isValidPassword) {

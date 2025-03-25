@@ -13,7 +13,7 @@ import {
     LogOut,
     ShieldAlert
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 interface AdminSidebarProps {
     onClose?: () => void;
@@ -22,6 +22,7 @@ interface AdminSidebarProps {
 export function AdminSidebar({ onClose }: AdminSidebarProps) {
     const pathname = usePathname();
     const [expanded, setExpanded] = useState<string | null>(null);
+    const [username, setUsername] = useState("Admin User");
 
     const toggleExpand = (key: string) => {
         if (expanded === key) {
@@ -70,6 +71,31 @@ export function AdminSidebar({ onClose }: AdminSidebarProps) {
         },
     ];
 
+    // Fetch admin data here 
+    const fetchAdminData = useCallback(async () => {
+        // Fetch admin data here
+        try {
+            const adminResponse = await fetch("/api/admin/data");
+
+            if (!adminResponse.ok) {
+                console.error("Failed to load admin data");
+                return;
+            }
+
+            const userData = await adminResponse.json();
+
+            setUsername(userData.name);
+        } catch (error) {
+            console.error("Error fetching user data:", error);
+        }
+    }, []);
+
+    useEffect(() => {
+        (async () => {
+            await fetchAdminData();
+        })();
+    }, [fetchAdminData]);
+
     return (
         <div className="h-full bg-[#1b2539] text-white flex flex-col">
             {/* Sidebar Header */}
@@ -115,7 +141,7 @@ export function AdminSidebar({ onClose }: AdminSidebarProps) {
                     <div className="flex items-center">
                         <div className="h-8 w-8 bg-gray-600 rounded-full"></div>
                         <div className="ml-2">
-                            <p className="text-sm font-medium">Admin User</p>
+                            <p className="text-sm font-medium">{username}</p>
                             <p className="text-xs text-gray-500">admin@luiai.com</p>
                         </div>
                     </div>
@@ -124,7 +150,7 @@ export function AdminSidebar({ onClose }: AdminSidebarProps) {
                         onClick={() => {
                             // Replace with actual logout logic
                             console.log("Logging out...");
-                            window.location.href = "/auth/login";
+                            window.location.href = "/home";
                         }}
                     >
                         <LogOut className="h-5 w-5" />

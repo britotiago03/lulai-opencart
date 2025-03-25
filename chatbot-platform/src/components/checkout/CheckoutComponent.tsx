@@ -7,18 +7,6 @@ import { StripeProvider } from "@/components/checkout/payment/StripeProvider";
 import { StripePaymentData, SubscriptionData } from "@/types/payment";
 import { Subscription } from "@/types/subscription";
 
-interface CustomerInfo {
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone: string;
-    address: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-}
-
 interface SubscriptionComponentProps {
     selectedSubscription: Subscription | null;
 }
@@ -56,6 +44,26 @@ export default function CheckoutComponent({ selectedSubscription }: Subscription
             }
 
             console.log("Payment processed successfully:", data);
+
+            const updateStatusResponse = await fetch("/api/subscriptions/edit-status", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(
+                    {
+                        subscription_type: selectedSubscription?.plan_type,
+                    }
+                ),
+            });
+
+            if(!updateStatusResponse.ok) {
+                const errorData = await updateStatusResponse.json();
+                console.error("Failed to update subscription status:", errorData);
+                setCheckoutError("Failed to update subscription status. Please try again.");
+                setIsSubmitting(false);
+                return;
+            }
 
             // Redirect to order confirmation
             router.push(`/order-confirmation/${data.subscriptionId}`);

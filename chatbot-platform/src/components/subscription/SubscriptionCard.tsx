@@ -14,11 +14,38 @@ interface SubscriptionCardProps {
 const SubscriptionCard: React.FC<SubscriptionCardProps> = ({title, description, price_desc, price, type}) => {
     const router = useRouter();
 
-    const handleSubscribe = () => {
-        if (type === "free") {
-            router.push("/dashboard");
-        } else {
-            router.push(`/checkout?price=${price}&type=${type}`);
+    const handleSubscribe = async () => {
+        // TODO: Edit to inplement change of subscription status here
+        // Edit user subscription status here
+
+        try {
+            if (type === "free") {
+                const response = await fetch("/api/subscriptions/edit-status", {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(
+                        {
+                            subscription_type: type
+                        }
+                    )
+                });
+
+                if(!response.ok) {
+                    const errorData = await response.json();
+                    console.error("Failed to update subscription status:", errorData);
+                    alert("Failed to update subscription. Please try again.");
+                    return;
+                }
+
+                router.push("/dashboard");
+            } else {
+                router.push(`/checkout?price=${price}&type=${type}`);
+            }
+        } catch(error) {
+            console.error("Error during subscription update:", error);
+            alert("An error occurred. Please try again.");
         }
     }
 
