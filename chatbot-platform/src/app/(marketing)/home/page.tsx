@@ -2,7 +2,7 @@
 import { HeroSection } from "@/components/marketing/HeroSection";
 import { FeatureSection, FeatureShowcase } from "@/components/marketing/FeatureSection";
 import { ProcessSection, IntegrationSection } from "@/components/marketing/ProcessSection";
-import { CTASection, NewsletterSection, ChatWidget } from "@/components/marketing/CTASection";
+import { CTASection, NewsletterSection } from "@/components/marketing/CTASection";
 
 export default function HomePage() {
     return (
@@ -29,7 +29,6 @@ export default function HomePage() {
             <NewsletterSection />
 
             {/* Chat Widget Demo */}
-            <ChatWidget />
         </div>
     );
 }

@@ -3,7 +3,7 @@ import { executeTransaction } from '@/lib/db';
 import { SubscriptionData } from '@/types/payment';
 import stripe from '@/lib/stripe';
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { userAuthOptions } from "@/lib/auth-config";
 import pool from '@/lib/db';
 
 export async function POST(request: NextRequest) {
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Get the current session to identify the user
-        const session = await getServerSession(authOptions);
+        const session = await getServerSession(userAuthOptions);
         console.log("Checkout session:", session);
 
         // Get userId from session or look it up by email
@@ -91,11 +91,12 @@ export async function POST(request: NextRequest) {
 
                 const subscriptionResult = await pool.query(
                     `INSERT INTO subscriptions 
-                    (user_id, plan_type, price, status, current_period_start, current_period_end, created_at)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7)
+                    (user_id, user_email, plan_type, price, status, current_period_start, current_period_renewal, created_at)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
                     RETURNING id`,
                     [
                         userId,
+                        session?.user.email,
                         data.subscription.plan_type,
                         data.subscription.price,
                         paymentStatus,

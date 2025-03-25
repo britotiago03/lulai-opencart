@@ -165,7 +165,7 @@ CREATE TABLE admin_settings (
 INSERT INTO admin_settings (setting_key, setting_value)
 VALUES
 ('access_token_renewal_frequency', 'weekly'),
-('admin_email', 'britotiago101@gmail.com'),
+('admin_email', 'boss2909@hotmail.com'),
 ('setup_completed', 'false');
 
 -- Insert sample users (for reviews)

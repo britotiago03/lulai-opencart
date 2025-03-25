@@ -4,12 +4,12 @@ import NextAuth from "next-auth";
 interface Subscription {
     plan_type: string;
     status: string;
-    current_period_end: string;
+    current_period_renewal: string;
 }
 
 declare module "next-auth" {
     interface Session {
-        user: {
+        _user: {
             id: string;
             email: string;
             name: string;
