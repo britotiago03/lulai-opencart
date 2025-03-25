@@ -2,11 +2,11 @@ import { Pool, PoolClient } from "pg";
 import { CustomerInfo } from "@/types/order";
 
 const pool = new Pool({
-    user: "postgres",
-    host: "postgres", // Use the service name instead of 'localhost'
-    database: "ecommerce_db1",
-    password: "postgres",
-    port: 5432,
+    user: process.env.DB_USER || "postgres",
+    host: process.env.DB_HOST || "chatbot_postgres", // Updated default
+    database: process.env.DB_NAME || "ecommerce_db1",
+    password: process.env.DB_PASSWORD || "postgres",
+    port: Number(process.env.DB_PORT) || 5432,
 });
 
 // Interface for cart items sent from client
@@ -99,6 +99,5 @@ export async function executeTransaction<T>(
         client.release();
     }
 }
-
 
 export default pool;
