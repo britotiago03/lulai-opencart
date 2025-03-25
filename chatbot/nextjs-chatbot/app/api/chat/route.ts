@@ -16,6 +16,11 @@ const initializeDB = () => {
   return new DataAPIClient(ASTRA_DB_APPLICATION_TOKEN).db(ASTRA_DB_API_ENDPOINT, { namespace: ASTRA_DB_NAMESPACE });
 };
 
+// Sanitize API key for collection names (matches loadDb.ts implementation)
+const sanitizeApiKey = (apiKey: string) => {
+  return apiKey.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+};
+
 export async function OPTIONS(req: Request) {
   return new Response(null, {
     headers: {
@@ -28,21 +33,21 @@ export async function OPTIONS(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    // Expecting both messages and storeName in the request body
-    const { messages, storeName } = await req.json();
-    if (!messages || !storeName) {
-      throw new Error("Missing required fields: messages and/or storeName");
+    // Expecting both messages and apiKey in the request body
+    const { messages, apiKey } = await req.json();
+    if (!messages || !apiKey) {
+      throw new Error("Missing required fields: messages and/or apiKey");
     }
     const latestMessage = messages[messages.length - 1]?.content;
     if (!latestMessage) {
       throw new Error("No message content provided.");
     }
 
-    // Derive dynamic database names
-    const dynamicDatabaseName = storeName.replace(/\s+/g, "_").toLowerCase();
-    const productCollectionName = `${dynamicDatabaseName}_productlist`;
-    const promptCollectionName = `${dynamicDatabaseName}_prompt`;
-    console.log(`Using product collection: ${productCollectionName}`);
+    // Sanitize and create collection names
+    const sanitizedKey = sanitizeApiKey(apiKey);
+    const productCollectionName = `${sanitizedKey}_productlist`;
+    const promptCollectionName = `${sanitizedKey}_prompt`;
+    console.log(`Using collections for API key: ${sanitizedKey}`);
     
     // Get embedding for the latest message from OpenAI
     const embedding = await openai.embeddings.create({
@@ -57,7 +62,7 @@ export async function POST(req: Request) {
     try {
       const collection = await db.collection(productCollectionName);
       if (!collection) {
-        throw new Error("Failed to retrieve collection");
+        throw new Error("Failed to retrieve product collection");
       }
 
       // Query documents with a retry mechanism
@@ -104,7 +109,7 @@ export async function POST(req: Request) {
       docContext = "Error retrieving product data.";
     }
 
-    // Try to load a custom system prompt from the store's prompt collection
+    // Load custom system prompt from the API key's prompt collection
     let customPrompt: string | null = null;
     try {
       const promptCollection = await db.collection(promptCollectionName);
@@ -116,58 +121,43 @@ export async function POST(req: Request) {
       console.error("Error retrieving custom prompt:", error);
     }
 
-    // Default system prompt guidelines if no custom prompt exists
-    const defaultSystemPrompt = `You are a customer service chatbot designed to assist customers with questions related to the store and its products. 
+    // Default system prompt guidelines (updated to use generic "API key" terminology)
+    const defaultSystemPrompt = `You are a customer service chatbot designed to assist customers with questions related to this integration. 
 Follow these guidelines:
 
-1. Focus on Product and Store Information:
-   - Answer questions related to the store's products, services, prices, availability, categories, and general inquiries about the business.
-   - If a product does not have enough context or information in the database, let the user know that the details are unavailable but offer a general response based on your knowledge.
+1. Focus on Product Information:
+   - Answer questions related to products, services, prices, availability, and categories using the provided context.
+   - If product details are unavailable, be transparent while offering helpful suggestions.
 
 2. Professional Tone:
    - Maintain a professional, friendly, and helpful tone at all times.
-   - Avoid any language that might be interpreted as controversial, inappropriate, or non-professional. Respond to inquiries respectfully and courteously.
+   - Avoid controversial or non-professional language.
 
-3. Handling Sensitive or Personal Information:
-   - If a user shares personal or sensitive information, immediately inform them that they should avoid sharing such details through this platform.
-   - For example, if someone shares their credit card number, home address, or personal details, reply with: "For your safety and privacy, please refrain from sharing personal or sensitive information through this chat."
+3. Privacy Protection:
+   - Immediately alert users if they share sensitive information.
+   - Example response: "For your safety, please avoid sharing personal details through this channel."
 
-4. Controversial or Off-Topic Questions:
-   - If the user asks a controversial, political, or unrelated question, respond with: 
-     "I'm here to help with questions regarding our products and services. If you need assistance with something related to our store, feel free to ask!"
-   - Avoid engaging in any discussions that stray from customer service or product-related topics.
+4. Context Boundaries:
+   - Politely decline to answer non-relevant questions with:
+     "I'm specialized in product-related inquiries. How can I assist you with our offerings?"
 
-5. Product Uncertainty:
-   - If a question about a product cannot be answered due to a lack of specific context, respond with something like:
-     "I don't have enough information on that product right now, but I can tell you generally that our products are designed for quality and reliability. Feel free to check out the product page for more details."
-   
-6. Store Policies & Availability:
-   - If asked about store policies, provide relevant, general information, such as return policies, shipping details, and operating hours (if available).
-   - Be clear about stock availability and make sure to state if the product is in stock or out of stock.
+5. Uncertainty Handling:
+   - If lacking information, respond with:
+     "I don't have specific details on that, but our products focus on quality and reliability. Check the product page for more information."
 
-7. Clear, Concise Responses:
-   - Keep your responses clear, direct, and concise, without unnecessary elaboration.
-   - If the user requires further information, offer links to product pages or relevant resources available in the store.
+6. Clear Communication:
+   - Provide concise responses with clear product details
+   - Offer relevant links when available`;
 
-8. Empathy and Understanding:
-   - Always be empathetic and understanding when responding, especially if the customer expresses frustration or dissatisfaction.
-   - Offer solutions where appropriate and assure customers that you will do your best to assist them.
-
-9. General Knowledge (Outside Context):
-   - If a user asks for something outside of the store’s context, provide a general answer based on knowledge, but gently guide the conversation back to store-related matters.
-
-10. Privacy and Data Security:
-    - Always prioritize the customer’s privacy. If any sensitive data (like passwords or credit card information) is mentioned, advise the customer not to share such details in the chat for their own safety.`;
-
-    // Build the final system prompt, appending the product context and the latest question.
+    // Build the final system prompt
     const finalSystemPrompt = `${customPrompt || defaultSystemPrompt}
     
 --------------
-START CONTEXT:
+PRODUCT CONTEXT:
 ${docContext}
 END CONTEXT
 --------------
-QUESTION: ${latestMessage}
+USER QUESTION: ${latestMessage}
 --------------`;
 
     // Construct the system message template

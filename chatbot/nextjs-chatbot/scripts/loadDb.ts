@@ -22,6 +22,11 @@ const splitter = new RecursiveCharacterTextSplitter({
   chunkOverlap: 100,
 });
 
+// Sanitize API key for collection names
+const sanitizeApiKey = (apiKey: string) => {
+  return apiKey.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+};
+
 // Define ProductData structure
 export interface ProductData {
   id: string;
@@ -67,7 +72,7 @@ const resolveUrl = (baseUrl: string, relativeUrl: string): string => {
   return new URL(relativeUrl, baseUrl).toString();
 };
 
-// Create collection dynamically for each store.
+// Create collection dynamically for each API key
 const createCollection = async (
   collectionName: string,
   isVectorCollection: boolean = true,
@@ -83,7 +88,6 @@ const createCollection = async (
 const fetchProductData = async (url: string, platform: string, apiKey?: string): Promise<ProductData[]> => {
   console.log(`Fetching product data from ${platform} at ${url}...`);
 
-  // OpenCart, CustomStore don't require an API key
   if (platform === "opencart") return await fetchOpenCartData(url, apiKey);
   if (platform === "shopify") return await fetchShopifyData(url, apiKey);
   if (platform === "customstore") return await fetchCustomStoreData(url);
@@ -91,9 +95,9 @@ const fetchProductData = async (url: string, platform: string, apiKey?: string):
   throw new Error("Unsupported platform");
 };
 
-// OpenCart
+// OpenCart implementation
 const fetchOpenCartData = async (url: string, apiKey?: string): Promise<ProductData[]> => {
-  const fetchUrl = apiKey ? `${url}&api_key=${apiKey}` : url; // Optional API key
+  const fetchUrl = apiKey ? `${url}&api_key=${apiKey}` : url;
   const response = await fetch(fetchUrl);
   if (!response.ok) throw new Error("Failed to fetch OpenCart data");
 
@@ -114,9 +118,8 @@ const fetchOpenCartData = async (url: string, apiKey?: string): Promise<ProductD
   }));
 };
 
-// Shopify
+// Shopify implementation
 const fetchShopifyData = async (url: string, apiKey?: string): Promise<ProductData[]> => {
-  // Shopify requires an API key
   if (!apiKey) throw new Error("Shopify requires an API key!");
 
   const response = await fetch(url, { headers: { "X-Shopify-Access-Token": apiKey } });
@@ -145,7 +148,7 @@ const fetchShopifyData = async (url: string, apiKey?: string): Promise<ProductDa
   }));
 };
 
-// Custom Store
+// Custom Store implementation
 const fetchCustomStoreData = async (url: string): Promise<ProductData[]> => {
   const response = await fetch(url);
   if (!response.ok) throw new Error("Failed to fetch Custom Store data");
@@ -191,11 +194,14 @@ const fetchCustomStoreData = async (url: string): Promise<ProductData[]> => {
   }));
 };
 
-// Store products in AstraDB
-const storeProductData = async (products: ProductData[], collectionName: string) => {
+// Store products in AstraDB using API key-based collection name
+const storeProductData = async (products: ProductData[], apiKey: string) => {
+  const sanitizedKey = sanitizeApiKey(apiKey);
+  const collectionName = `${sanitizedKey}_productlist`;
+
   try {
     console.log("Ensuring collection exists...");
-    await createCollection(collectionName); // This creates a vector-enabled collection
+    await createCollection(collectionName);
     let db = getDbClient();
     let collection = await db.collection(collectionName);
 
@@ -253,73 +259,66 @@ const storeProductData = async (products: ProductData[], collectionName: string)
   }
 };
 
-// Store custom system prompt (if provided) in its own collection (non-vector)
-const storeSystemPrompt = async (storeName: string, customPrompt: string) => {
-  // Use the same dynamic naming convention as the product list collection
-  const promptCollectionName = `${storeName.replace(/\s+/g, "_").toLowerCase()}_prompt`;
+// Store custom system prompt using API key-based collection name
+const storeSystemPrompt = async (apiKey: string, customPrompt: string) => {
+  const sanitizedKey = sanitizeApiKey(apiKey);
+  const promptCollectionName = `${sanitizedKey}_prompt`;
 
-  // Create a collection for the custom prompt without vector configuration
   await createCollection(promptCollectionName, false);
   const db = getDbClient();
   const promptCollection = await db.collection(promptCollectionName);
 
-  // Insert a document with a fixed id so that the prompt can be updated later if needed
   await promptCollection.insertOne({
     id: "system_prompt",
     content: customPrompt,
   });
 
-  console.log(`Stored custom prompt for store: ${storeName}`);
+  console.log(`Stored custom prompt for API key: ${apiKey}`);
 };
 
-
-// Main function – now accepts an optional customPrompt parameter.
+// Main integration function
 export const loadProductDataForStore = async ({
   storeName,
   productApiUrl,
   platform,
   apiKey,
-  customPrompt, // optional custom system prompt provided by the client
+  customPrompt,
 }: {
   storeName: string;
   productApiUrl: string;
   platform: string;
-  apiKey?: string;
+  apiKey: string;
   customPrompt?: string;
 }) => {
-  console.log(`Starting integration for ${storeName}...`);
+  console.log(`Starting integration for API key: ${apiKey}`);
 
-  // Use a consistent naming convention for the product list collection
-  const collectionName = `${storeName.replace(/\s+/g, "_").toLowerCase()}_productlist`;
+  if (!apiKey) throw new Error("API key is required");
+
   const products = await fetchProductData(productApiUrl, platform, apiKey);
-  await storeProductData(products, collectionName);
+  await storeProductData(products, apiKey);
 
-  // If a custom prompt is provided, store it separately
   if (customPrompt) {
-    await storeSystemPrompt(storeName, customPrompt);
+    await storeSystemPrompt(apiKey, customPrompt);
   }
 
-  console.log(`Integration complete for ${storeName}!`);
+  console.log(`Integration complete for API key: ${apiKey}`);
 };
 
-
-// Update custom system prompt in AstraDB
-export const updateSystemPrompt = async (storeName: string, customPrompt: string) => {
-  // Compute collection name based on your naming convention
-  const promptCollectionName = `${storeName.replace(/\s+/g, "_").toLowerCase()}_prompt`;
+// Update custom system prompt
+export const updateSystemPrompt = async (apiKey: string, customPrompt: string) => {
+  const sanitizedKey = sanitizeApiKey(apiKey);
+  const promptCollectionName = `${sanitizedKey}_prompt`;
   const db = getDbClient();
   const promptCollection = await db.collection(promptCollectionName);
 
   try {
-    // Update only the content field of the document with id "system_prompt"
     await promptCollection.updateOne(
       { id: "system_prompt" },
       { $set: { content: customPrompt } }
     );
-    console.log(`Updated custom prompt for store: ${storeName}`);
+    console.log(`Updated custom prompt for API key: ${apiKey}`);
   } catch (error: any) {
-    console.error(`Error updating custom prompt for store ${storeName}: ${error.message}`);
+    console.error(`Error updating custom prompt: ${error.message}`);
     throw error;
   }
 };
-

@@ -63,8 +63,15 @@ export default function Integrate() {
   };
 
   const generateApiKey = () => {
-    const key = Math.random().toString(36).substring(2, 15) + 
-                Math.random().toString(36).substring(2, 15);
+    // Generate 16 random bytes (128 bits)
+    const array = new Uint8Array(16);
+    window.crypto.getRandomValues(array);
+    
+    // Convert to hex string
+    const key = Array.from(array, byte => 
+      byte.toString(16).padStart(2, '0')
+    ).join('');
+  
     setFormData((prev) => ({ ...prev, apiKey: key }));
   };
 

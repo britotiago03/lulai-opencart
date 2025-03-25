@@ -51,12 +51,12 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     const body = await req.json();
-    const { storeName, customPrompt } = body;
-    if (!storeName || !customPrompt) {
+    const { apiKey, customPrompt } = body;
+    if (!apiKey || !customPrompt) {
       return NextResponse.json({ message: "Missing required fields." }, { status: 400 });
     }
 
-    await updateSystemPrompt(storeName, customPrompt);
+    await updateSystemPrompt(apiKey, customPrompt);
     return NextResponse.json(
       { message: "Prompt updated successfully" },
       {
