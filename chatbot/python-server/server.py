@@ -7,8 +7,8 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 
-# Load environment variables from .env located one directory above this script
-dotenv_path = os.path.join(os.path.dirname(__file__), "..", ".env")
+# Load environment variables from .env.local located one directory above this script
+dotenv_path = os.path.join(os.path.dirname(__file__), "..", ".env.local")
 load_dotenv(dotenv_path=dotenv_path)
 
 logging.basicConfig(level=logging.INFO)
@@ -25,7 +25,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize the OpenAI client with the API key from the .env file
+# Initialize the OpenAI client with the API key from the .env.local file
 api_key = os.getenv("OPENAI_API_KEY")
 if not api_key:
     raise Exception("OPENAI_API_KEY environment variable not set")
