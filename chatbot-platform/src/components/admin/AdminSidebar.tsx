@@ -150,7 +150,7 @@ export function AdminSidebar({ onClose }: AdminSidebarProps) {
                         onClick={() => {
                             // Replace with actual logout logic
                             console.log("Logging out...");
-                            window.location.href = "/auth/login";
+                            window.location.href = "/home";
                         }}
                     >
                         <LogOut className="h-5 w-5" />
