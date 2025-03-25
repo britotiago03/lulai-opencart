@@ -25,7 +25,6 @@ export default function SignupForm() {
 
         if (res.ok) {
             setSuccessMessage("Thanks for signing up! Please check your email to verify your account.");
-            router.push("/auth/signin");
         } else {
             const data = await res.json();
             setError(data.error || "Signup failed");

@@ -14,6 +14,7 @@ import {
     Bell,
     Settings
 } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
 interface SidebarProps {
     onClose?: () => void;
@@ -21,6 +22,7 @@ interface SidebarProps {
 
 export function Sidebar({ onClose }: SidebarProps) {
     const pathname = usePathname();
+    const [username, setUsername] = useState("Amanda Goldberg");
 
     const isActive = (path: string) => {
         return pathname === path || pathname?.startsWith(`${path}/`);
@@ -47,6 +49,31 @@ export function Sidebar({ onClose }: SidebarProps) {
             onClose();
         }
     };
+
+    const fetchUserData = useCallback(async () => {
+        // Fetch name here
+        try {
+            const userResponse = await fetch("/api/users/data");
+
+            if(!userResponse.ok) {
+                console.error("Failed to load user data");
+                return;
+            }
+            
+            const userData = await userResponse.json();
+            setUsername(userData.name);
+
+        } catch (error) {
+            console.error("Error fetching user data:", error);
+        }
+    }, []);
+
+    // USeEffect with IIFE to avoid promise warning
+    useEffect(() => {
+        (async () => {
+            await fetchUserData(); 
+        })();
+    }, [fetchUserData]);
 
     return (
         <div className="w-64 h-full bg-[#0f1729] text-white flex flex-col">
@@ -126,7 +153,8 @@ export function Sidebar({ onClose }: SidebarProps) {
                         {/* User avatar placeholder */}
                     </div>
                     <div>
-                        <p className="text-sm font-medium">Amanda Goldberg</p>
+                        {/* TODO: Change this placeholder username to current session user */}
+                        <p className="text-sm font-medium">{username}</p>
                         <p className="text-xs text-gray-400">View profile</p>
                     </div>
                     <button className="ml-auto">

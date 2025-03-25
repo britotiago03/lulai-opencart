@@ -10,7 +10,7 @@ export async function GET(_: NextRequest) {
 
         return await executeTransaction(async (client) => {
             const userResult = await client.query(
-                `SELECT * FROM users where id = $1`, 
+                `SELECT * FROM admin_users where id = $1`, 
                 [session?.user.id]
             );
 
@@ -22,6 +22,8 @@ export async function GET(_: NextRequest) {
             }
 
             const userData = userResult.rows[0];
+
+            console.log("Retrieved data:", userData);
 
             return NextResponse.json(userData);
         });
