@@ -34,7 +34,22 @@ export default function SignInForm() {
                     setError("Invalid email or password");
                 }
             } else {
-                router.push("/subscriptions");
+                // Check if user already chose a subscription, and redirect accordingly
+                const response = await fetch(`/api/users/data`);
+
+                if (!response.ok) {
+                    setError("Failed to load user details");
+                    setLoading(false);
+                    return;
+                }
+
+                const userData = await response.json();
+                
+                if(userData.subscription_status === 'none') {
+                    router.push("/subscriptions");
+                } else {
+                    router.push("/dashboard");
+                }
                 router.refresh();
             }
         } catch (err) {
