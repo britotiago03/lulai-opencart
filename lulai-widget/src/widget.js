@@ -1,3 +1,4 @@
+// lulai-chat-widget.js
 class LulaiChatWidget extends HTMLElement {
   constructor() {
     super();
@@ -5,6 +6,7 @@ class LulaiChatWidget extends HTMLElement {
     this.isChatOpen = false;
     this.isLoading = false;
     this.messages = [];
+    this.apiKey = null;
     // TTS properties
     this.ttsQueue = [];
     this.isPlayingTTS = false;
@@ -20,6 +22,11 @@ class LulaiChatWidget extends HTMLElement {
     if (window.AudioContext || window.webkitAudioContext) {
       this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
     }
+  }
+
+  // New method to set API key
+  setApiKey(apiKey) {
+    this.apiKey = apiKey;
   }
 
   connectedCallback() {
@@ -285,6 +292,17 @@ class LulaiChatWidget extends HTMLElement {
   }
 
   async fetchResponse() {
+    // Get the API key from the attribute
+    const apiKey = this.getAttribute('api-key');
+    if (!apiKey) {
+      console.error("API Key is not set. Please add the api-key attribute.");
+      this.addMessage({ 
+        role: 'assistant', 
+        content: 'Error: API key is not configured. Please contact support.' 
+      });
+      return;
+    }
+  
     this.isLoading = true;
     this.updateMessages();
   
@@ -295,8 +313,6 @@ class LulaiChatWidget extends HTMLElement {
     this.audioBuffers = [];
   
     const apiEndpoint = this.getAttribute('api-endpoint') || 'http://localhost:3001/api/chat';
-    const storeName = this.getAttribute('store-name'); // Fetch store name from the widget attribute
-    console.log("Store name:", storeName);
   
     // Create a placeholder for the assistant's response.
     let assistantMessage = { role: 'assistant', content: "" };
@@ -308,11 +324,14 @@ class LulaiChatWidget extends HTMLElement {
     try {
       const payloadMessages = this.messages.filter(msg => msg.role !== 'assistant' || msg.content.trim() !== "");
   
-      // Include storeName in the payload
+      // Include apiKey in the payload
       const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: payloadMessages, storeName: storeName }) // Add storeName here
+        body: JSON.stringify({ 
+          messages: payloadMessages,
+          apiKey: apiKey
+        })
       });
       
       if (!response.body) throw new Error("No response body");
