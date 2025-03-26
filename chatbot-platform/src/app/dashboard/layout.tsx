@@ -1,17 +1,15 @@
 // src/app/dashboard/layout.tsx
 "use client";
 
-import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { MobileNav, useMobileNav } from "@/components/dashboard/MobileNav";
 
-export default function DashboardLayout({
+export default function DashboardLayoutContent({
                                             children,
                                         }: {
     children: React.ReactNode;
 }) {
     const { isOpen, isMobile, toggle } = useMobileNav();
-    const pathname = usePathname();
 
     return (
         <div className="flex h-screen overflow-hidden bg-[#0f1729]">

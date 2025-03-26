@@ -39,21 +39,11 @@ function DashboardPageContent() {
 
     // Fetch user's chatbots
     useEffect(() => {
-        if(status === "loading") return;
-
-        // require signin
-        if (!session) {
-            router.push('/auth/signin');
-            return;
-        } 
-
         setIsLoggedIn(true);
 
         const fetchChatbots = async () => {
             try {
                 setLoading(true);
-
-                
 
                 // Fetch all chatbots
                 const response = await fetch('/api/chatbots');
@@ -94,9 +84,9 @@ function DashboardPageContent() {
         } else {
             setLoading(false);
         }
-    }, [user, session, status, router]);
+    }, [user]);
 
-    if (isLoggedIn === null || loading || status === "loading") {
+    if (loading) {
         return (
             <div className="max-w-7xl mx-auto p-6">
                 <div className="text-center py-8">
@@ -159,7 +149,7 @@ function DashboardPageContent() {
                                 </svg>
                             </div>
                             <div>
-                                <h2 className="text-xl sm:text-2xl font-semibold">Welcome back, {user?.name || 'User'}</h2>
+                                <h2 className="text-xl sm:text-2xl font-semibold">Welcome back, {session?.user.name || 'User'}</h2>
                                 <p className="text-gray-400 mt-1">Here's an overview of your chatbots and their performance</p>
                             </div>
                         </Link>
