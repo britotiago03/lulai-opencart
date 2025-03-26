@@ -17,6 +17,8 @@ services:
     volumes:
       - ecommerce_postgres_data:/var/lib/postgresql/data
       - ./ecommerce-store/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+    - lulai-network
 
   ecommerce_nextjs:
     build:
@@ -34,6 +36,7 @@ services:
       DB_PASSWORD: "postgres"
       DB_NAME: "ecommerce_db"
       DB_PORT: "5432"
+      DATABASE_URL: "postgresql://postgres:postgres@ecommerce_postgres:5432/ecommerce_db"
       # Next.js configuration
       NEXTAUTH_URL: "http://localhost:3000"
       NEXT_PUBLIC_APP_URL: "http://localhost:3000"
@@ -57,6 +60,8 @@ services:
     volumes:
       - chatbot_platform_postgres_data:/var/lib/postgresql/data
       - ./chatbot-platform/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+    - lulai-network
 
   chatbot_platform_nextjs:
     build:
@@ -78,6 +83,8 @@ services:
       NEXTAUTH_URL: "http://localhost:3001"
       NEXT_PUBLIC_APP_URL: "http://localhost:3001"
       API_URL: "http://localhost:3001"
+    networks:
+    - lulai-network
 
   # ===============================
   # 3) Lulai Chatbot Services
