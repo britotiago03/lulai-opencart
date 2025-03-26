@@ -1,15 +1,12 @@
-// storage.ts
 import { NextRequest, NextResponse } from "next/server";
-import { loadProductDataForStore, updateSystemPrompt } from "@/scripts/loadDb";
-
-const ALLOWED_ORIGIN = "http://localhost:3000";
+import { loadProductDataForStore, updateSystemPrompt } from "@/app/scripts/loadDb";
 
 // CORS headers setup for OPTIONS, POST, and now PUT
 export async function OPTIONS(req: NextRequest) {
   return new NextResponse(null, {
     headers: {
-      "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
-      "Access-Control-Allow-Methods": "POST, PUT, OPTIONS",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, PUT, OPTIONS, GET",
       "Access-Control-Allow-Headers": "Content-Type, Authorization",
       "Access-Control-Allow-Credentials": "true",
     },
@@ -22,20 +19,33 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { storeName, productApiUrl, platform, apiKey, customPrompt } = body;
 
+    console.log('Received integration request:', { storeName, productApiUrl, platform });
+
     if (!storeName || !productApiUrl || !platform) {
-      return NextResponse.json({ message: "Missing required fields." }, { status: 400 });
+      return NextResponse.json({ message: "Missing required fields." }, { 
+        status: 400,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+        }
+      });
     }
 
     const finalApiKey = apiKey || undefined;
 
-    await loadProductDataForStore({ storeName, productApiUrl, platform, apiKey: finalApiKey, customPrompt });
+    await loadProductDataForStore({ 
+      storeName, 
+      productApiUrl, 
+      platform, 
+      apiKey: finalApiKey, 
+      customPrompt 
+    });
 
     return NextResponse.json(
       { message: "Integration started." },
       {
         status: 202,
         headers: {
-          "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
+          "Access-Control-Allow-Origin": "*",
           "Access-Control-Allow-Methods": "POST, PUT, OPTIONS",
           "Access-Control-Allow-Headers": "Content-Type, Authorization",
           "Access-Control-Allow-Credentials": "true",
@@ -43,7 +53,20 @@ export async function POST(req: NextRequest) {
       }
     );
   } catch (error: any) {
-    return NextResponse.json({ message: `Error: ${error.message}` }, { status: 500 });
+    console.error('Integration error:', error);
+
+    return NextResponse.json(
+      { 
+        message: `Error: ${error.message}`, 
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined 
+      }, 
+      { 
+        status: 500,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+        }
+      }
+    );
   }
 }
 
@@ -52,8 +75,14 @@ export async function PUT(req: NextRequest) {
   try {
     const body = await req.json();
     const { apiKey, customPrompt } = body;
+
     if (!apiKey || !customPrompt) {
-      return NextResponse.json({ message: "Missing required fields." }, { status: 400 });
+      return NextResponse.json({ message: "Missing required fields." }, { 
+        status: 400,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+        }
+      });
     }
 
     await updateSystemPrompt(apiKey, customPrompt);
@@ -62,7 +91,7 @@ export async function PUT(req: NextRequest) {
       {
         status: 200,
         headers: {
-          "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
+          "Access-Control-Allow-Origin": "*",
           "Access-Control-Allow-Methods": "POST, PUT, OPTIONS",
           "Access-Control-Allow-Headers": "Content-Type, Authorization",
           "Access-Control-Allow-Credentials": "true",
@@ -70,7 +99,20 @@ export async function PUT(req: NextRequest) {
       }
     );
   } catch (error: any) {
-    return NextResponse.json({ message: `Error: ${error.message}` }, { status: 500 });
+    console.error('Prompt update error:', error);
+
+    return NextResponse.json(
+      { 
+        message: `Error: ${error.message}`, 
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined 
+      }, 
+      { 
+        status: 500,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+        }
+      }
+    );
   }
 }
 
@@ -104,8 +146,8 @@ export async function GET(req: NextRequest) {
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache",
       "Connection": "keep-alive",
-      "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
-      "Access-Control-Allow-Methods": "POST, PUT, OPTIONS",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, PUT, OPTIONS, GET",
       "Access-Control-Allow-Headers": "Content-Type, Authorization",
       "Access-Control-Allow-Credentials": "true",
     },
