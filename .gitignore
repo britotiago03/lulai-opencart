@@ -103,7 +103,7 @@ chatbot-platform/next-env.d.ts
 **/logs
 **/*.log
 
-# Local env files (you have .env.local.local but might want to add these)
+# Local env files (you have .env.local.local.local but might want to add these)
 **/.env.development
 **/.env.test
 **/.env.production

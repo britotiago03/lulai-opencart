@@ -114,7 +114,7 @@ export default function Integrate() {
     try {
       // Fix 1: Add proper method to storage request
       setProgress(prev => [...prev, "Saving custom prompt to AstraDB..."]);
-      const storageRes = await fetch("http://localhost:3001/api/storage", {
+      const storageRes = await fetch("http://localhost:3005/api/storage", {
         method: "POST", // Ensure method is specified
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData), // Send full form data
@@ -611,7 +611,7 @@ export default function Integrate() {
                     <pre className="bg-gray-100 p-2 rounded mt-1 overflow-x-auto">
                       {`<script src="${downloadUrl}"></script>
 <lulai-chat-widget 
-  api-endpoint="http://localhost:3001/api/chat"
+  api-endpoint="http://localhost:3005/api/chat"
   api-key="${formData.apiKey}"
 ></lulai-chat-widget>`}
                     </pre>

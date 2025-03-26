@@ -8,7 +8,7 @@ const DATABASE_URL = process.env.DATABASE_URL!;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY!;
 
 if (!DATABASE_URL || !OPENAI_API_KEY) {
-  throw new Error("Missing environment variables. Check your .env file.");
+  throw new Error("Missing environment variables. Check your .env.local file.");
 }
 
 // Initialize DB Connection
