@@ -8,6 +8,8 @@ import DashboardStats from '@/components/dashboard/DashboardStats';
 import DeployedAgents from '@/components/dashboard/DeployedAgents';
 import QuickAnalytics from '@/components/dashboard/QuickAnalytics';
 import { useAuth } from '@/context/AuthContext';
+import { useSession, SessionProvider } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 interface Chatbot {
     id: string;
@@ -20,7 +22,7 @@ interface Chatbot {
     responses: any[];
 }
 
-export default function DashboardPage() {
+function DashboardPageContent() {
     const { user } = useAuth();
     const [loading, setLoading] = useState(true);
     const [chatbots, setChatbots] = useState<Chatbot[]>([]);
@@ -31,12 +33,27 @@ export default function DashboardPage() {
         conversionRate: 0,
         averageResponseTime: 0
     });
+    const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+    const { data: session, status } = useSession();
+    const router = useRouter();
 
     // Fetch user's chatbots
     useEffect(() => {
+        if(status === "loading") return;
+
+        // require signin
+        if (!session) {
+            router.push('/auth/signin');
+            return;
+        } 
+
+        setIsLoggedIn(true);
+
         const fetchChatbots = async () => {
             try {
                 setLoading(true);
+
+                
 
                 // Fetch all chatbots
                 const response = await fetch('/api/chatbots');
@@ -77,9 +94,9 @@ export default function DashboardPage() {
         } else {
             setLoading(false);
         }
-    }, [user]);
+    }, [user, session, status, router]);
 
-    if (loading) {
+    if (isLoggedIn === null || loading || status === "loading") {
         return (
             <div className="max-w-7xl mx-auto p-6">
                 <div className="text-center py-8">
@@ -347,5 +364,13 @@ export default function DashboardPage() {
                 </Card>
             </div>
         </div>
+    );
+}
+
+export default function DashboardPage() {
+    return (
+        <SessionProvider>
+            <DashboardPageContent />
+        </SessionProvider>
     );
 }
