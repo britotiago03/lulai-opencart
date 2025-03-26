@@ -38,6 +38,8 @@ services:
       NEXTAUTH_URL: "http://localhost:3000"
       NEXT_PUBLIC_APP_URL: "http://localhost:3000"
       API_URL: "http://localhost:3000"
+    networks:
+    - lulai-network
 
   # ===============================
   # 2) Chatbot Platform Services
@@ -149,13 +151,13 @@ services:
     restart: always
     # Mapping 3005 on the host to 3001 inside container (instead of 3001:3001 to avoid conflict)
     ports:
-      - "3005:3001"
+      - "3005:3000"
     env_file:
       - ./lulai-chatbot/nextjs-chatbot/.env.local
     volumes:
-      - ./lulai-chatbot/nextjs-chatbot:/app
-      - /app/node_modules
-      - ./lulai-chatbot/nextjs-chatbot/scripts:/scripts
+    - ./lulai-chatbot/nextjs-chatbot:/app
+    - ./lulai-chatbot/nextjs-chatbot/scripts:/app/scripts
+
     command: ["npm", "run", "dev"]
     depends_on:
       - lulai_chatbot_python_server
@@ -175,8 +177,6 @@ services:
       - ./lulai-chatbot/nextjs-chatbot/.env.local
     networks:
       - lulai-network
-    expose:
-      - "8000"
 
 # ===========================================================
 # Networks
