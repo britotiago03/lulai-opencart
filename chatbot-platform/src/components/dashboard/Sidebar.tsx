@@ -15,18 +15,17 @@ import {
     Settings,
     Router
 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-import { signOut } from "next-auth/react";
+import { useState } from "react";
+import { SessionProvider, signOut, useSession } from "next-auth/react";
 
 interface SidebarProps {
     onClose?: () => void;
 }
 
-export function Sidebar({ onClose }: SidebarProps) {
+function SidebarContent({ onClose }: SidebarProps) {
     const pathname = usePathname();
-    const [username, setUsername] = useState("Amanda Goldberg");
     const [showLogout, setShowLogout] = useState(false);
-    const router = useRouter();
+    const { data: session } = useSession();
 
     const isActive = (path: string) => {
         return pathname === path || pathname?.startsWith(`${path}/`);
@@ -62,31 +61,6 @@ export function Sidebar({ onClose }: SidebarProps) {
     const handleLogout = async () => {
         signOut({callbackUrl: "/auth/signin" });
     };
-
-    const fetchUserData = useCallback(async () => {
-        // Fetch name here
-        try {
-            const userResponse = await fetch("/api/users/data");
-
-            if(!userResponse.ok) {
-                console.error("Failed to load user data");
-                return;
-            }
-            
-            const userData = await userResponse.json();
-            setUsername(userData.name);
-
-        } catch (error) {
-            console.error("Error fetching user data:", error);
-        }
-    }, []);
-
-    // USeEffect with IIFE to avoid promise warning
-    useEffect(() => {
-        (async () => {
-            await fetchUserData(); 
-        })();
-    }, [fetchUserData]);
 
     return (
         <div className="w-64 h-full bg-[#0f1729] text-white flex flex-col">
@@ -166,7 +140,7 @@ export function Sidebar({ onClose }: SidebarProps) {
                         {/* User avatar placeholder */}
                     </div>
                     <div>
-                        <p className="text-sm font-medium">{username}</p>
+                        <p className="text-sm font-medium">{session?.user.name || "User"}</p>
                         <p className="text-xs text-gray-400">View profile</p>
                     </div>
                     <div className="relative ml-auto">
@@ -191,5 +165,13 @@ export function Sidebar({ onClose }: SidebarProps) {
                 
             </div>
         </div>
+    );
+}
+
+export function Sidebar({ onClose }: SidebarProps) {
+    return (
+        <SessionProvider>
+            <SidebarContent onClose={onClose}/>
+        </SessionProvider>
     );
 }

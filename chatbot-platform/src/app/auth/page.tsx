@@ -7,6 +7,8 @@ import SignupForm from "@/components/authentication/signup/SignupForm";
 import SigninForm from "@/components/authentication/signin/SigninForm";
 import { SessionProvider } from "next-auth/react";
 import GoogleSigninButton from "@/components/google/GoogleSigninButton";
+import GoogleSignupButton from "@/components/google/GoogleSignupButton";
+
 
 export default function AuthPage() {
     const router = useRouter();
@@ -62,9 +64,14 @@ export default function AuthPage() {
                             {isSignUp ? <SignupForm /> : <SigninForm />}
                         </div>
                         <div className="relative w-full">
-                            <SessionProvider>
-                                <GoogleSigninButton/>
-                            </SessionProvider>
+                            {isSignUp ? 
+                                (<SessionProvider>
+                                    <GoogleSignupButton/>
+                                </SessionProvider>) :
+                                (<SessionProvider>
+                                    <GoogleSigninButton />
+                                </SessionProvider>
+                            )}
                         </div>
                     </div>
                 </div>

@@ -3,13 +3,14 @@ import { redirect } from "next/navigation";
 import pool from "@/lib/db";
 import AdminLoginPage from "@/components/admin/AdminLoginPage";
 
-export default async function AdminRoute({ params }: { params: { adminRoute: string[] } }) {
-    // Ensure params.adminRoute is properly awaited
-    const adminRouteParts = params?.adminRoute ?? [];
+export default async function AdminRoute({ params }: { params: { adminRoute?: string[] } }) {
+    // Safely destructure params 
+    const awaitedParams = await Promise.resolve(params);
+    const adminRouteParts = awaitedParams.adminRoute ?? [];
 
     if (adminRouteParts.length === 0) {
         console.error("Invalid or missing adminRouteParts:", adminRouteParts);
-        redirect("/404");
+        return redirect("/admin/invalid-link");
     }
 
     // Construct the secure path
@@ -19,7 +20,7 @@ export default async function AdminRoute({ params }: { params: { adminRoute: str
     const isSecurePattern = /^\/secure-admin-\d{4}$/.test(path);
     if (!isSecurePattern) {
         console.warn("Unauthorized admin path attempted:", path);
-        redirect("/404");
+        return redirect("/admin/invalid-link");
     }
 
     try {
@@ -31,13 +32,13 @@ export default async function AdminRoute({ params }: { params: { adminRoute: str
 
         if (result.rows.length === 0) {
             console.warn("Admin access token not found or expired for path:", path);
-            redirect("/404");
+            return redirect("/admin/invalid-link");
         }
 
         // Render login page with the secure path
         return <AdminLoginPage securePath={path} />;
     } catch (error) {
         console.error("Error processing admin route:", error);
-        redirect("/404");
+        return redirect("/admin/error");
     }
 }

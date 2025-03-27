@@ -3,36 +3,8 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 
-export default function GoogleSigninButton() {
+export default function GoogleSignupButton() {
   const { data: session } = useSession();
-
-  const handleSignIn = async () => {
-    try {
-      const result = await signIn("google", {redirect: false});
-
-      if(result?.ok) {
-        const response = await fetch("/api/users/data");
-        
-        if (!response.ok) {
-          console.error("Failed to fetch user data");
-          return;
-        }
-
-        const userData = await response.json();
-
-        // Redirect logic
-        if(userData?.subscription_status === 'none') {
-          window.location.href = "/subscriptions";
-        } else {
-          window.location.href = "/dashboard";
-        }
-      } else {
-        console.error("Google sign-in failed");
-      }
-    } catch(error) {
-      console.error("Error during sign-in", error);
-    }
-  }
 
   return (
     <div>
@@ -47,7 +19,7 @@ export default function GoogleSigninButton() {
       ) : (
         <button 
           className="flex items-center pl-2 pr-6 py-3 text-gray-500 border-2 border-black rounded-lg"
-          onClick={handleSignIn}>
+          onClick={() => signIn("google", {callbackUrl: "/dashboard"})}>
           <Image
             src="/google_icon.png"
             alt="Next.js logo"
@@ -56,7 +28,7 @@ export default function GoogleSigninButton() {
             priority
             className="mr-2"
           />  
-          Sign in with Google
+          Sign up with Google
         </button>
       )}
     </div>
