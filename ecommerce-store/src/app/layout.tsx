@@ -2,7 +2,7 @@ import React from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { PathnameProvider } from "@/components/layout/PathnameProvider";
-import ClientLayout from "@/components/layout/ClientLayout"; // ✅ Import the new client layout
+import ClientLayout from "@/components/layout/ClientLayout"; // Import the new client layout
 import "./globals.css";
 import { initializeAdminSystem } from "@/lib/admin-init"; // ✅ Import admin system initializer
 
@@ -34,7 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <html lang="en">
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
           <PathnameProvider>
-              <ClientLayout>{children}</ClientLayout> {/* ✅ Now inside a client component */}
+              <ClientLayout>{children}</ClientLayout>
           </PathnameProvider>
         </body>
         </html>
