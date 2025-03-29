@@ -22,15 +22,15 @@ export async function sendVerificationEmail(
     const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/verify?token=${token}&type=account`;
 
     const mailOptions = {
-        from: `"${process.env.EMAIL_FROM_NAME || 'My App'}" <${process.env.EMAIL_FROM || 'noreply@example.com'}>`,
+        from: `"${process.env.EMAIL_FROM_NAME || 'LulAI Chatbot platform'}" <${process.env.EMAIL_FROM || 'noreply@example.com'}>`,
         to: email,
         subject: 'Verify your email address',
         html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2>Hello ${name},</h2>
-        <p>Thank you for signing up! Please verify your email address by clicking the button below:</p>
+        <p>Thank you for signing up to lulAI chatbot platform! Please verify your email address by clicking the button below:</p>
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${verificationUrl}" style="background-color: #4CAF50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">
+          <a href="${verificationUrl}" style="background-color:rgb(0, 0, 0); color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">
             Verify Email
           </a>
         </div>
@@ -53,7 +53,7 @@ export async function sendEmailChangeVerification(
     const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/verify-email-change?token=${token}`;
 
     const mailOptions = {
-        from: `"${process.env.EMAIL_FROM_NAME || 'My App'}" <${process.env.EMAIL_FROM || 'noreply@example.com'}>`,
+        from: `"${process.env.EMAIL_FROM_NAME || 'LulAI Chatbot platform'}" <${process.env.EMAIL_FROM || 'noreply@example.com'}>`,
         to: email,
         subject: 'Verify your new email address',
         html: `
@@ -61,7 +61,7 @@ export async function sendEmailChangeVerification(
         <h2>Hello ${name},</h2>
         <p>We received a request to change your email address. Please verify your new email address by clicking the button below:</p>
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${verificationUrl}" style="background-color: #4CAF50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">
+          <a href="${verificationUrl}" style="background-color:rgb(0, 0, 0); color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">
             Verify New Email
           </a>
         </div>
@@ -84,7 +84,7 @@ export async function sendPasswordResetEmail(
     const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password?token=${token}`;
 
     const mailOptions = {
-        from: `"${process.env.EMAIL_FROM_NAME || 'My App'}" <${process.env.EMAIL_FROM || 'noreply@example.com'}>`,
+        from: `"${process.env.EMAIL_FROM_NAME || 'LulAI Chatbot platform'}" <${process.env.EMAIL_FROM || 'noreply@example.com'}>`,
         to: email,
         subject: 'Reset your password',
         html: `
@@ -92,7 +92,7 @@ export async function sendPasswordResetEmail(
         <h2>Hello ${name},</h2>
         <p>We received a request to reset your password. Click the button below to create a new password:</p>
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${resetUrl}" style="background-color: #4CAF50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">
+          <a href="${resetUrl}" style="background-color:rgb(0, 0, 0); color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">
             Reset Password
           </a>
         </div>
