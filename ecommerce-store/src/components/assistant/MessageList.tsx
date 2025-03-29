@@ -11,7 +11,7 @@ interface MessageListProps {
     speakingMessageIndex: number | null;
     playMessageAudio: (content: string, index: number) => void;
     stopSpeaking: () => void;
-    messagesEndRef: React.RefObject<HTMLDivElement>;
+    messagesEndRef: React.RefObject<HTMLDivElement | null>;
 }
 
 const MessageList: React.FC<MessageListProps> = ({

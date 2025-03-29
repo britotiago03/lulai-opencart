@@ -11,7 +11,7 @@ import { Action, UnvalidatedAction } from './types';
 
 export async function POST(req: NextRequest) {
     try {
-        const { message, history } = await req.json();
+        const { message, history, currentProductId, currentProductInfo } = await req.json();
 
         if (!message) {
             return NextResponse.json(
@@ -29,6 +29,22 @@ export async function POST(req: NextRequest) {
         // Get available products for better context
         const productContext = await getProductContext(productTerms);
 
+        // Add current product context if available
+        let currentProductContext = "";
+        if (currentProductId && currentProductInfo) {
+            currentProductContext = `
+CURRENT PRODUCT:
+The user is currently viewing this product:
+ID: ${currentProductId}
+Name: ${currentProductInfo.name || 'Unknown'}
+Brand: ${currentProductInfo.brand || 'Unknown'}
+Price: $${currentProductInfo.price?.toFixed(2) || 'Unknown'}
+${currentProductInfo.description ? `Description: ${currentProductInfo.description}` : ''}
+
+If the user asks to "add this to cart", "buy this", or similar phrases, they are referring to this product.
+`;
+        }
+
         // Craft system prompt with store context
         const systemPrompt = `You are a helpful shopping assistant for an e-commerce store. 
     
@@ -40,19 +56,35 @@ Your task is to help users navigate the site, find products, and answer question
 IMPORTANT INFORMATION ABOUT PRODUCTS:
 ${productContext}
 
+${currentProductContext}
+
 When the user asks about a specific product, try to identify the exact product from the list of available products above, and navigate them directly to that product page using the product ID.
 
 Always prioritize exact product matches over general searches when possible.
 
 When users want to navigate to a specific page, you should include an action that specifies where they should go.
 
+If the user wants to add the current product to their cart, update quantities, or remove items, use a cart action.
+
 FORMAT YOUR RESPONSE AS JSON with the following structure:
 {
   "response": "Your helpful response to the user",
   "action": {
-    "type": "navigate" or "search" or null,
-    "path": "/path/to/navigate/to" (only for navigate type),
-    "query": "search query" (only for search type)
+    // For navigation:
+    "type": "navigate", 
+    "path": "/path/to/navigate/to"
+    
+    // OR for search:
+    "type": "search",
+    "query": "search query"
+    
+    // OR for cart operations:
+    "type": "cart",
+    "operation": "add" or "remove" or "update",
+    "productId": 123,
+    "quantity": 1 (required for add/update operations)
+    
+    // OR undefined if no action needed
   }
 }`;
 
@@ -64,7 +96,7 @@ FORMAT YOUR RESPONSE AS JSON with the following structure:
             const parsedResponse = await queryOpenAI(systemPrompt, message, formattedHistory);
 
             // Validate action if present
-            let validatedAction: Action = null;
+            let validatedAction: Action | undefined = undefined;
             if (parsedResponse.action) {
                 validatedAction = validateAndNormalizeAction(parsedResponse.action);
                 parsedResponse.action = validatedAction as UnvalidatedAction;
@@ -104,6 +136,20 @@ FORMAT YOUR RESPONSE AS JSON with the following structure:
                             parsedResponse.response = `I couldn't find a specific product page for "${productIdentifier}", but I'll show you search results for it instead.`;
                         }
                     }
+                }
+            }
+
+            // Handle cart actions with current product context
+            if (parsedResponse.action?.type === 'cart') {
+                // If the user refers to the current product but no productId is specified
+                if (!parsedResponse.action.productId && currentProductId) {
+                    parsedResponse.action.productId = currentProductId;
+                }
+
+                // If we still don't have a valid productId, remove the action
+                if (!parsedResponse.action.productId) {
+                    parsedResponse.action = undefined;
+                    parsedResponse.response += " I couldn't determine which product you're referring to. Please specify the product or navigate to a product page first.";
                 }
             }
 

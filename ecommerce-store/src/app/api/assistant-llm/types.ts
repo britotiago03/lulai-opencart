@@ -9,13 +9,23 @@ export type ProductSearchAction = {
     query: string;
 };
 
-export type Action = NavigationAction | ProductSearchAction | null;
+export type CartAction = {
+    type: 'cart';
+    operation: 'add' | 'remove' | 'update';
+    productId: number;
+    quantity?: number;
+};
+
+export type Action = NavigationAction | ProductSearchAction | CartAction | undefined;
 
 // Unvalidated action object from LLM response
 export interface UnvalidatedAction {
     type?: string;
     path?: string;
     query?: string;
+    operation?: string;
+    productId?: number;
+    quantity?: number;
     [key: string]: unknown;
 }
 
@@ -54,5 +64,5 @@ export interface OpenAIResponse {
 // Response structure
 export interface AssistantResponse {
     response: string;
-    action?: UnvalidatedAction;
+    action?: UnvalidatedAction | undefined;
 }

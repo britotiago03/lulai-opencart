@@ -5,6 +5,7 @@ import { useCart } from "@/hooks/cart/useCart";
 import { CartTable } from "@/components/cart/CartTable";
 import { CartSummary } from "@/components/cart/CartSummary";
 import { EmptyCart } from "@/components/cart/EmptyCart";
+import { useEffect } from "react";
 
 export default function CartPage() {
     const {
@@ -14,9 +15,30 @@ export default function CartPage() {
         updating,
         updateMessages,
         updateQuantity,
-        removeItem
+        removeItem,
+        fetchCart
     } = useCart();
     const router = useRouter();
+
+    // Listen for cart-refresh-needed event from the AI assistant
+    useEffect(() => {
+        const handleCartRefresh = async () => {
+            console.log("Cart refresh triggered by AI assistant");
+            try {
+                await fetchCart();
+            } catch (error) {
+                console.error("Error refreshing cart:", error);
+            }
+        };
+
+        // Add event listener
+        window.addEventListener('cart-refresh-needed', handleCartRefresh);
+
+        // Clean up event listener
+        return () => {
+            window.removeEventListener('cart-refresh-needed', handleCartRefresh);
+        };
+    }, [fetchCart]);
 
     // Define Server Actions (with proper naming)
     const onUpdateQuantityAction = async (itemId: number, productId: number, newQuantity: number) => {

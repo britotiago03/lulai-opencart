@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import MessageList from './MessageList';
 import ChatInput from './ChatInput';
 import AudioService from '@/services/AudioService';
@@ -19,6 +19,10 @@ const AIShoppingAssistant: React.FC = () => {
     const [isSpeaking, setIsSpeaking] = useState(false);
     const [isListening, setIsListening] = useState(false);
     const [speakingMessageIndex, setSpeakingMessageIndex] = useState<number | null>(null);
+    const [addToCartStatus, setAddToCartStatus] = useState<{ status: 'idle' | 'success' | 'error', message: string }>({
+        status: 'idle',
+        message: ''
+    });
 
     // Refs
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -31,8 +35,9 @@ const AIShoppingAssistant: React.FC = () => {
     const audioService = audioServiceRef.current;
     const assistantService = assistantServiceRef.current;
 
-    // Router
+    // Router and current path
     const router = useRouter();
+    const pathname = usePathname();
 
     // Initialize services
     useEffect(() => {
@@ -45,10 +50,116 @@ const AIShoppingAssistant: React.FC = () => {
         };
     }, [audioService, assistantService]);
 
+    // Monitor URL changes to detect product pages
+    useEffect(() => {
+        // Check if current URL is a product page
+        if (pathname && pathname.startsWith('/product/')) {
+            // Extract product ID from URL
+            const productId = parseInt(pathname.split('/product/')[1], 10);
+
+            if (!isNaN(productId)) {
+                // Fetch product details to set context
+                const fetchProductDetails = async () => {
+                    try {
+                        const response = await fetch(`/api/products/${productId}`);
+                        if (response.ok) {
+                            const productData = await response.json();
+                            // Set product context in assistant service
+                            assistantService.setCurrentProduct(productId, productData);
+                        }
+                    } catch (error) {
+                        console.error('Error fetching product details:', error);
+                    }
+                };
+
+                // Call the async function and handle the Promise properly
+                void fetchProductDetails();
+            }
+        } else {
+            // Clear product context when not on a product page
+            assistantService.clearCurrentProduct();
+        }
+    }, [pathname, assistantService]);
+
     // Scroll to bottom when messages change
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
+
+    // Handle cart operations
+    const handleCartAction = useCallback(async (operation: 'add' | 'remove' | 'update', productId: number, quantity?: number) => {
+        setAddToCartStatus({ status: 'idle', message: '' });
+
+        try {
+            let endpoint = '';
+            let method = 'POST';
+            let body: Record<string, unknown> | undefined = { productId };
+
+            // Determine endpoint and request details based on operation
+            if (operation === 'add') {
+                endpoint = '/api/cart/add';
+                body.quantity = quantity || 1;
+            } else if (operation === 'remove') {
+                endpoint = `/api/cart/remove?productId=${productId}`;
+                method = 'DELETE';
+                body = undefined;
+            } else if (operation === 'update') {
+                endpoint = '/api/cart/update';
+                method = 'PUT';
+                body = { productId, quantity: quantity || 1 };
+            }
+
+            // Make API request
+            const response = await fetch(endpoint, {
+                method,
+                headers: method !== 'DELETE' ? { 'Content-Type': 'application/json' } : undefined,
+                body: body ? JSON.stringify(body) : undefined
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                // Trigger cart update event for navbar
+                window.dispatchEvent(new Event('cart-updated'));
+
+                // Check if user is on the cart page and refresh it if needed
+                if (pathname === '/cart') {
+                    // Trigger a custom event for the cart page to refresh
+                    window.dispatchEvent(new CustomEvent('cart-refresh-needed'));
+
+                    // For immediate refresh, you could also force a router refresh
+                    router.refresh();
+                }
+
+                setAddToCartStatus({
+                    status: 'success',
+                    message: operation === 'add' ? 'Added to cart successfully!' : 'Cart updated successfully!'
+                });
+
+                // Clear status after 3 seconds
+                setTimeout(() => {
+                    setAddToCartStatus({ status: 'idle', message: '' });
+                }, 3000);
+            } else {
+                setAddToCartStatus({
+                    status: 'error',
+                    message: data.error || 'Failed to update cart'
+                });
+                return;
+            }
+        } catch (error) {
+            console.error('Cart operation error:', error);
+            setAddToCartStatus({
+                status: 'error',
+                message: error instanceof Error ? error.message : 'Failed to update cart'
+            });
+
+            // Clear error after 5 seconds
+            setTimeout(() => {
+                setAddToCartStatus({ status: 'idle', message: '' });
+            }, 5000);
+        }
+    }, [pathname, router]);
 
     /**
      * Process a user message and handle AI response
@@ -68,8 +179,12 @@ const AIShoppingAssistant: React.FC = () => {
 
         try {
             // Process the query with the assistant service
-            const { aiResponse, shouldNavigate, navigationPath } =
-                await assistantService.processUserQuery(text);
+            const {
+                aiResponse,
+                shouldNavigate,
+                navigationPath,
+                cartAction
+            } = await assistantService.processUserQuery(text);
 
             // Add AI response
             const assistantMessage: Message = {
@@ -79,6 +194,15 @@ const AIShoppingAssistant: React.FC = () => {
             };
 
             setMessages(prev => [...prev, assistantMessage]);
+
+            // Handle cart action if present
+            if (cartAction) {
+                await handleCartAction(
+                    cartAction.operation,
+                    cartAction.productId,
+                    cartAction.quantity
+                );
+            }
 
             // Play the response audio
             const messageIndex = messages.length + 1; // +1 for the new message
@@ -182,6 +306,15 @@ const AIShoppingAssistant: React.FC = () => {
 
     return (
         <div className="fixed right-4 bottom-4 z-50">
+            {/* Cart status notification */}
+            {addToCartStatus.status !== 'idle' && (
+                <div className={`absolute bottom-full right-0 mb-2 p-3 rounded-lg shadow-lg ${
+                    addToCartStatus.status === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
+                }`}>
+                    {addToCartStatus.message}
+                </div>
+            )}
+
             {!isOpen ? (
                 // Assistant button (closed state)
                 <button
