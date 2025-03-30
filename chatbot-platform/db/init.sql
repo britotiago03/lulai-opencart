@@ -98,7 +98,7 @@ INSERT INTO users (name, email, password, verified) VALUES
 INSERT INTO admin_settings (setting_key, setting_value)
 VALUES
 ('access_token_renewal_frequency', 'weekly'),
-('admin_email', 'boss2909@hotmail.com'),
+('admin_email', 'britotiago101@gmail.com'),
 ('setup_completed', 'false');
 
 -- Drop existing tables if they exist (for clean initialization)
