@@ -14,9 +14,15 @@ class LulaiChatWidget extends HTMLElement {
     this.audioChunks = [];
     this.audioContext = null;
     this.audioSource = null;
-    // Store the scroll position
     this.lastScrollPosition = 0;
-
+  
+    // Get or create user ID
+    this.userId = localStorage.getItem('lulai_user_id');
+    if (!this.userId) {
+      this.userId = 'user_' + Math.random().toString(36).substring(2, 15);
+      localStorage.setItem('lulai_user_id', this.userId);
+    }
+  
     this.config = {
       primaryColor: "{{primaryColor}}",
       secondaryColor: "{{secondaryColor}}",
@@ -610,6 +616,17 @@ class LulaiChatWidget extends HTMLElement {
   
     const apiEndpoint = this.getAttribute('api-endpoint') || 'http://localhost:3005/api/chat';
     const apiKey = this.getAttribute('api-key');
+    
+    // Get the userId from attribute or generate a unique one if not provided
+    let userId = this.getAttribute('user-id');
+    if (!userId) {
+      // Generate a unique user ID if not provided and store it in localStorage
+      userId = localStorage.getItem('lulai_user_id');
+      if (!userId) {
+        userId = 'user_' + Math.random().toString(36).substring(2, 15);
+        localStorage.setItem('lulai_user_id', userId);
+      }
+    }
   
     let assistantMessage = { role: 'assistant', content: "" };
   
@@ -618,7 +635,11 @@ class LulaiChatWidget extends HTMLElement {
       const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: payloadMessages, apiKey })
+        body: JSON.stringify({ 
+          messages: payloadMessages, 
+          apiKey,
+          userId
+        })
       });
   
       if (!response.body) throw new Error("No response body");

@@ -1,4 +1,3 @@
-// /api/chat/route.ts
 import OpenAI from "openai";
 import { Pool } from 'pg';
 import 'dotenv/config';
@@ -28,11 +27,15 @@ export async function OPTIONS(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    // Expecting both messages and apiKey in the request body
-    const { messages, apiKey } = await req.json();
+    // Expecting messages, apiKey, and userId in the request body
+    const { messages, apiKey, userId } = await req.json();
     if (!messages || !apiKey) {
       throw new Error("Missing required fields: messages and/or apiKey");
     }
+    
+    // Use a default userId if none is provided
+    const userIdentifier = userId || 'anonymous';
+    
     const latestMessage = messages[messages.length - 1]?.content;
     if (!latestMessage) {
       throw new Error("No message content provided.");
@@ -44,6 +47,23 @@ export async function POST(req: Request) {
     const promptTableName = `${sanitizedKey}_prompt`;
     console.log(`Using tables for API key: ${sanitizedKey}`);
 
+    // Store the user's message in the database
+    const client = await pool.connect();
+    
+    try {
+      // Save the latest user message to the conversations table
+      await client.query(
+        `INSERT INTO conversations (api_key, user_id, message_role, message_content) 
+         VALUES ($1, $2, $3, $4)`,
+        [apiKey, userIdentifier, 'user', latestMessage]
+      );
+      // Log where it stored and what message was stored
+      console.log(`Stored USER message in 'conversations' table for userId: ${userIdentifier}. Message: "${latestMessage}"`);
+    } catch (dbError: any) {
+      console.error("Error storing user message:", dbError);
+      // Continue execution even if saving fails
+    }
+
     // Get embedding for the latest message from OpenAI
     const embedding = await openai.embeddings.create({
       model: "text-embedding-ada-002",
@@ -52,7 +72,6 @@ export async function POST(req: Request) {
     });
 
     let docContext = "";
-    const client = await pool.connect();
     let customPrompt: string | null = null;
     try {
       // Vector similarity search on products
@@ -89,8 +108,6 @@ export async function POST(req: Request) {
     } catch (dbError: any) {
       console.error("Database error:", dbError);
       docContext = "Error retrieving product data.";
-    } finally {
-      client.release();
     }
 
     // Default system prompt guidelines
@@ -145,6 +162,9 @@ USER QUESTION: ${latestMessage}
       messages: [template, ...messages],
     });
 
+    // Variable to collect the complete assistant response
+    let completeAssistantResponse = "";
+
     // Stream the response back to the frontend
     const stream = new ReadableStream({
       async start(controller) {
@@ -152,15 +172,34 @@ USER QUESTION: ${latestMessage}
           for await (const chunk of openaiResponse) {
             const delta = chunk.choices?.[0]?.delta;
             if (delta?.content) {
+              // Append to complete response
+              completeAssistantResponse += delta.content;
               controller.enqueue(`data: ${JSON.stringify({ role: "assistant", content: delta.content })}\n\n`);
             }
           }
+          
+          // Store the complete assistant response in the database
+          try {
+            await client.query(
+              `INSERT INTO conversations (api_key, user_id, message_role, message_content) 
+               VALUES ($1, $2, $3, $4)`,
+              [apiKey, userIdentifier, 'assistant', completeAssistantResponse]
+            );
+            // Log where it stored and what message was stored
+            console.log(`Stored ASSISTANT message in 'conversations' table for userId: ${userIdentifier}. Message: "${completeAssistantResponse}"`);
+          } catch (saveError) {
+            console.error("Error storing assistant response:", saveError);
+          } finally {
+            // Always release the client back to the pool
+            client.release();
+          }
+          
           controller.enqueue("data: {}\n\n");
         } catch (streamError) {
           console.error("Stream error:", streamError);
+          client.release();
           controller.error(streamError);
         }
-        controller.close();
       }
     });
 
