@@ -1,22 +1,17 @@
 // /api/chat/route.ts
 import OpenAI from "openai";
-import { DataAPIClient } from "@datastax/astra-db-ts";
+import { Pool } from 'pg';
+import 'dotenv/config';
 
-const { 
-  ASTRA_DB_NAMESPACE, 
-  ASTRA_DB_API_ENDPOINT, 
-  ASTRA_DB_APPLICATION_TOKEN, 
-  OPENAI_API_KEY 
-} = process.env;
+const { OPENAI_API_KEY, DATABASE_URL } = process.env;
 
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
+const pool = new Pool({
+  connectionString: DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+});
 
-// Function to initialize DB client
-const initializeDB = () => {
-  return new DataAPIClient(ASTRA_DB_APPLICATION_TOKEN).db(ASTRA_DB_API_ENDPOINT, { namespace: ASTRA_DB_NAMESPACE });
-};
-
-// Sanitize API key for collection names (matches loadDb.ts implementation)
+// Sanitize API key for table names (matches loadDb.ts implementation)
 const sanitizeApiKey = (apiKey: string) => {
   return apiKey.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
 };
@@ -43,12 +38,12 @@ export async function POST(req: Request) {
       throw new Error("No message content provided.");
     }
 
-    // Sanitize and create collection names
+    // Sanitize and create table names
     const sanitizedKey = sanitizeApiKey(apiKey);
-    const productCollectionName = `${sanitizedKey}_productlist`;
-    const promptCollectionName = `${sanitizedKey}_prompt`;
-    console.log(`Using collections for API key: ${sanitizedKey}`);
-    
+    const productTableName = `${sanitizedKey}_productlist`;
+    const promptTableName = `${sanitizedKey}_prompt`;
+    console.log(`Using tables for API key: ${sanitizedKey}`);
+
     // Get embedding for the latest message from OpenAI
     const embedding = await openai.embeddings.create({
       model: "text-embedding-ada-002",
@@ -57,36 +52,16 @@ export async function POST(req: Request) {
     });
 
     let docContext = "";
-    let db = initializeDB(); // fresh DB connection per request
-
+    const client = await pool.connect();
+    let customPrompt: string | null = null;
     try {
-      const collection = await db.collection(productCollectionName);
-      if (!collection) {
-        throw new Error("Failed to retrieve product collection");
-      }
-
-      // Query documents with a retry mechanism
-      let documents = [];
-      let retries = 2;
-      while (retries > 0) {
-        try {
-          const cursor = collection.find({}, {
-            sort: { $vector: embedding.data[0].embedding },
-            limit: 999
-          });
-          documents = await cursor.toArray();
-          break;
-        } catch (dbError: any) {
-          console.error("Database query error:", dbError);
-          if (dbError.message.includes("The session has been destroyed")) {
-            console.warn("Reinitializing database connection...");
-            db = initializeDB();
-            retries--;
-          } else {
-            throw dbError;
-          }
-        }
-      }
+      // Vector similarity search on products
+      const { rows: documents } = await client.query(
+        `SELECT * FROM ${productTableName}
+         ORDER BY vector <=> $1
+         LIMIT 999`,
+        [JSON.stringify(embedding.data[0].embedding)]
+      );
 
       if (!documents || documents.length === 0) {
         console.warn("No relevant documents found in database.");
@@ -104,24 +79,21 @@ export async function POST(req: Request) {
           `**URL**: [Link to Product](${doc.url || "#"})\n-----------------------------------\n`
         ).join("\n");
       }
+
+      // Load custom system prompt from the prompt table
+      const { rows } = await client.query(
+        `SELECT content FROM ${promptTableName} WHERE id = $1`,
+        ["system_prompt"]
+      );
+      customPrompt = rows[0]?.content || null;
     } catch (dbError: any) {
-      console.error("Final DB error:", dbError);
+      console.error("Database error:", dbError);
       docContext = "Error retrieving product data.";
+    } finally {
+      client.release();
     }
 
-    // Load custom system prompt from the API key's prompt collection
-    let customPrompt: string | null = null;
-    try {
-      const promptCollection = await db.collection(promptCollectionName);
-      const promptDoc = await promptCollection.findOne({ id: "system_prompt" });
-      if (promptDoc && promptDoc.content) {
-        customPrompt = promptDoc.content;
-      }
-    } catch (error) {
-      console.error("Error retrieving custom prompt:", error);
-    }
-
-    // Default system prompt guidelines (updated to use generic "API key" terminology)
+    // Default system prompt guidelines
     const defaultSystemPrompt = `You are a customer service chatbot designed to assist customers with questions related to this integration. 
 Follow these guidelines:
 
@@ -146,8 +118,8 @@ Follow these guidelines:
      "I don't have specific details on that, but our products focus on quality and reliability. Check the product page for more information."
 
 6. Clear Communication:
-   - Provide concise responses with clear product details
-   - Offer relevant links when available`;
+   - Provide concise responses with clear product details.
+   - Offer relevant links when available.`;
 
     // Build the final system prompt
     const finalSystemPrompt = `${customPrompt || defaultSystemPrompt}
@@ -168,7 +140,7 @@ USER QUESTION: ${latestMessage}
 
     // OpenAI streaming response
     const openaiResponse = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o", // Ensure this model name is correct; adjust if necessary.
       stream: true,
       messages: [template, ...messages],
     });

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
 import crypto from 'crypto';
+import JavaScriptObfuscator from 'javascript-obfuscator';
 
 interface WidgetConfig {
   widgetConfig: {
@@ -47,28 +48,42 @@ export async function POST(request: NextRequest) {
       }, { status: 500 });
     }
 
-    // Read the template file
+    // Read and process the template
     let templateContent = await fs.readFile(templatePath, 'utf8');
 
-    // Replace placeholders with actual config values
+    // Replace placeholders with config values
     Object.entries(widgetConfig).forEach(([key, value]) => {
       const placeholder = `{{${key}}}`;
       templateContent = templateContent.replace(new RegExp(placeholder, 'g'), value);
     });
 
-    // Generate a more predictable filename
+    // Obfuscate the generated code
+    const obfuscationResult = JavaScriptObfuscator.obfuscate(templateContent, {
+      compact: true,
+      controlFlowFlattening: true,
+      controlFlowFlatteningThreshold: 0.75,
+      numbersToExpressions: true,
+      simplify: true,
+      shuffleStringArray: true,
+      splitStrings: true,
+      stringArrayThreshold: 0.75,
+      transformObjectKeys: true,
+      unicodeEscapeSequence: true
+    });
+
+    const obfuscatedCode = obfuscationResult.getObfuscatedCode();
+
+    // Generate filename and paths
     const hash = crypto.createHash('md5')
       .update(JSON.stringify(widgetConfig))
       .digest('hex')
       .slice(0, 10);
     const outputFilename = `lulai-widget-${hash}.js`;
-    
-    // Construct full output path
     const publicDir = path.join(process.cwd(), 'public');
     const widgetsDir = path.join(publicDir, 'widgets');
     const outputPath = path.join(widgetsDir, outputFilename);
 
-    // Ensure the directory exists with detailed logging
+    // Ensure output directory exists
     try {
       await fs.mkdir(widgetsDir, { recursive: true });
       console.log('Widgets directory created/verified:', widgetsDir);
@@ -80,10 +95,10 @@ export async function POST(request: NextRequest) {
       }, { status: 500 });
     }
 
-    // Write the customized widget file with error handling
+    // Write the obfuscated widget file
     try {
-      await fs.writeFile(outputPath, templateContent);
-      console.log('Widget file successfully written:', outputPath);
+      await fs.writeFile(outputPath, obfuscatedCode);
+      console.log('Obfuscated widget file written:', outputPath);
     } catch (writeError) {
       console.error('Failed to write widget file:', writeError);
       return NextResponse.json({ 
@@ -93,7 +108,7 @@ export async function POST(request: NextRequest) {
       }, { status: 500 });
     }
 
-    // Verify file was created
+    // Verify file creation
     try {
       const stats = await fs.stat(outputPath);
       console.log('Widget file stats:', {
@@ -106,23 +121,19 @@ export async function POST(request: NextRequest) {
       console.error('Failed to get file stats:', statError);
     }
 
-    // Return the public URL of the widget
+    // Return public URL
     const publicUrl = `/widgets/${outputFilename}`;
-    console.log('Generated widget public URL:', publicUrl);
-
     return NextResponse.json({ 
       downloadUrl: publicUrl,
       message: 'Widget successfully built',
       outputPath: outputPath,
       filename: outputFilename
     });
+
   } catch (error) {
-    // Catch-all error logging
-    console.error('Comprehensive Widget Build Error:', {
+    console.error('Widget Build Error:', {
       message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : 'No stack trace',
-      type: typeof error,
-      stringified: JSON.stringify(error)
+      stack: error instanceof Error ? error.stack : 'No stack trace'
     });
 
     return NextResponse.json({ 

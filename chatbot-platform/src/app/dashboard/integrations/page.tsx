@@ -66,12 +66,18 @@ export default function Integrate() {
     // Generate 16 random bytes (128 bits)
     const array = new Uint8Array(16);
     window.crypto.getRandomValues(array);
-    
+
     // Convert to hex string
-    const key = Array.from(array, byte => 
+    let key = Array.from(array, byte => 
       byte.toString(16).padStart(2, '0')
     ).join('');
-  
+
+    // Ensure the first character is a letter
+    if (!/^[a-zA-Z]/.test(key)) {
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+        key = letters[Math.floor(Math.random() * letters.length)] + key.slice(1);
+    }
+
     setFormData((prev) => ({ ...prev, apiKey: key }));
   };
 
@@ -113,17 +119,17 @@ export default function Integrate() {
   
     try {
       // Fix 1: Add proper method to storage request
-      setProgress(prev => [...prev, "Saving custom prompt to AstraDB..."]);
+      setProgress(prev => [...prev, "Saving custom prompt to the Database..."]);
       const storageRes = await fetch("http://localhost:3005/api/storage", {
-        method: "POST", // Ensure method is specified
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData), // Send full form data
+        body: JSON.stringify(formData),
       });
   
       // Fix 2: Add method to chatbot request
       setProgress(prev => [...prev, "Saving chatbot details to PostgreSQL..."]);
       const chatbotRes = await fetch("/api/chatbots", {
-        method: "POST", // Explicit method declaration
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
@@ -131,7 +137,7 @@ export default function Integrate() {
       // Fix 3: Verify build-widget endpoint
       setProgress(prev => [...prev, "Building widget package..."]);
       const widgetRes = await fetch("/api/build-widget", {
-        method: "POST", // Must use POST for sending JSON body
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           integration: formData,
@@ -156,7 +162,6 @@ export default function Integrate() {
     }
   };
   
-
   return (
     <div className="max-w-7xl mx-auto p-6">
       <div className="mb-6">
@@ -480,42 +485,74 @@ export default function Integrate() {
                 </div>
               </div>
 
-              <div className="mt-8">
-                <div className="border rounded-md p-4">
-                  <div className="mb-2 text-sm font-medium">Widget Preview</div>
-                  <div className="relative bg-gray-100 rounded-md h-64 flex items-center justify-center">
-                    <div className="relative h-full w-full overflow-hidden">
+            <div className="mt-8">
+              <div className="border rounded-md p-4">
+                <div className="mb-2 text-sm font-medium">Widget Preview</div>
+                <div 
+                  className="relative bg-gray-100 rounded-md flex items-center justify-center"
+                  style={{
+                    height: `${Number(widgetConfig.windowHeight) * 0.5 + 64}px`,
+                    minHeight: `${Number(widgetConfig.buttonSize) * 0.7 + 64}px`
+                  }}
+                >
+                  <div className="relative h-full w-full overflow-hidden">
+                    {/* Chat Window Preview */}
+                    <div 
+                      className="bg-white shadow-md rounded-md absolute right-8 bottom-8"
+                      style={{
+                        width: `${Number(widgetConfig.windowWidth) * 0.5}px`,
+                        height: `${Number(widgetConfig.windowHeight) * 0.5}px`,
+                        transformOrigin: 'bottom right'
+                      }}
+                    >
                       <div 
-                        className="bg-white shadow-md rounded-md absolute right-16 bottom-16" 
-                        style={{
-                          width: `${Number(widgetConfig.windowWidth) * 0.4}px`,
-                          height: `${Number(widgetConfig.windowHeight) * 0.4}px`,
-                        }}
+                        className="p-2 rounded-t-md text-white text-sm flex justify-between items-center"
+                        style={{ backgroundColor: widgetConfig.primaryColor }}
                       >
-                        <div 
-                          className="p-2 rounded-t-md text-white text-sm flex justify-between items-center"
-                          style={{ backgroundColor: widgetConfig.primaryColor }}
-                        >
-                          <span>{widgetConfig.headerText}</span>
-                          <span>×</span>
+                        <span>{widgetConfig.headerText}</span>
+                        <span>×</span>
+                      </div>
+                      {/* Chat Messages Preview */}
+                      <div className="bg-gray-50 h-4/5 p-2 overflow-y-auto">
+                        <div className="flex justify-start mb-2">
+                          <div 
+                            className="bg-gray-200 rounded-lg p-2 max-w-[70%]"
+                            style={{ color: '#000' }}
+                          >
+                            How can I help you?
+                          </div>
                         </div>
-                        <div className="bg-gray-50 h-4/5"></div>
-                        <div className="p-1 border-t"></div>
+                        <div className="flex justify-end">
+                          <div 
+                            className="rounded-lg p-2 max-w-[70%]"
+                            style={{ 
+                              backgroundColor: widgetConfig.secondaryColor,
+                              color: '#000'  // Ensured black text color
+                            }}
+                          >
+                            Sample question
+                          </div>
+                        </div>
                       </div>
-                      <div 
-                        className="absolute right-6 bottom-6 flex items-center justify-center text-white font-bold rounded-full shadow-md"
-                        style={{
-                          backgroundColor: widgetConfig.primaryColor,
-                          width: `${Number(widgetConfig.buttonSize) * 0.6}px`,
-                          height: `${Number(widgetConfig.buttonSize) * 0.6}px`,
-                        }}
-                      >
-                        +
-                      </div>
+                      <div className="p-1 border-t"></div>
+                    </div>
+
+                    {/* Chat Button Preview */}
+                    <div 
+                      className="absolute right-4 bottom-4 flex items-center justify-center text-white font-bold rounded-full shadow-md"
+                      style={{
+                        backgroundColor: widgetConfig.primaryColor,
+                        width: `${Number(widgetConfig.buttonSize) * 0.7}px`,
+                        height: `${Number(widgetConfig.buttonSize) * 0.7}px`
+                      }}
+                    >
+                      +
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
+
             </CardContent>
           </Card>
 
@@ -578,7 +615,7 @@ export default function Integrate() {
                 type="button"
                 onClick={handleBuildWidget}
                 className="w-full px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors mt-6"
-                disabled={buildingWidget}
+                disabled={buildingWidget || widgetBuilt}
               >
                 {buildingWidget ? (
                   <div className="flex items-center justify-center">
@@ -634,6 +671,7 @@ export default function Integrate() {
               type="button"
               onClick={handlePrevious}
               className="px-6 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
+              disabled={buildingWidget || widgetBuilt}
             >
               Back
             </button>
