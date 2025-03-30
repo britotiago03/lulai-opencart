@@ -34,7 +34,7 @@ export async function PUT(req: Request) {
             console.log("Updating subscription status...");
             await client.query(
                 `UPDATE users SET subscription_status = $1 WHERE id = $2`,
-                [body.subscription_type, session.user.id.toString()] // Ensure ID is string
+                [body.subscription_type, session.user.id.toString()] 
             );
         });
 
@@ -43,7 +43,7 @@ export async function PUT(req: Request) {
             console.log("Verifying subscription status update...");
             const result = await client.query(
                 `SELECT subscription_status FROM users WHERE id = $1`,
-                [session.user.id.toString()] // Ensure ID is string
+                [session.user.id.toString()]
             );
             return result;
         });

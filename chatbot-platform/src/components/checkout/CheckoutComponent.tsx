@@ -19,52 +19,86 @@ export default function CheckoutComponent({ selectedSubscription }: Subscription
     const handlePaymentSubmit = async (paymentData: StripePaymentData) => {
         setIsSubmitting(true);
         setCheckoutError(null);
-
+    
         try {
             console.log("Processing payment with data:", paymentData);
-
-            const subscriptionData : SubscriptionData = {
+    
+            const subscriptionData: SubscriptionData = {
                 paymentMethod: "stripe",
                 paymentData,
                 subscription: selectedSubscription,
             };
-
-            const response = await fetch("/api/checkout/stripe", {
-                method: "POST",
+    
+            // Check if the user already has an active subscription
+            const subscriptionStatusResponse = await fetch("/api/users/data", {
+                method: "GET",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(subscriptionData),
             });
+    
+            if (!subscriptionStatusResponse.ok) {
+                const errorData = await subscriptionStatusResponse.json();
+                console.error("Failed to fetch subscription status:", errorData);
+                setCheckoutError("Failed to fetch subscription status. Please try again.");
+                setIsSubmitting(false);
+                return;
+            }
+    
+            const userData = await subscriptionStatusResponse.json();
+            const hasActiveSubscription = userData.subscription_status && userData.subscription_status !== "none";
+    
+            let response;
+    
+            if (hasActiveSubscription) {
+                // Update existing subscription
+                console.log("Updating existing subscription...");
+                response = await fetch("/api/subscriptions/change", {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        subscription_type: selectedSubscription?.plan_type,
+                        price: selectedSubscription?.price,
+                    }),
+                });
+            } else {
+                // Create a new subscription
+                console.log("Creating new subscription...");
+                response = await fetch("/api/checkout/stripe", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(subscriptionData),
+                });
 
-            const data = await response.json();
-
+            }
+    
+            const data = await response.json();            
+    
             if (!response.ok) {
                 setCheckoutError(data.error || "Failed to process payment");
                 setIsSubmitting(false);
                 return;
             }
-
+    
             console.log("Payment processed successfully:", data);
-
+    
+            // Update subscription status
             const updateStatusResponse = await fetch("/api/subscriptions/edit-status", {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(
-                    {
-                        subscription_type: selectedSubscription?.plan_type,
-                    }
-                ),
+                body: JSON.stringify({
+                    subscription_type: selectedSubscription?.plan_type,
+                }),
             });
-
-            if(!updateStatusResponse.ok) {
+    
+            if (!updateStatusResponse.ok) {
                 const errorData = await updateStatusResponse.json();
                 console.error("Failed to update subscription status:", errorData);
                 setCheckoutError("Failed to update subscription status. Please try again.");
                 setIsSubmitting(false);
                 return;
             }
-
+    
             // Redirect to order confirmation
             router.push(`/order-confirmation/${data.subscriptionId}`);
         } catch (error) {

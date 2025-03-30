@@ -65,12 +65,19 @@ export default function SubscriptionsComponent() {
                         price={20}
                         type="basic"
                     />
-                     <SubscriptionCard
+                    <SubscriptionCard
                         title="Pro"
                         description="Perfect for organizations"
                         price_desc="$49/month"
                         price={49}
                         type="pro"
+                    />
+                    <SubscriptionCard
+                        title="Enterprise"
+                        description="Perfect for large organizations or enterprises"
+                        price_desc="$49/month"
+                        price={79}
+                        type="enterprise"
                     />
                 </div>
             </main>

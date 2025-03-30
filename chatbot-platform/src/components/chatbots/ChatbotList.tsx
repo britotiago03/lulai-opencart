@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Edit, Trash2, MessageSquare, BarChart3, ExternalLink } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
@@ -133,7 +133,7 @@ export default function ChatbotList() {
                                 <p className="text-xs text-gray-500">Responses</p>
                                 <p className="font-medium">{chatbot.responses?.length || 0}</p>
                             </div>
-                        </div>
+                        </CardContent>
 
                         <div className="flex space-x-2">
                             <Link
@@ -155,8 +155,8 @@ export default function ChatbotList() {
                                 <BarChart3 className="h-5 w-5" />
                             </Link>
                         </div>
-                    </CardContent>
-                </Card>
+                    </Card>
+                </Link>
             ))}
         </div>
     );

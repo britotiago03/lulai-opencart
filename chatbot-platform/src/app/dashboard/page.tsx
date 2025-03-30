@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { useSession, SessionProvider } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { RetrievedSubscription } from "@/types/subscription";
 
 interface Chatbot {
     id: string;
@@ -32,6 +33,7 @@ function DashboardPageContent() {
     const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
     const { data: session, status } = useSession();
     const router = useRouter();
+    const [subscription, setSubscription] = useState<RetrievedSubscription | null>(null);
 
     // Fetch chatbots
     useEffect(() => {
@@ -72,7 +74,27 @@ function DashboardPageContent() {
             }
         };
 
+        // Fetch subscription data here
+        const fetchSubscription = async () => {
+            try {
+                const response = await fetch("/api/subscriptions/data");
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch subscription data");
+                }
+
+                const data = await response.json();
+                setSubscription(data.subscription || null);
+            } catch (err) {
+                console.error("Error fetching subscription:", err);
+                setError("Failed to load subscription data. Please try again.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
         fetchChatbots();
+        fetchSubscription();
     }, [user]);
 
     // Loading
@@ -389,29 +411,30 @@ function DashboardPageContent() {
                 </Card>
             )}
 
-            {/* Subscription Info */}
+            {/* Subscription Info 
+             TODO: EDIT this page to display current subscription */}
             <Card className="bg-[#1b2539] border-0 mt-6">
                 <CardContent className="p-4 sm:p-6">
                     <div className="flex flex-col md:flex-row md:items-center justify-between">
                         <div>
                             <h3 className="text-lg font-semibold">Your Subscription</h3>
-                            <p className="text-gray-400 mt-1">Professional Plan - $49.99/month</p>
+                            <p className="text-gray-400 mt-1">{subscription?.plan_type || "none"} - ${subscription?.price}/month</p>
                             <div className="mt-2 text-sm">
                 <span className="px-2 py-1 bg-blue-900/30 text-blue-400 rounded-full">
                   Active
                 </span>
                                 <span className="ml-2 text-gray-400">
-                  Next billing:{" "}
-                                    {new Date(
-                                        Date.now() + 15 * 24 * 60 * 60 * 1000
-                                    ).toLocaleDateString()}
+                  Next billing:{subscription?.renewal_date ? new Date(subscription.renewal_date).toLocaleDateString() : "N/A"}
                 </span>
                             </div>
                         </div>
                         <div className="mt-4 md:mt-0">
-                            <button className="px-4 py-2 border border-blue-600 text-blue-500 rounded-md hover:bg-blue-900/20 transition-colors mr-2">
-                                Upgrade Plan
-                            </button>
+                        <Link
+                            href="/subscriptions"
+                            className="px-4 py-2 border border-blue-600 text-blue-500 rounded-md hover:bg-blue-900/20 transition-colors mr-2"
+                        >
+                            Upgrade Plan
+                        </Link>
                             <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
                                 Manage Billing
                             </button>
