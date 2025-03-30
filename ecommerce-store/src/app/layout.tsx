@@ -1,11 +1,10 @@
 import React from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { PathnameProvider } from "@/components/layout/PathnameProvider";
-import ClientLayout from "@/components/layout/ClientLayout"; // Import the new client layout
+import Providers from "@/components/layout/Providers";
+import Navbar from "@/components/layout/Navbar";
+import AIShoppingAssistant from "@/components/assistant/AIShoppingAssistant";
 import "./globals.css";
-import { initializeAdminSystem } from "@/lib/admin-init"; // ✅ Import admin system initializer
-
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -19,23 +18,27 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
     title: "My Next.js App",
-    description: "A fully functional Next.js authentication system",
+    description: "A fully functional Next.js e-commerce site with AI assistant",
 };
 
-// ✅ Ensure the admin system initializes only once
-let initialized = false;
-if (typeof window === "undefined" && !initialized) {
-    initializeAdminSystem();
-    initialized = true;
-}
+// Enable static generation of the layout shell
+export const dynamic = 'force-static';
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+                                       children,
+                                   }: {
+    children: React.ReactNode;
+}) {
     return (
         <html lang="en">
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-          <PathnameProvider>
-              <ClientLayout>{children}</ClientLayout>
-          </PathnameProvider>
+        <Providers>
+            <Navbar />
+            <main>
+                {children}
+            </main>
+            <AIShoppingAssistant />
+        </Providers>
         </body>
         </html>
     );

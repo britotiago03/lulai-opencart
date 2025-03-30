@@ -29,7 +29,6 @@ function AdminLoginFormContent({}: AdminLoginPageProps) {
                 password,
                 callbackUrl: "/admin"
             });
-            
 
             console.log("Signin result:", result);
 

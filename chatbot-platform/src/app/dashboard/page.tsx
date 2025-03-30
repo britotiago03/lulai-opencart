@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
+import { useSession, SessionProvider } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 interface Chatbot {
     id: string;
@@ -16,7 +18,7 @@ interface Chatbot {
     responses: any[];
 }
 
-export default function DashboardPage() {
+function DashboardPageContent() {
     const { user } = useAuth();
     const [loading, setLoading] = useState(true);
     const [chatbots, setChatbots] = useState<Chatbot[]>([]);
@@ -27,9 +29,14 @@ export default function DashboardPage() {
         conversionRate: 0,
         averageResponseTime: 0,
     });
+    const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+    const { data: session, status } = useSession();
+    const router = useRouter();
 
     // Fetch chatbots
     useEffect(() => {
+        setIsLoggedIn(true);
+
         const fetchChatbots = async () => {
             if (!user) {
                 setLoading(false);
@@ -140,12 +147,8 @@ export default function DashboardPage() {
                                 </svg>
                             </div>
                             <div>
-                                <h2 className="text-xl sm:text-2xl font-semibold">
-                                    Welcome back, {user?.name || "User"}
-                                </h2>
-                                <p className="text-gray-400 mt-1">
-                                    Here's an overview of your chatbots and their performance
-                                </p>
+                                <h2 className="text-xl sm:text-2xl font-semibold">Welcome back, {session?.user.name || 'User'}</h2>
+                                <p className="text-gray-400 mt-1">Here's an overview of your chatbots and their performance</p>
                             </div>
                         </Link>
                         {chatbots.length === 0 ? (
@@ -417,5 +420,13 @@ export default function DashboardPage() {
                 </CardContent>
             </Card>
         </div>
+    );
+}
+
+export default function DashboardPage() {
+    return (
+        <SessionProvider>
+            <DashboardPageContent />
+        </SessionProvider>
     );
 }
