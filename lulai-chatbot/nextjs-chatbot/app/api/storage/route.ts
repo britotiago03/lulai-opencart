@@ -1,3 +1,4 @@
+//lulai-chatbot/nextjs-chatbot/app/api/storage/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { loadProductDataForStore, updateSystemPrompt } from "@/app/scripts/loadDb";
 
