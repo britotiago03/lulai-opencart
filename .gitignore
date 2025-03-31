@@ -260,3 +260,6 @@ chatbot/frontend/.vercel
 # typescript
 chatbot/frontend/*.tsbuildinfo
 chatbot/frontend/next-env.d.ts
+
+# lulai-chatbot
+/lulai-chatbot/nextjs-chatbot/db/data/

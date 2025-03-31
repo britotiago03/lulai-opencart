@@ -1,3 +1,4 @@
+# lulai-chatbot/nextjs-chatbot/python-server/server.py
 from fastapi import FastAPI, UploadFile, File, HTTPException, Request
 from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,7 +8,11 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 
-# Load environment variables from .env.local located one directory above this script
+# Import ElevenLabs SDK
+from elevenlabs import VoiceSettings
+from elevenlabs.client import ElevenLabs
+
+# Load environment variables
 dotenv_path = os.path.join(os.path.dirname(__file__), "..", ".env.local")
 load_dotenv(dotenv_path=dotenv_path)
 
@@ -25,21 +30,29 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize the OpenAI client with the API key from the .env.local file
-api_key = os.getenv("OPENAI_API_KEY")
-if not api_key:
+# Initialize API clients
+openai_api_key = os.getenv("OPENAI_API_KEY")
+elevenlabs_api_key = os.getenv("ELEVENLABS_API_KEY")
+
+if not openai_api_key:
     raise Exception("OPENAI_API_KEY environment variable not set")
-client = OpenAI(api_key=api_key)
 
-# Real-Time Streaming Text-to-Speech Endpoint
-@app.post("/tts")
-async def text_to_speech(request: Request):
-    logger.info("Received POST /tts request")
-    data = await request.json()
-    text_input = data.get("input")
-    if not text_input:
-        raise HTTPException(status_code=400, detail="Missing input text")
+client = OpenAI(api_key=openai_api_key)
 
+# Initialize ElevenLabs client if API key is available
+elevenlabs_client = None
+if elevenlabs_api_key:
+    elevenlabs_client = ElevenLabs(api_key=elevenlabs_api_key)
+else:
+    logger.warning("ELEVENLABS_API_KEY not set. Will use OpenAI TTS as fallback.")
+
+# Default voice - using Adam
+DEFAULT_VOICE_ID = "pNInz6obpgDQGcFmaJgB"
+
+# OpenAI TTS fallback function
+async def openai_tts_fallback(text_input):
+    logger.info("Using OpenAI TTS fallback")
+    
     def iterfile():
         # Stream TTS audio from OpenAI as it is generated in chunks
         with client.audio.speech.with_streaming_response.create(
@@ -51,9 +64,78 @@ async def text_to_speech(request: Request):
             for chunk in response.iter_bytes(1024):
                 yield chunk
 
-    return StreamingResponse(iterfile(), media_type="audio/mpeg", headers={"Cache-Control": "no-store"})
+    return StreamingResponse(
+        iterfile(), 
+        media_type="audio/mpeg", 
+        headers={"Cache-Control": "no-store"}
+    )
 
-# Whisper Transcription Endpoint
+@app.post("/tts")
+async def text_to_speech(request: Request):
+    logger.info("Received POST /tts request")
+    data = await request.json()
+    text_input = data.get("input")
+    
+    if not text_input:
+        raise HTTPException(status_code=400, detail="Missing input text")
+    
+    # Try ElevenLabs first if available
+    if elevenlabs_client:
+        try:
+            logger.info("Attempting to use ElevenLabs TTS")
+            
+            # We won't use streaming directly from ElevenLabs due to error handling limitations
+            # Instead, we'll get the whole audio file and then stream it to the client
+            try:
+                # Generate audio with ElevenLabs
+                audio_data = elevenlabs_client.text_to_speech.convert(
+                    voice_id=DEFAULT_VOICE_ID,
+                    output_format="mp3_44100_128",
+                    text=text_input,
+                    model_id="eleven_turbo_v2_5",
+                    voice_settings=VoiceSettings(
+                        stability=0.5,
+                        similarity_boost=0.8,
+                        style=0.0,
+                        use_speaker_boost=True,
+                        speed=1.0,
+                    ),
+                )
+                
+                # Collect all the audio chunks
+                audio_bytes = b''
+                for chunk in audio_data:
+                    if chunk:
+                        audio_bytes += chunk
+                
+                # Stream the collected audio to the client
+                return StreamingResponse(
+                    io.BytesIO(audio_bytes),
+                    media_type="audio/mpeg",
+                    headers={"Cache-Control": "no-store"}
+                )
+            
+            except Exception as e:
+                # Check specifically for 401 errors from ElevenLabs
+                if hasattr(e, 'status_code') and e.status_code == 401:
+                    logger.error(f"ElevenLabs authentication error: {str(e)}")
+                    logger.info("Falling back to OpenAI TTS due to ElevenLabs authentication issue")
+                else:
+                    logger.error(f"Error with ElevenLabs TTS: {str(e)}")
+                    logger.info("Falling back to OpenAI TTS")
+                
+                # Fall back to OpenAI
+                return await openai_tts_fallback(text_input)
+                
+        except Exception as e:
+            logger.error(f"Unexpected error with ElevenLabs TTS: {str(e)}")
+            logger.info("Falling back to OpenAI TTS")
+            return await openai_tts_fallback(text_input)
+    else:
+        # Fallback to OpenAI TTS if ElevenLabs is not configured
+        logger.info("ElevenLabs not configured, using OpenAI TTS")
+        return await openai_tts_fallback(text_input)
+
 @app.post("/whisper")
 async def whisper_transcription(file: UploadFile = File(...)):
     try:
@@ -68,9 +150,8 @@ async def whisper_transcription(file: UploadFile = File(...)):
             file=(file.filename, io.BytesIO(audio_bytes), file.content_type)
         )
         
-        logger.info(f"Response from OpenAI: {response}")
-        
         transcription_text = response.text
+        logger.info(f"Transcription: {transcription_text[:50]}...")
 
         return JSONResponse({"transcription": transcription_text})
     
