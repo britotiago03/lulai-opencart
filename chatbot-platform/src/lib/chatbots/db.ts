@@ -140,15 +140,11 @@ export async function updateChatbot(
         const updateResult = await query<ChatbotRow>(
             `UPDATE chatbots
              SET name = $1,
-                 industry_id = $2,
-                 platform = $3,
-                 api_url = $4,
-                 api_key = $5,
-                 custom_prompt = $6,
+                 custom_prompt = $2,
                  updated_at = NOW()
-             WHERE id = $7
-             RETURNING id, name, platform, api_url, api_key, custom_prompt, created_at, updated_at`,
-            [chatbot.name, industryId, chatbot.platform, chatbot.apiUrl || null, chatbot.apiKey || null, chatbot.customPrompt || null, id]
+             WHERE id = $3
+             RETURNING id, name, custom_prompt, created_at, updated_at`,
+            [chatbot.name, chatbot.customPrompt || null, id]
         );
         
         const updated = updateResult.rows[0];
@@ -158,9 +154,7 @@ export async function updateChatbot(
             id: updated.id.toString(),
             name: updated.name,
             industry: chatbot.industry,
-            platform: updated.platform,
-            apiUrl: updated.api_url || null,
-            apiKey: updated.api_key || null,
+            platform: chatbot.platform,
             customPrompt: updated.custom_prompt || null,
             createdAt: new Date(updated.created_at),
             updatedAt: new Date(updated.updated_at)
