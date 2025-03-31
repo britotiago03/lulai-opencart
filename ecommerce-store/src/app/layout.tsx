@@ -5,6 +5,7 @@ import Providers from "@/components/layout/Providers";
 import Navbar from "@/components/layout/Navbar";
 import AIShoppingAssistant from "@/components/assistant/AIShoppingAssistant";
 import "./globals.css";
+import ChatWidget from "@/components/widget"; // Import the ChatWidget component
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -34,6 +35,7 @@ export default function RootLayout({
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Providers>
             <Navbar />
+            <ChatWidget/>
             <main>
                 {children}
             </main>

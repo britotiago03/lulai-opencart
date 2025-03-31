@@ -161,6 +161,8 @@ services:
       - "3005:3000"
     env_file:
       - ./lulai-chatbot/nextjs-chatbot/.env.local
+    environment:
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@lulai-chatbot-db:5432/${POSTGRES_DB}"
     volumes:
     - ./lulai-chatbot/nextjs-chatbot:/app
     - ./lulai-chatbot/nextjs-chatbot/scripts:/app/scripts
@@ -168,6 +170,7 @@ services:
     command: ["npm", "run", "dev"]
     depends_on:
       - lulai_chatbot_python_server
+      - lulai_chatbot_db
     networks:
       - lulai-network
 
@@ -184,6 +187,32 @@ services:
       - ./lulai-chatbot/nextjs-chatbot/.env.local
     networks:
       - lulai-network
+  
+  lulai_chatbot_db:
+    image: pgvector/pgvector:pg15
+    container_name: lulai-chatbot-db
+    restart: always
+    env_file:
+    - ./lulai-chatbot/nextjs-chatbot/.env.local
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_DB: "${POSTGRES_DB}"
+    volumes:
+      - ./lulai-chatbot/nextjs-chatbot/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - lulai_chatbot_db_data:/var/lib/postgresql/data
+      
+    ports:
+      - "5435:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - lulai-network
+
+
 
 # ===========================================================
 # Networks
@@ -199,3 +228,4 @@ volumes:
   ecommerce_postgres_data:
   chatbot_platform_postgres_data:
   lulai_postgres_data:
+  lulai_chatbot_db_data:
