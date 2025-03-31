@@ -10,7 +10,7 @@ const ChatWidget = () => {
         document.body.appendChild(script);
     }, []);
 
-    return <lulai-chat-widget api-key="S17b778e1a3639290989ed78439f77cb"></lulai-chat-widget>;
+    return <lulai-chat-widget api-key="F3b84ce8409b209e4ee7c80da6af9496"></lulai-chat-widget>;
 };
 
 export default ChatWidget;

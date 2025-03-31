@@ -8,5 +8,6 @@ CREATE TABLE IF NOT EXISTS conversations (
   user_id VARCHAR(255) NOT NULL,
   message_role VARCHAR(50) NOT NULL,
   message_content TEXT NOT NULL,
+  metadata JSONB,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
