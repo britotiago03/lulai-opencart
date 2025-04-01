@@ -23,11 +23,12 @@ function AdminDashboardPageContent() {
     const [conversationCount, setConversationCount] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(true);
     const router = useRouter();
-    const { data: session } = useSession();        
+    const { data: session, status } = useSession();        
 
     useEffect(() => {
         // Ensure admin user is logged in or redirect to home page
-        if (!session || !session.user.isAdmin) {
+        // TODO: Ensure the authenticated user is admin
+        if (status === "unauthenticated") {
             router.push("/home"); 
             router.refresh();
             return;

@@ -156,6 +156,33 @@ function ChatbotEditClientContent({ id }: { id: string }) {
                             />
                         </div>
                         <div>
+                            <label className="block text-sm font-medium mb-2">Product API URL</label>
+                            <input
+                                type="url"
+                                value={formData.apiUrl}
+                                disabled
+                                className="w-full p-2 border rounded-md bg-gray-100 text-gray-600"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Platform</label>
+                            <input
+                                type="text"
+                                value={formData.platform}
+                                disabled
+                                className="w-full p-2 border rounded-md bg-gray-100 text-gray-600"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-2">API Key (Optional)</label>
+                            <input
+                                type="text"
+                                value={formData.apiKey}
+                                disabled
+                                className="w-full p-2 border rounded-md bg-gray-100 text-gray-600"
+                            />
+                        </div>
+                        <div>
                             <label className="block text-sm font-medium mb-2">Custom Prompt (Optional)</label>
                             <textarea
                                 value={formData.customPrompt}
