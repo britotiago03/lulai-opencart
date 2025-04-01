@@ -165,8 +165,6 @@ services:
       DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@lulai-chatbot-db:5432/${POSTGRES_DB}"
     volumes:
     - ./lulai-chatbot/nextjs-chatbot:/app
-    - ./lulai-chatbot/nextjs-chatbot/scripts:/app/scripts
-
     command: ["npm", "run", "dev"]
     depends_on:
       - lulai_chatbot_python_server
