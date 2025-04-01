@@ -29,12 +29,12 @@ export async function POST(req: Request) {
             const tokenResult = await client.query(
                 `SELECT vt.user_id
                  FROM verification_tokens vt
-                 JOIN admin_users au ON vt.user_id = au.id
+                 JOIN admin_users au ON vt.user_id::integer = au.id 
                  WHERE vt.token = $1
                  AND vt.type = 'admin_setup'
                  AND vt.expires_at > NOW()`,
                 [token]
-            );
+              );
 
             if (tokenResult.rows.length === 0) {
                 await client.query('ROLLBACK');
