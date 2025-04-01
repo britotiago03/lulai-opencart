@@ -2,17 +2,31 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { SessionProvider, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { Card } from '@/components/ui/card';
 import { Calendar, Clock, MessageCircle } from 'lucide-react';
 
-export default function ConversationsPage() {
+function ConversationsPageContent() {
     const [loading, setLoading] = useState(true);
     const [chatbots, setChatbots] = useState<any[]>([]);
     const [selectedChatbotId, setSelectedChatbotId] = useState<string | null>(null);
     const [conversations, setConversations] = useState<any[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [isMobile, setIsMobile] = useState(false);
+    const { data: session, status } = useSession();
+    const router = useRouter();
+
+    // Ensure user is logged in and has a valid session
+    useEffect(() => {
+        if(status === "unauthenticated") {
+            router.push('/auth/signin');
+            router.refresh();
+            return;
+        }
+    },[session, router]);
+
 
     // Check if we're on a mobile device
     useEffect(() => {
@@ -224,5 +238,13 @@ export default function ConversationsPage() {
                 </Card>
             )}
         </div>
+    );
+}
+
+export default function ConversationsPage() {
+    return (
+        <SessionProvider>
+            <ConversationsPageContent />
+        </SessionProvider>
     );
 }

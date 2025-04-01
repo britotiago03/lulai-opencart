@@ -7,10 +7,12 @@ import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import AnalyticsDashboard from '@/components/analytics/AnalyticsDashboard';
 import { ChatbotAnalytics } from '@/lib/analytics/types';
+import { SessionProvider, useSession } from 'next-auth/react';
 
-export default function AnalyticsPage() {
+function AnalyticsPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const { data: session, status } = useSession();
     const [selectedChatbotId, setSelectedChatbotId] = useState<string | null>(null);
     const [chatbots, setChatbots] = useState<{ id: string; name: string }[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -24,6 +26,13 @@ export default function AnalyticsPage() {
 
     // Fetch available chatbots
     useEffect(() => {
+
+        if (status === "unauthenticated") {
+            router.push('/auth/signin');
+            router.refresh();
+            return;
+        }
+
         const fetchChatbots = async () => {
             try {
                 const response = await fetch('/api/chatbots');
@@ -50,7 +59,7 @@ export default function AnalyticsPage() {
         };
 
         fetchChatbots();
-    }, [searchParams]);
+    }, [searchParams, session, router]);
 
     // Handle chatbot selection change
     const handleChatbotChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -146,5 +155,13 @@ export default function AnalyticsPage() {
                 />
             )}
         </div>
+    );
+}
+
+export default function AnalyticsPage() {
+    return (
+        <SessionProvider>
+            <AnalyticsPageContent />
+        </SessionProvider>
     );
 }

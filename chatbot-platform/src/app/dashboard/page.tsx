@@ -39,6 +39,13 @@ function DashboardPageContent() {
     useEffect(() => {
         setIsLoggedIn(true);
 
+        // Ensure user is logged in or redirect to home page
+        if(status === "unauthenticated") {
+            router.push("/auth/signin"); 
+            router.refresh();
+            return;
+        }
+
         const fetchChatbots = async () => {
             if (!user) {
                 setLoading(false);
@@ -95,7 +102,7 @@ function DashboardPageContent() {
 
         fetchChatbots();
         fetchSubscription();
-    }, [user]);
+    }, [user, session, router]);
 
     // Loading
     if (loading) {

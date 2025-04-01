@@ -24,7 +24,7 @@ export default function GoogleSignupButton() {
         priority
         className="mr-2"
       />  
-      Sign in with Google
+      Sign up with Google
     </button>
   );
 }

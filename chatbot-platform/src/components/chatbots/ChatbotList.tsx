@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Edit, Trash2, MessageSquare, BarChart3, ExternalLink } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
+import { SessionProvider, useSession } from 'next-auth/react';
 
 interface Chatbot {
     id: string;
@@ -18,13 +20,21 @@ interface Chatbot {
     responses: any[];
 }
 
-export default function ChatbotList() {
+function ChatbotListContent() {
     const [chatbots, setChatbots] = useState<Chatbot[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const { user, isAdmin } = useAuth();
+    const { data: session, status } = useSession();
+    const router = useRouter();
 
     useEffect(() => {
+        if (status === "unauthenticated") {
+            router.push("/auth/signin");
+            router.refresh();
+            return;
+        }
+
         const fetchChatbots = async () => {
             try {
                 setLoading(true);
@@ -52,7 +62,7 @@ export default function ChatbotList() {
         };
 
         fetchChatbots();
-    }, [user, isAdmin]);
+    }, [user, isAdmin, session, router]);
 
     const handleDelete = async (id: string) => {
         if (!window.confirm('Are you sure you want to delete this chatbot?')) {
@@ -159,5 +169,13 @@ export default function ChatbotList() {
                 </Link>
             ))}
         </div>
+    );
+}
+
+export default function ChatbotListPage() {
+    return (
+        <SessionProvider>
+            <ChatbotListContent />
+        </SessionProvider>
     );
 }

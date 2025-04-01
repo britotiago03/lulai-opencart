@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import {  ThumbsUp} from 'lucide-react';
 import FeedbackModal from './FeedbackModal';
+import { useSession, SessionProvider } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 interface Message {
     id: string;
@@ -18,7 +20,7 @@ interface Message {
     conversationId?: string; // Database ID for the conversation
 }
 
-export default function ChatbotTester({ id }: { id: string }) {
+function ChatbotTesterContent({ id }: { id: string }) {
     const [messages, setMessages] = useState<Message[]>([
         { id: '0', text: 'Hi there! How can I help you today?', isUser: false }
     ]);
@@ -28,10 +30,20 @@ export default function ChatbotTester({ id }: { id: string }) {
     const [sessionId, setSessionId] = useState('');
     const [visitorId, setVisitorId] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const { data: session, status } = useSession();
+    const router = useRouter();
 
     // Feedback state
     const [feedbackMessageId, setFeedbackMessageId] = useState<string | null>(null);
     const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+
+    useEffect(() => {
+        if(status === "unauthenticated") {
+            router.push('auth/signin');
+            router.refresh();
+            return;
+        }
+    },[session, router]);
 
     // Generate session and visitor IDs
     useEffect(() => {
@@ -355,5 +367,13 @@ export default function ChatbotTester({ id }: { id: string }) {
         }
       `}</style>
         </div>
+    );
+}
+
+export default function ChatbotTester({ id }: { id: string }) {
+    return (
+        <SessionProvider>
+            <ChatbotTesterContent id={id} />
+        </SessionProvider>
     );
 }

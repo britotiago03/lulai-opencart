@@ -1,15 +1,30 @@
 // src/app/dashboard/chatbots/create/page.tsx
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import ChatbotForm from '@/components/chatbots/ChatbotForm';
 import { useRouter } from 'next/navigation';
 import { ChatbotResponse, Industry } from '@/lib/db/schema';
+import { SessionProvider, useSession } from 'next-auth/react';
+import LoadingSkeleton from '@/components/loading/LoadingSkeleton';
 
-export default function CreateChatbotPage() {
+function CreateChatbotPageContent() {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const { data: session, status } = useSession();
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        // Check if the user is authenticated
+        if (status === "unauthenticated") {
+            router.push('/auth/signin'); 
+            router.refresh();
+            return;
+        } else {
+            setLoading(false);
+        }
+    }, [session, router]);
 
     const handleSubmit = async (data: {
         name: string;
@@ -49,6 +64,12 @@ export default function CreateChatbotPage() {
             setIsSubmitting(false);
         }
     };
+    
+    if(loading) {
+        return (
+            <LoadingSkeleton />
+        );
+    }
 
     return (
         <div className="max-w-4xl mx-auto p-6">
@@ -61,5 +82,13 @@ export default function CreateChatbotPage() {
                 </CardContent>
             </Card>
         </div>
+    );
+}
+
+export default function CreateChatbotPage() {
+    return (
+        <SessionProvider>
+            <CreateChatbotPageContent />
+        </SessionProvider>
     );
 }
