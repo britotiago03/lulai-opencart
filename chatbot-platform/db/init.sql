@@ -2,23 +2,25 @@
 \c ecommerce_db1;
 
 -- Drop existing tables if they exist (for clean initialization)
-DROP TABLE IF EXISTS users, sessions, subscriptions, products, cart;
+DROP TABLE IF EXISTS users, sessions, subscriptions, products, cart, verification_tokens CASCADE;
 
--- Create users table
+-- Create users table with flexible ID handling
 CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
+    id VARCHAR(255) PRIMARY KEY,  -- Changed from SERIAL to VARCHAR to handle Google IDs
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
+    password VARCHAR(255),  -- Made nullable for OAuth users
+    auth_provider VARCHAR(50),  -- 'email', 'google', etc.
     subscription_status VARCHAR(50) DEFAULT 'none',
     subscription_renewal_date TIMESTAMP WITH TIME ZONE,
     verified BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Create verification_tokens table with updated user_id type
 CREATE TABLE verification_tokens (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    user_id VARCHAR(255) NOT NULL REFERENCES users(id) ON DELETE CASCADE,  -- Updated type
     token VARCHAR(255) NOT NULL,
     type VARCHAR(50) NOT NULL, -- 'email_verification' or 'email_change'
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -27,7 +29,7 @@ CREATE TABLE verification_tokens (
     UNIQUE(token)
 );
 
--- Create admin users table
+-- Create admin users table (unchanged as it's for internal admin users)
 CREATE TABLE admin_users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -39,7 +41,7 @@ CREATE TABLE admin_users (
     last_login TIMESTAMP WITH TIME ZONE
 );
 
--- Create table for secure admin access URLs
+-- Create table for secure admin access URLs (unchanged)
 CREATE TABLE admin_access_tokens (
     id SERIAL PRIMARY KEY,
     url_path VARCHAR(255) NOT NULL,
@@ -51,7 +53,7 @@ CREATE TABLE admin_access_tokens (
     is_active BOOLEAN DEFAULT TRUE
 );
 
--- Create admin settings table
+-- Create admin settings table (unchanged)
 CREATE TABLE admin_settings (
     id SERIAL PRIMARY KEY,
     setting_key VARCHAR(255) UNIQUE NOT NULL,
@@ -60,19 +62,19 @@ CREATE TABLE admin_settings (
     updated_by INTEGER REFERENCES admin_users(id)
 );
 
--- Create sessions table
+-- Create sessions table with updated user_id type
 CREATE TABLE sessions (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id),
+    user_id VARCHAR(255) REFERENCES users(id),  -- Updated type
     expires TIMESTAMP WITH TIME ZONE NOT NULL,
     session_token VARCHAR(255) UNIQUE NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create subscriptions table
+-- Create subscriptions table with updated user_id type
 CREATE TABLE subscriptions (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id),
+    user_id VARCHAR(255) REFERENCES users(id),  -- Updated type
     user_email VARCHAR(255) REFERENCES users(email),
     plan_type VARCHAR(50) NOT NULL,
     price NUMERIC,
@@ -82,7 +84,6 @@ CREATE TABLE subscriptions (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-
 -- Add indexes
 CREATE INDEX users_email_idx ON users(email);
 CREATE INDEX sessions_token_idx ON sessions(session_token);
@@ -90,15 +91,15 @@ CREATE INDEX subscriptions_user_id_idx ON subscriptions(user_id);
 CREATE INDEX verification_tokens_token_idx ON verification_tokens(token);
 CREATE INDEX verification_tokens_user_id_idx ON verification_tokens(user_id);
 
--- inserting users
-INSERT INTO users (name, email, password, verified) VALUES 
-('BossLeModern', 'test@hotmail.com', '$2b$10$c6N89mld2qWN/qS.kQptP.5hcn.nRFVkCG1AkermebvKPDCUZlmg2', true); -- pass: testy1234
+-- Insert test user with explicit ID
+INSERT INTO users (id, name, email, password, verified, auth_provider) VALUES 
+('1', 'BossLeModern', 'test@hotmail.com', '$2b$10$c6N89mld2qWN/qS.kQptP.5hcn.nRFVkCG1AkermebvKPDCUZlmg2', true, 'email');
 
 -- Insert default settings
 INSERT INTO admin_settings (setting_key, setting_value)
 VALUES
 ('access_token_renewal_frequency', 'weekly'),
-('admin_email', 'britotiago101@gmail.com'),
+('admin_email', 'boss2909@hotmail.com'),
 ('setup_completed', 'false');
 
 -- Drop existing tables if they exist (for clean initialization)

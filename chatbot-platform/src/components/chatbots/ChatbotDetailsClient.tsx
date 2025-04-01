@@ -5,13 +5,23 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Chatbot } from '@/lib/db/schema';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { SessionProvider, useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
-export default function ChatbotDetailsClient({ id }: { id: string }) {
+function ChatbotDetailsClientContent({ id }: { id: string }) {
     const [chatbot, setChatbot] = useState<Chatbot | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const { data: session, status } = useSession();
+    const router = useRouter();
 
     useEffect(() => {
+        if(status === "unauthenticated") {
+            router.push('/auth/signin');
+            router.refresh();
+            return;
+        }
+
         const fetchChatbot = async () => {
             try {
                 const response = await fetch(`/api/chatbots/${id}`);
@@ -33,7 +43,7 @@ export default function ChatbotDetailsClient({ id }: { id: string }) {
         };
 
         fetchChatbot();
-    }, [id]);
+    }, [id, session, router]);
 
     if (loading) {
         return <div className="text-center py-8">Loading chatbot details...</div>;
@@ -128,5 +138,13 @@ export default function ChatbotDetailsClient({ id }: { id: string }) {
                 </CardContent>
             </Card>
         </div>
+    );
+}
+
+export default function ChatbotDetailsClientPage({ id }: { id: string }) {
+    return (
+        <SessionProvider>
+            <ChatbotDetailsClientContent id={id} />
+        </SessionProvider>
     );
 }

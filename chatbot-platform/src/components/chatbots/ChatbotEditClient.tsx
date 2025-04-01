@@ -6,8 +6,9 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Chatbot, Industry } from '@/lib/db/schema';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { SessionProvider, useSession } from 'next-auth/react';
 
-export default function ChatbotEditClient({ id }: { id: string }) {
+function ChatbotEditClientContent({ id }: { id: string }) {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [chatbot, setChatbot] = useState<Chatbot | null>(null);
@@ -21,9 +22,16 @@ export default function ChatbotEditClient({ id }: { id: string }) {
         apiKey: '',
         customPrompt: '',
     });
+    const { data: session, status } = useSession();
 
     useEffect(() => {
         const fetchChatbot = async () => {
+            if(status === "unauthenticated") {
+                router.push('auth/signin');
+                router.refresh();
+                return;
+            } 
+
             try {
                 const response = await fetch(`/api/chatbots/${id}`);
                 if (response.status === 404) {
@@ -52,7 +60,7 @@ export default function ChatbotEditClient({ id }: { id: string }) {
         };
 
         fetchChatbot();
-    }, [id]);
+    }, [id, session, router]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -68,10 +76,6 @@ export default function ChatbotEditClient({ id }: { id: string }) {
                 body: JSON.stringify({
                     ...formData,
                     // Keep the uneditable fields unchanged
-                    industry: chatbot?.industry,
-                    apiUrl: chatbot?.apiUrl,
-                    platform: chatbot?.platform,
-                    apiKey: chatbot?.apiKey,
                 }),
             });
 
@@ -152,15 +156,6 @@ export default function ChatbotEditClient({ id }: { id: string }) {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium mb-2">Industry</label>
-                            <input
-                                type="text"
-                                value={formData.industry}
-                                disabled
-                                className="w-full p-2 border rounded-md bg-gray-100 text-gray-600"
-                            />
-                        </div>
-                        <div>
                             <label className="block text-sm font-medium mb-2">Product API URL</label>
                             <input
                                 type="url"
@@ -205,5 +200,13 @@ export default function ChatbotEditClient({ id }: { id: string }) {
                 </div>
             </form>
         </div>
+    );
+}
+
+export default function ChatbotEditClientPage({ id }: { id: string }) {
+    return (
+        <SessionProvider>
+            <ChatbotEditClientContent id={id} />
+        </SessionProvider>
     );
 }

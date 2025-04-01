@@ -12,15 +12,28 @@ import {
     Settings,
     ShieldAlert
 } from "lucide-react";
+import { SessionProvider } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
-export default function AdminDashboardPage() {
+function AdminDashboardPageContent() {
     const [userCount, setUserCount] = useState<number>(0);
     const [chatbotCount, setChatbotCount] = useState<number>(0);
     const [activeSubscriptions, setActiveSubscriptions] = useState<number>(0);
     const [conversationCount, setConversationCount] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(true);
+    const router = useRouter();
+    const { data: session, status } = useSession();        
 
     useEffect(() => {
+        // Ensure admin user is logged in or redirect to home page
+        // TODO: Ensure the authenticated user is admin
+        if (status === "unauthenticated") {
+            router.push("/home"); 
+            router.refresh();
+            return;
+        }
+
         // In the future, this would fetch real data from your API
         const fetchAdminStats = async () => {
             try {
@@ -47,7 +60,7 @@ export default function AdminDashboardPage() {
         };
 
         fetchAdminStats();
-    }, []);
+    }, [session, router]);
 
     const adminCards = [
         {
@@ -141,4 +154,12 @@ export default function AdminDashboardPage() {
             )}
         </div>
     );
+}
+
+export default function AdminDashboardPage() {
+    return (
+        <SessionProvider>
+            <AdminDashboardPageContent />
+        </SessionProvider>
+    )
 }

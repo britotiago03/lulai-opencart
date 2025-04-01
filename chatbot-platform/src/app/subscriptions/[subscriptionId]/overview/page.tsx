@@ -51,6 +51,18 @@ export default function SubscriptionsOverviewPage() {
         })();
     }, [fetchSubscription]);
 
+    // Format the date
+    const formatDate = (dateString: string) => {
+        const options: Intl.DateTimeFormatOptions = {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        };
+        return new Date(dateString).toLocaleDateString(undefined, options);
+    };
+
     if (loading) {
         return (
             <div className="container mx-auto p-8 text-center">
@@ -102,8 +114,8 @@ export default function SubscriptionsOverviewPage() {
                     <p className="text-lg text-gray-500 font-semibold">Plan Type: {subscription.plan_type}</p>
                     <p className="text-lg text-gray-500 font-semibold">Price: {subscription.price}</p>
                     <p className="text-lg text-gray-500 font-semibold">Status: {subscription.status}</p>
-                    <p className="text-lg text-gray-500 font-semibold">Start Date: {subscription.start_date}</p>
-                    <p className="text-lg text-gray-500 font-semibold">End Date: {subscription.renewal_date}</p>
+                    <p className="text-lg text-gray-500 font-semibold">Start Date: {formatDate(subscription.start_date)}</p>
+                    <p className="text-lg text-gray-500 font-semibold">End Date: {formatDate(subscription.renewal_date)}</p>
                 </div>
                 <p className="text-gray-600 text-center">
                     Manage your subscription details and stay updated with your plan.
@@ -122,7 +134,7 @@ export default function SubscriptionsOverviewPage() {
                     onClick={() => router.push("/subscriptions")}
                     className="px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition"
                 >
-                    Go to Subscriptions
+                    Change subscription
                 </button>
             </div>
         </div>

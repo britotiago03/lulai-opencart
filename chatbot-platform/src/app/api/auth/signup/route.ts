@@ -4,10 +4,14 @@ import pool from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { createVerificationToken, TOKEN_TYPES } from "@/lib/tokenService";
 import { sendVerificationEmail } from "@/lib/emailService";
+import { getServerSession } from "next-auth";
+import { userAuthOptions } from "@/lib/auth-config";
+import { v4 as uuidv4 } from "uuid"; // Import uuidv4 for generating unique IDs
 
 export async function POST(req: Request) {
     try {
         const { name, email, password } = await req.json();
+        const session = await getServerSession(userAuthOptions);
 
         // Check if user already exists
         const existingUser = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
@@ -23,10 +27,12 @@ export async function POST(req: Request) {
        try {
            await client.query('BEGIN');
 
+           const newUserID = uuidv4(); // Generate a new UUID for the user ID
+
            // Insert new user with verified=false
            const result = await client.query(
-               "INSERT INTO users (name, email, password, verified) VALUES ($1, $2, $3, $4) RETURNING id",
-               [name, email, hashedPassword, false]
+               "INSERT INTO users (id, name, email, password, verified, auth_provider) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
+               [newUserID, name, email, hashedPassword, false, 'email']
            );
            console.log("New user inserted");
 

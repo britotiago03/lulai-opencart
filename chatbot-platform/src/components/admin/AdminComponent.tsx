@@ -15,7 +15,7 @@ export default function AdminComponent() {
     useEffect(() => {
         if (status === "loading") return;
         
-        if (!session) {
+        if (!session || !session.user.isAdmin) {
             router.replace("/auth/admin/login");
         } else {
             setIsLoggedIn(true);

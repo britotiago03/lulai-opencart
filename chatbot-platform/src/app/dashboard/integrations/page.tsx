@@ -1,11 +1,18 @@
 // chatbot-platform/src/app/dashboard/integrations/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { SessionProvider, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Globe, ShoppingCart, Code, Loader, Download } from "lucide-react";
+import LoadingSkeleton from "@/components/loading/LoadingSkeleton";
 
-export default function Integrate() {
+function IntegrateContent() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  
   const [formData, setFormData] = useState({
     storeName: "",
     productApiUrl: "",
@@ -161,6 +168,23 @@ export default function Integrate() {
       setBuildingWidget(false);
     }
   };
+
+  useEffect(() => {
+    if(status === "unauthenticated") {
+      router.push("/auth/signin");
+      router.refresh();
+      return;
+    } else {
+      setLoading(false);
+    }
+  },[session, router]);
+
+  // Loading
+  if (loading) {
+    return (
+        <LoadingSkeleton />
+    );
+  }
   
   return (
     <div className="max-w-7xl mx-auto p-6">
@@ -679,5 +703,13 @@ export default function Integrate() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function IntegrationsPage() {
+  return (
+    <SessionProvider>
+      <IntegrateContent />
+    </SessionProvider>
   );
 }

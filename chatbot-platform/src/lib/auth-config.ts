@@ -4,6 +4,7 @@ import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { verifyUser } from "@/lib/auth.service";
 import { AdminCredentialsProvider } from "@/lib/admin-auth";
+import pool from "@/lib/db"; // Adjust the path to your database module
 
 // Extend the Session and User types to include custom properties
 declare module "next-auth" {
@@ -75,12 +76,19 @@ export const userAuthOptions: NextAuthOptions = {
         }),
     ],
     callbacks: {
-        async jwt({ token, user }) {
+        async redirect({ url, baseUrl }) {
+            // Handle Google's callback URL
+            if (url.includes('/api/auth/check-subscription')) {
+              return `${baseUrl}/api/auth/check-subscription`;
+            }
+            return url.startsWith(baseUrl) ? url : baseUrl;
+        },
+        async jwt({ token, user, account }) {
             if (user) {
                 token.id = user.id;
                 token.email = user.email;
                 token.name = user.name;
-                token.subscription = user.subscription || null;
+                token.subscription = user.subscription || 'none';
                 token.isAdmin = false; // Always false for user auth
             }
             return token;
@@ -89,11 +97,39 @@ export const userAuthOptions: NextAuthOptions = {
             if (session.user) {
                 session.user.id = token.id as string;
                 session.user.email = token.email as string;
-                session.user.subscription = typeof token.subscription === "string" ? token.subscription : null;
-                session.user.isAdmin = false; // Always false for user auth
+                session.user.name = token.name as string;
+                session.user.subscription = token.subscription as string;
+                session.user.isAdmin = false;
             }
             return session;
         },
+        // New signin callback to better control user creation
+        async signIn({ user, account }) {
+            if (account?.provider === 'google') {
+              try {
+                // Check if user exists
+                const existingUser = await pool.query(
+                  'SELECT id, subscription_status FROM users WHERE email = $1',
+                  [user.email]
+                );
+        
+                if (existingUser.rows.length === 0) {
+                  // Create new user with default subscription
+                  await pool.query(
+                    `INSERT INTO users 
+                     (id, name, email, verified, auth_provider, subscription_status) 
+                     VALUES ($1, $2, $3, $4, $5, $6)`,
+                    [user.id, user.name, user.email, true, 'google', 'none']
+                  );
+                }
+                return true;
+              } catch (error) {
+                console.error('Google sign-in error:', error);
+                return false;
+              }
+            }
+            return true; // Allow credentials provider
+          },
     },
     pages: {
         signIn: "/auth/signin",

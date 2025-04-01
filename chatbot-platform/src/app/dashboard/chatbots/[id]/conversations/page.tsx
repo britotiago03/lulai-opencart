@@ -7,8 +7,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ConversationSummary } from '@/lib/analytics/types';
 import { MessageCircle, CheckCircle, Calendar, Clock } from 'lucide-react';
+import { SessionProvider, useSession } from 'next-auth/react';
 
-export default function ConversationsPage({ params }: { params: { id: string } }) {
+function ConversationsPageContent({ params }: { params: { id: string } }) {
     const unwrappedParams = use(params); // even showing errors this method works instead
     const chatbotId = unwrappedParams.id;
     const router = useRouter();
@@ -17,6 +18,7 @@ export default function ConversationsPage({ params }: { params: { id: string } }
     const [totalCount, setTotalCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const { data: session, status } = useSession();
 
     // Pagination
     const page = parseInt(searchParams.get('page') || '1', 10);
@@ -30,6 +32,13 @@ export default function ConversationsPage({ params }: { params: { id: string } }
 
     // Load conversations
     useEffect(() => {
+
+        if(status === "unauthenticated") {
+            router.push('/auth/signin');
+            router.refresh();
+            return;
+        }
+
         const fetchConversations = async () => {
             try {
                 setLoading(true);
@@ -55,7 +64,7 @@ export default function ConversationsPage({ params }: { params: { id: string } }
         };
 
         fetchConversations();
-    }, [chatbotId, page, startDate, endDate]);
+    }, [chatbotId, page, startDate, endDate, session, router]);
 
     // Format date for display
     const formatDate = (date: Date | string) => {
@@ -269,5 +278,16 @@ export default function ConversationsPage({ params }: { params: { id: string } }
                 </div>
             )}
         </div>
+    );
+}
+
+export default function ConversationsPage({ params }: { params: { id: string } }) {
+    const unwrappedParams = use(params); // even showing errors this method works instead
+    const chatbotId = unwrappedParams.id;
+
+    return (
+        <SessionProvider>
+            <ConversationsPageContent params={{ id: chatbotId }} />
+        </SessionProvider>
     );
 }

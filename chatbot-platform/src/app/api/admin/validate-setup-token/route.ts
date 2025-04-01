@@ -14,14 +14,14 @@ export async function GET(req: Request) {
         // Check if the token exists in the verification_tokens table and is not expired
         const tokenResult = await pool.query(
             `SELECT vt.user_id, a.url_path, a.access_key
-       FROM verification_tokens vt
-       LEFT JOIN admin_users au ON vt.user_id = au.id
-       LEFT JOIN admin_access_tokens a ON a.created_by = au.id AND a.is_active = true
-       WHERE vt.token = $1
-       AND vt.type = 'admin_setup'
-       AND vt.expires_at > NOW()`,
+             FROM verification_tokens vt
+             LEFT JOIN admin_users au ON vt.user_id::integer = au.id 
+             LEFT JOIN admin_access_tokens a ON a.created_by::integer = au.id AND a.is_active = true
+             WHERE vt.token = $1
+             AND vt.type = 'admin_setup'
+             AND vt.expires_at > NOW()`,
             [token]
-        );
+          );
 
         if (tokenResult.rows.length === 0) {
             return NextResponse.json({ valid: false, error: "Invalid or expired token" });

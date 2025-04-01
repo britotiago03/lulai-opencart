@@ -6,8 +6,10 @@ import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ConversationDetail } from '@/lib/analytics/types';
 import { CheckCircle, User, Bot, Star } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useSession, SessionProvider } from 'next-auth/react';
 
-export default function ConversationDetailPage({ params }: { params: { id: string; conversationId: string } }) {
+function ConversationDetailPage({ params }: { params: { id: string; conversationId: string } }) {
     const chatbotId = params.id;
     const conversationId = params.conversationId;
     const [conversation, setConversation] = useState<ConversationDetail | null>(null);
@@ -17,8 +19,16 @@ export default function ConversationDetailPage({ params }: { params: { id: strin
     const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
     const [feedbackRating, setFeedbackRating] = useState<number>(0);
     const [feedbackText, setFeedbackText] = useState<string>('');
+    const router = useRouter();
+    const { data: session, status } = useSession();
 
     useEffect(() => {
+        if (status === "unauthenticated") {
+            router.push('/auth/signin'); 
+            router.refresh();
+            return;
+        }
+
         const fetchConversation = async () => {
             try {
                 setLoading(true);
@@ -42,7 +52,7 @@ export default function ConversationDetailPage({ params }: { params: { id: strin
         };
 
         fetchConversation();
-    }, [conversationId]);
+    }, [conversationId, session, router]);
 
     const handleFeedbackSubmit = async (messageId: string) => {
         if (feedbackRating === 0) return;
@@ -334,5 +344,13 @@ export default function ConversationDetailPage({ params }: { params: { id: strin
                 </CardContent>
             </Card>
         </div>
+    );
+}
+
+export default function ConversationDetailPageWrapper({ params }: { params: { id: string; conversationId: string } }) {
+    return (
+        <SessionProvider>
+            <ConversationDetailPage params={params} />
+        </SessionProvider>
     );
 }
