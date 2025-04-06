@@ -8,21 +8,31 @@ import TemplateSelector from './TemplateSelector';
 
 interface ChatbotFormProps {
     onSubmit: (data: {
-        name: string;
+        storeName: string;
         description: string;
         industry: Industry;
         responses: ChatbotResponse[];
+        apiUrl?: string;
+        platform?: string;
+        apiKey?: string;
+        customPrompt?: string;
     }) => void;
     isSubmitting?: boolean;
 }
 
 export default function ChatbotForm({ onSubmit, isSubmitting = false }: ChatbotFormProps) {
     const [formData, setFormData] = useState({
-        name: '',
+        storeName: '',
         description: '',
         industry: 'general' as Industry,
-        responses: [] as ChatbotResponse[]
-    });
+        responses: [] as ChatbotResponse[],
+        apiUrl: '',
+        platform: 'lulAI',
+        apiKey: '',
+        customPrompt: ''
+    });;
+
+    console.log('Initial form state:', formData);
 
     const [currentStep, setCurrentStep] = useState<'info' | 'template' | 'responses'>('info');
 
@@ -30,6 +40,7 @@ export default function ChatbotForm({ onSubmit, isSubmitting = false }: ChatbotF
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        console.log('Form submitted:', formData);
         onSubmit(formData);
     };
 
@@ -70,8 +81,8 @@ export default function ChatbotForm({ onSubmit, isSubmitting = false }: ChatbotF
                         <input
                             type="text"
                             id="name"
-                            value={formData.name}
-                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            value={formData.storeName}
+                            onChange={(e) => setFormData({ ...formData, storeName: e.target.value })}
                             className="w-full p-2 border rounded-md bg-background text-foreground"
                             required
                         />
@@ -113,7 +124,7 @@ export default function ChatbotForm({ onSubmit, isSubmitting = false }: ChatbotF
                             type="button"
                             onClick={handleNextStep}
                             className="bg-foreground text-background py-2 px-4 rounded-md hover:bg-opacity-90"
-                            disabled={!formData.name}
+                            disabled={!formData.storeName}
                         >
                             Next: Choose Template
                         </button>

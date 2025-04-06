@@ -27,10 +27,14 @@ function CreateChatbotPageContent() {
     }, [session, router]);
 
     const handleSubmit = async (data: {
-        name: string;
+        storeName: string;
         description: string;
         industry: Industry;
         responses: ChatbotResponse[];
+        apiUrl?: string;
+        platform?: string;
+        apiKey?: string;
+        customPrompt?: string;
     }) => {
         try {
             setIsSubmitting(true);
