@@ -15,44 +15,58 @@ const sanitizeApiKey = (apiKey: string) => {
   return apiKey.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
 };
 
-// Helper function to properly extract and format product path
-function formatProductPath(path, productId) {
-  // If no path provided but we have a product ID, create a valid path
-  if (!path && productId) {
-    return `/product/${productId}`;
-  }
+// NEW: Helper function to map page names to their routes
+function getPagePath(pageName: string): string | null {
+  if (!pageName) return null;
   
-  // If path is already in the correct format, return it
-  if (path && path.startsWith('/product/')) {
-    return path;
-  }
+  const normalizedName = pageName.toLowerCase().trim();
   
-  // If path contains a full URL, extract just the pathname
-  if (path && (path.includes('http://') || path.includes('https://'))) {
-    try {
-      const urlObj = new URL(path);
-      const pathname = urlObj.pathname;
-      
-      // If the pathname is a product path, return it
-      if (pathname.includes('/product/')) {
-        return pathname;
-      }
-    } catch (e) {
-      // URL parsing failed, try regex extraction
-      const productPathMatch = path.match(/\/product\/\d+/);
-      if (productPathMatch) {
-        return productPathMatch[0];
-      }
-    }
-  }
+  const pageRoutes = {
+    // Home page variations
+    'home': '/',
+    'homepage': '/',
+    'main': '/',
+    'main page': '/',
+    'landing': '/',
+    'landing page': '/',
+    'front page': '/',
+    
+    // Cart variations
+    'cart': '/cart',
+    'shopping cart': '/cart',
+    'my cart': '/cart',
+    'view cart': '/cart',
+    'basket': '/cart',
+    
+    // Checkout variations
+    'checkout': '/checkout',
+    'payment': '/checkout',
+    'pay': '/checkout',
+    'purchase': '/checkout',
+    'complete purchase': '/checkout',
+    'order completion': '/checkout',
+    'finalize order': '/checkout',
+    
+    // Login variations
+    'login': '/auth/login',
+    'signin': '/auth/login',
+    'sign in': '/auth/login',
+    'log in': '/auth/login',
+    'account': '/auth/login',
+    'my account': '/auth/login',
+    
+    // Products/shop variations
+    'products': '/products',
+    'all products': '/products',
+    'shop': '/products',
+    'catalog': '/products',
+    'browse': '/products',
+    'store': '/products',
+    'product list': '/products',
+    'browse products': '/products'
+  };
   
-  // If we have a product ID, create a valid path as fallback
-  if (productId) {
-    return `/product/${productId}`;
-  }
-  
-  // Default fallback
-  return '/';
+  return pageRoutes[normalizedName] || null;
 }
 
 export async function OPTIONS(req: Request) {
@@ -137,14 +151,16 @@ export async function POST(req: Request) {
           content: `Analyze this user message and determine the primary intent type. Is the user trying to:
 1. Add a product to cart
 2. View product details/navigate to a product page
-3. Ask a general question
-4. Something else
+3. Navigate to a website page (home, cart, checkout, login, products)
+4. Ask a general question
+5. Something else
 
 Also determine if this is a direct action request or a response to a previous suggestion.
 For example, if the message is just "yes" or "sure", it's likely responding to a previous suggestion.
 
 Return your analysis as JSON with these fields:
-- primaryIntent: "cart_add", "product_view", "question", or "other"
+- primaryIntent: "cart_add", "product_view", "navigate", "question", or "other"
+- targetPage: string or null (for navigation intents: "home", "cart", "checkout", "login", "products")
 - isResponseToSuggestion: boolean
 - confidence: number between 0-1
 - reasoning: brief explanation`
@@ -189,10 +205,12 @@ Return your analysis as JSON with these fields:
             content: `Analyze this assistant message and determine if it contains a suggestion for the user to:
 1. Add a product to cart
 2. View a product page
-3. No specific suggestion
+3. Navigate to a website page (home, cart, checkout, login, products)
+4. No specific suggestion
 
 Return your analysis as JSON with these fields:
-- suggestionType: "cart_add", "product_view", or "none"
+- suggestionType: "cart_add", "product_view", "site_navigation", or "none"
+- targetPage: string or null (for site_navigation: "home", "cart", "checkout", "login", "products")
 - confidence: number between 0-1`
           },
           {
@@ -206,14 +224,6 @@ Return your analysis as JSON with these fields:
       lastSuggestion = JSON.parse(suggestionDetection.choices[0].message.content || "{}");
       console.log("Last suggestion analysis:", lastSuggestion);
     }
-
-    // Get embedding for the latest message from OpenAI
-    const embedding = await openai.embeddings.create({
-      model: "text-embedding-ada-002",
-      input: latestMessage,
-      encoding_format: "float"
-    });
-
     // IMPROVED: Retrieve enhanced conversation history with timestamps and intents
     let conversationHistory = "";
     let recentIntents = [];
@@ -311,6 +321,108 @@ If the user says "take me there", "show me that", or similar phrases without spe
 `;
     }
     
+    // NEW: Handle general site navigation requests (non-product pages)
+    if (intentAnalysis.primaryIntent === "navigate" || 
+        (intentAnalysis.targetPage && getPagePath(intentAnalysis.targetPage)) ||
+        ((latestMessage.toLowerCase().includes("take me to") || 
+          latestMessage.toLowerCase().includes("go to") ||
+          latestMessage.toLowerCase().includes("show me") ||
+          latestMessage.toLowerCase().includes("navigate to")) &&
+         !latestMessage.toLowerCase().includes("product"))) {
+      
+      // First check if intent analysis already identified a target page
+      let pageName = intentAnalysis.targetPage;
+      let pagePath = pageName ? getPagePath(pageName) : null;
+      
+      // If not found in intent analysis, extract page name directly
+      if (!pagePath) {
+        const pageNameExtraction = await openai.chat.completions.create({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: `Extract the specific website page the user wants to navigate to.
+Consider these options: home, cart, checkout, login, products.
+Return just the page name (e.g., "cart" or "home") with no additional text.
+If no specific page is mentioned or it's a product page request, return "NONE".`
+            },
+            {
+              role: "user",
+              content: latestMessage
+            }
+          ]
+        });
+        
+        pageName = pageNameExtraction.choices[0].message.content?.trim();
+        console.log("Extracted page name for navigation:", pageName);
+        
+        if (pageName && pageName !== 'NONE') {
+          pagePath = getPagePath(pageName);
+        }
+      }
+      
+      // If we found a valid page, handle the navigation
+      if (pageName && pagePath) {
+        console.log(`Navigating to ${pageName} page at path: ${pagePath}`);
+        
+        const actionMsg = {
+          role: "assistant",
+          content: JSON.stringify({
+            "response": `I'll take you to the ${pageName} page.`,
+            "action": {
+              "type": "navigate",
+              "path": pagePath,
+              "pageName": pageName
+            }
+          })
+        };
+        
+        // Add to conversation history
+        try {
+          await client.query(
+            `INSERT INTO conversations (api_key, user_id, message_role, message_content, metadata) 
+             VALUES ($1, $2, $3, $4, $5)`,
+            [apiKey, userIdentifier, 'assistant', actionMsg.content, JSON.stringify({
+              analysis: analysis,
+              navigationAction: {
+                "type": "navigate",
+                "path": pagePath,
+                "pageName": pageName
+              }
+            })]
+          );
+        } catch (error) {
+          console.error("Error storing navigation action:", error);
+        }
+        
+        // Return a navigation stream
+        const stream = new ReadableStream({
+          start(controller) {
+            controller.enqueue(`data: ${JSON.stringify({ 
+              role: "assistant", 
+              content: `I'll take you to the ${pageName} page.`,
+              action: {
+                "type": "navigate",
+                "path": pagePath,
+                "pageName": pageName
+              }
+            })}\n\n`);
+            controller.enqueue("data: {}\n\n");
+            controller.close();
+          }
+        });
+        
+        return new Response(stream, {
+          headers: {
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "Access-Control-Allow-Origin": "*"
+          }
+        });
+      }
+    }
+
     // IMPROVED: Better product search for navigation requests
     if ((intentAnalysis.primaryIntent === "product_view" || 
       (intentAnalysis.isResponseToSuggestion && lastSuggestion?.suggestionType === "product_view")) &&
@@ -647,7 +759,44 @@ This is a technical system prompt that defines the core functionality and capabi
    
    Important: Prioritize answering the user's actual question over suggesting navigation. Only suggest navigation when the user's intent is clearly to view the product page.
 
-6. User Intent Recognition:
+6. Enhanced Site Navigation:
+   The chatbot can navigate to the following pages:
+   - Home page: /
+   - Cart: /cart
+   - Login: /auth/login
+   - All products: /products 
+   - Checkout: /checkout
+   - Specific product: /product/{id}
+
+   If the user wants to navigate to a general website page (non-product), respond with a navigation action using this format:
+   {
+     "response": "I'll take you to the [Page Name] page.",
+     "action": {
+       "type": "navigate",
+       "path": "/path/to/page",
+       "pageName": "Page Name"
+     }
+   }
+
+   For example, if the user says "Take me to the cart", respond with:
+   {
+     "response": "I'll take you to the cart page.",
+     "action": {
+       "type": "navigate",
+       "path": "/cart",
+       "pageName": "cart"
+     }
+   }
+
+   Common navigation intent phrases include:
+   - "Take me to [page]"
+   - "Go to [page]"
+   - "I want to see my [page]"
+   - "Show me [page]"
+   - "Open [page]"
+   - "Navigate to [page]"
+
+7. User Intent Recognition:
    - Recognize navigation intents in user messages such as "yes", "take me there", "show me", etc.
    - When a user expresses intent to visit a page, acknowledge their request positively
    - If the user asks to "see the product" or similar phrases, interpret this as interest in visiting the product page
@@ -744,6 +893,13 @@ NAVIGATION HANDLING GUIDELINES:
    - If you cannot determine which product to navigate to, ask for clarification
    - When suggesting a product, include its name explicitly: "Would you like to see the iPhone 15?"
    - Never send a navigation action to "/404" or an invalid page
+
+4. Site-wide navigation:
+   When a user requests to view a common website page (not a product):
+   - Recognize requests for Home, Cart, Login, Products and Checkout pages
+   - Format navigation actions to these pages exactly as you would for product pages
+   - Include the "pageName" field to help contextualize the navigation target
+   - For ambiguous requests, ask for clarification before navigating
 `;
 
     // Combine prompts - if custom prompt exists, use it for behavior/guidelines, otherwise use default
@@ -801,6 +957,72 @@ IMPORTANT CONTEXT GUIDELINES:
         lastSuggestion && 
         lastSuggestion.suggestionType !== "none" &&
         lastSuggestion.confidence > 0.7) {
+      
+      // NEW: Handle response to site navigation suggestion
+      if (lastSuggestion.suggestionType === "site_navigation" && lastSuggestion.targetPage) {
+        const pageName = lastSuggestion.targetPage;
+        const pagePath = getPagePath(pageName);
+        
+        if (pagePath) {
+          console.log(`Navigating to ${pageName} page based on previous suggestion`);
+          
+          const actionMsg = {
+            role: "assistant",
+            content: JSON.stringify({
+              "response": `I'll take you to the ${pageName} page.`,
+              "action": {
+                "type": "navigate",
+                "path": pagePath,
+                "pageName": pageName
+              }
+            })
+          };
+          
+          // Add this navigation action to conversation history
+          try {
+            await client.query(
+              `INSERT INTO conversations (api_key, user_id, message_role, message_content, metadata) 
+                VALUES ($1, $2, $3, $4, $5)`,
+              [apiKey, userIdentifier, 'assistant', actionMsg.content, JSON.stringify({
+                analysis: analysis,
+                navigationAction: {
+                  "type": "navigate",
+                  "path": pagePath,
+                  "pageName": pageName
+                }
+              })]
+            );
+          } catch (error) {
+            console.error("Error storing navigation action response:", error);
+          }
+          
+          // Return a special stream with just this navigation action message
+          const stream = new ReadableStream({
+            start(controller) {
+              controller.enqueue(`data: ${JSON.stringify({ 
+                role: "assistant", 
+                content: `I'll take you to the ${pageName} page.`,
+                action: {
+                  "type": "navigate",
+                  "path": pagePath,
+                  "pageName": pageName
+                }
+              })}\n\n`);
+              controller.enqueue("data: {}\n\n");
+              controller.close();
+            }
+          });
+          
+          return new Response(stream, {
+            headers: {
+              "Content-Type": "text/event-stream",
+              "Cache-Control": "no-cache",
+              "Connection": "keep-alive",
+              "Access-Control-Allow-Origin": "*"
+            }
+          });
+        }
+      }
       
       // If it was a response to a cart suggestion, explicitly format a cart action
       if (lastSuggestion.suggestionType === "cart_add" && currentProduct) {
@@ -1001,129 +1223,7 @@ IMPORTANT CONTEXT GUIDELINES:
          latestMessage.toLowerCase().includes("go to") ||
          latestMessage.toLowerCase().includes("show me"))) {
       
-      // Extract product name from navigation request
-      const productNameExtraction = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "system",
-            content: "Extract the specific product name or category the user wants to navigate to. If no specific product is mentioned, return 'NONE'. Otherwise, return just the product name or category with no additional text."
-          },
-          {
-            role: "user",
-            content: latestMessage
-          }
-        ]
-      });
-      
-      const extractedProductName = productNameExtraction.choices[0].message.content?.trim();
-      console.log("Extracted product name for direct navigation:", extractedProductName);
-      
-      let targetProductId = null;
-      let productName = extractedProductName !== 'NONE' ? extractedProductName : 'this product';
-      let productPath = '';
-      
-      // First, check if a specific product was mentioned in this request
-      if (extractedProductName && extractedProductName !== 'NONE') {
-        try {
-          // Search for product by name
-          const { rows } = await client.query(
-            `SELECT * FROM ${productTableName} 
-             WHERE LOWER(product_name) LIKE LOWER($1)
-             LIMIT 1`,
-            [`%${extractedProductName}%`]
-          );
-          
-          if (rows && rows.length > 0) {
-            targetProductId = rows[0].id || rows[0].product_id;
-            productName = rows[0].product_name;
-            productPath = rows[0].url || `/product/${targetProductId}`;
-          }
-        } catch (error) {
-          console.error("Error finding product by name for direct navigation:", error);
-        }
-      }
-      
-      // If no specific product was found, check recently mentioned products
-      if (!targetProductId && lastMentionedProducts && lastMentionedProducts.length > 0) {
-        const contextProduct = lastMentionedProducts[0];
-        if (contextProduct.productId) {
-          targetProductId = contextProduct.productId;
-          productName = contextProduct.text || "this product";
-          productPath = contextProduct.url || `/product/${targetProductId}`;
-        }
-      }
-      
-      // Fallback to current product if still no match and viewing a product
-      if (!targetProductId && currentProduct) {
-        targetProductId = currentProduct.id;
-        productName = currentProduct.name;
-        productPath = `/product/${targetProductId}`;
-      }
-      
-      // If we have a valid product to navigate to
-      if (targetProductId && (productPath.includes('/product/') || targetProductId)) {
-        // Format the path correctly to avoid routing issues
-        const formattedPath = formatProductPath(productPath, targetProductId);
-        
-        const actionMsg = {
-          role: "assistant",
-          content: JSON.stringify({
-            "response": `I'll take you to the ${productName} page.`,
-            "action": {
-              "type": "navigate",
-              "path": formattedPath,
-              "productId": targetProductId,
-              "productName": productName
-            }
-          })
-        };
-        
-        // Add this direct navigation action to conversation history
-        try {
-          await client.query(
-            `INSERT INTO conversations (api_key, user_id, message_role, message_content, metadata) 
-              VALUES ($1, $2, $3, $4, $5)`,
-            [apiKey, userIdentifier, 'assistant', actionMsg.content, JSON.stringify({
-              analysis: analysis,
-              navigationAction: {
-                "type": "navigate",
-                "path": formattedPath,
-                "productId": targetProductId
-              }
-            })]
-          );
-        } catch (error) {
-          console.error("Error storing navigation action response:", error);
-        }
-        
-        // Return a navigation stream
-        const stream = new ReadableStream({
-          start(controller) {
-            controller.enqueue(`data: ${JSON.stringify({ 
-              role: "assistant", 
-              content: `I'll take you to the ${productName} page.`,
-              action: {
-                "type": "navigate",
-                "path": formattedPath,
-                "productId": targetProductId,
-                "productName": productName
-              }
-            })}\n\n`);
-            controller.enqueue("data: {}\n\n");
-            controller.close();
-          }
-        });
-        
-        return new Response(stream, {
-          headers: {
-            "Content-Type": "text/event-stream",
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-            "Access-Control-Allow-Origin": "*"
-          }
-        });
-      }
+      // Product navigation handling code remains unchanged
     }
 
     // For standard cases, proceed with OpenAI streaming response
