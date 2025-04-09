@@ -8,7 +8,7 @@ export default function ChatbotsPage() {
             <div className="flex justify-between items-center mb-8">
                 <h1 className="text-2xl font-bold">My Chatbots</h1>
                 <Link
-                    href="/dashboard/chatbots/create"
+                    href="/dashboard/integrations"
                     className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                 >
                     Create New Chatbot
