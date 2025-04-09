@@ -117,7 +117,7 @@ export async function sendAdminSetupEmail(
     accessPath: string,
     accessKey: string
 ) {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001';
 
     // Use the new path that doesn't go through the admin layout
     const setupUrl = `${appUrl}/admin-setup?token=${setupToken}`;
@@ -185,7 +185,7 @@ export async function sendAdminAccessUpdateEmail(
     accessKey: string,
     expiresAt: Date
 ) {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001';
     const loginUrl = `${appUrl}${accessPath}?key=${accessKey}`;
     const expirationDate = expiresAt.toLocaleDateString('en-US', {
         year: 'numeric',

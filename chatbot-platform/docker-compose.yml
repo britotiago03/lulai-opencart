@@ -18,7 +18,7 @@ services:
     container_name: nextjs_app1
     restart: always
     ports:
-      - "3000:3000"
+      - "3001:3000"
     depends_on:
       - postgres
     environment:
