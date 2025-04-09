@@ -226,12 +226,6 @@ export default function AdminChatbotDetailPage({ params }: { params: { id: strin
                 </div>
                 <div className="flex gap-2">
                     <button
-                        className="px-4 py-2 border border-blue-600 text-blue-500 rounded-md hover:bg-blue-900/20 transition-colors"
-                        onClick={() => alert(`Test chatbot ${params.id}`)}
-                    >
-                        Test Chatbot
-                    </button>
-                    <button
                         className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                         onClick={() => router.push(`/admin/chatbots/${params.id}/edit`)}
                     >
