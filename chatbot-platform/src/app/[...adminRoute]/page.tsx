@@ -10,7 +10,7 @@ export default async function AdminRoute({ params }: { params: { adminRoute?: st
 
     if (adminRouteParts.length === 0) {
         console.error("Invalid or missing adminRouteParts:", adminRouteParts);
-        return redirect("/admin/invalid-link");
+        return redirect("/404");
     }
 
     // Construct the secure path
@@ -20,7 +20,7 @@ export default async function AdminRoute({ params }: { params: { adminRoute?: st
     const isSecurePattern = /^\/secure-admin-\d{4}$/.test(path);
     if (!isSecurePattern) {
         console.warn("Unauthorized admin path attempted:", path);
-        return redirect("/admin/invalid-link");
+        return redirect("/404");
     }
 
     try {
@@ -32,7 +32,7 @@ export default async function AdminRoute({ params }: { params: { adminRoute?: st
 
         if (result.rows.length === 0) {
             console.warn("Admin access token not found or expired for path:", path);
-            return redirect("/admin/invalid-link");
+            return redirect("/404");
         }
 
         // Render login page with the secure path
