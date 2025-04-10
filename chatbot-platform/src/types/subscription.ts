@@ -1,15 +1,20 @@
+// src/types/subscription.ts
 export interface Subscription {
-    plan_type: string;
-    price: number;
+    id: string;
+    user_id: string;
+    plan_id: string;
+    status: string;
+    current_period_start: string;
+    current_period_end: string;
+    cancel_at_period_end: boolean;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface RetrievedSubscription {
-    id: number;
-    user_id: number;
+    id: string;
     plan_type: string;
     price: number;
-    status: string;
-    start_date: string;
     renewal_date: string;
-    created_at: string;
+    status: string;
 }

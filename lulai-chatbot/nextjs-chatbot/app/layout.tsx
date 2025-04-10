@@ -1,3 +1,4 @@
+// lulai-opencart/lulai-chatbot/nextjs-chatbot/app/layout.tsx
 import "./global.css"
 
 export const metadata = {

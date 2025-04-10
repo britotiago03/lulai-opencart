@@ -1,4 +1,4 @@
-// lulai-chatbot/nextjs-chatbot/scripts/loadDb.ts
+// lulai-opencart/lulai-chatbot/nextjs-chatbot/app/scripts/loadDb.ts
 import { Pool } from 'pg';
 import OpenAI from 'openai';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';

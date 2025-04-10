@@ -1,3 +1,4 @@
+// lulai-opencart/lulai-chatbot/nextjs-chatbot/app/components/PromptSuggestionsRow.tsx
 import PromptSuggestionButton from "./PromptSuggestionButton";
 
 const PromptSuggestionsRow = ({ onPromptClick }) => {

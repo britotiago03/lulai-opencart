@@ -1,4 +1,4 @@
-//app/page.tsx
+// lulai-opencart/lulai-chatbot/nextjs-chatbot/app/page.tsx
 
 "use client";
 

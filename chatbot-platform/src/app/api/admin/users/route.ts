@@ -1,148 +1,52 @@
-// app/api/admin/users/route.ts
-import { NextResponse } from "next/server";
-import pool from "@/lib/db";
-import { createVerificationToken } from "@/lib/tokenService";
-import { sendAdminSetupEmail } from "@/lib/emailService";
-import { updateAdminAccessToken } from "@/lib/adminSetup";
-import { validateAdminAccess } from "@/lib/admin-utils";
+// src/app/api/admin/users/route.ts
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "../../auth/[...nextauth]/route";
+import { pool } from "@/lib/db";
 
-// GET /api/admin/users - Get all admin users
-export async function GET() {
+export async function GET(req: NextRequest) {
     try {
-        // Validate admin access - we don't need the session for this route
-        const { errorResponse } = await validateAdminAccess();
-        if (errorResponse) return errorResponse;
+        const session = await getServerSession(authOptions);
 
-        // Fetch all admin users
-        const result = await pool.query(
-            `SELECT id, name, email, is_super_admin, is_active, created_at, last_login
-       FROM admin_users
-       ORDER BY is_super_admin DESC, name ASC`
-        );
-
-        return NextResponse.json({ users: result.rows });
-    } catch (error) {
-        console.error("Error fetching admin users:", error);
-        return NextResponse.json(
-            { error: "Error fetching admin users", details: error instanceof Error ? error.message : String(error) },
-            { status: 500 }
-        );
-    }
-}
-
-// POST /api/admin/users - Create a new admin user
-export async function POST(req: Request) {
-    try {
-        // Validate super admin access
-        const { session, errorResponse } = await validateAdminAccess(true);
-        if (errorResponse) return errorResponse;
-
-        // Ensure session is not null
-        if (!session) {
-            return NextResponse.json({ error: "Invalid session" }, { status: 401 });
-        }
-
-        const { name, email, is_super_admin } = await req.json();
-
-        // Validate required fields
-        if (!name || !email) {
+        if (!session || session.user.role !== "admin") {
             return NextResponse.json(
-                { error: "Name and email are required fields" },
-                { status: 400 }
+                { message: "Unauthorized" },
+                { status: 401 }
             );
         }
 
-        // Check if email is already in use
-        const emailCheck = await pool.query(
-            "SELECT 1 FROM admin_users WHERE email = $1",
-            [email]
-        );
-
-        if (emailCheck.rows.length > 0) {
-            return NextResponse.json(
-                { error: "An admin with this email already exists" },
-                { status: 400 }
-            );
-        }
-
-        // Create new admin user
         const client = await pool.connect();
-
         try {
-            await client.query('BEGIN');
+            // Get all users with their chatbot counts
+            const result = await client.query(`
+        SELECT u.id, u.name, u.email, u.role, u.created_at,
+               COUNT(c.id) as chatbot_count,
+               MAX(c.updated_at) as last_active
+        FROM users u
+        LEFT JOIN chatbots c ON u.id = c.user_id
+        GROUP BY u.id, u.name, u.email, u.role, u.created_at
+        ORDER BY u.created_at DESC
+      `);
 
-            // Insert new admin user without password (will be set via email)
-            const result = await client.query(
-                `INSERT INTO admin_users (name, email, is_super_admin, is_active)
-         VALUES ($1, $2, $3, true)
-         RETURNING id, name, email, is_super_admin, is_active, created_at, last_login`,
-                [name, email, is_super_admin || false]
-            );
+            // Format the data to match the expected structure
+            const formattedUsers = result.rows.map(user => ({
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                created_at: user.created_at,
+                chatbotCount: parseInt(user.chatbot_count) || 0,
+                lastActive: user.last_active || user.created_at
+            }));
 
-            const newAdminId = result.rows[0].id;
-
-            // Create a setup token for password setting
-            const setupToken = await createVerificationToken(
-                newAdminId,
-                'admin_setup',
-                undefined,
-                client
-            );
-
-            // Get current active access token
-            const accessTokenResult = await client.query(
-                `SELECT url_path, access_key
-         FROM admin_access_tokens 
-         WHERE is_active = true 
-         ORDER BY created_at DESC 
-         LIMIT 1`
-            );
-
-            // Initialize access path and key variables
-            let accessPath;
-            let accessKey;
-
-            if (accessTokenResult.rows.length > 0) {
-                accessPath = accessTokenResult.rows[0].url_path;
-                accessKey = accessTokenResult.rows[0].access_key;
-            } else {
-                // If no active token exists, create one
-                const currentAdminId = Number(session.user.id);
-                const newToken = await updateAdminAccessToken(currentAdminId);
-                accessPath = newToken.path;
-                accessKey = newToken.key;
-            }
-
-            await client.query('COMMIT');
-
-            // Send setup email
-            await sendAdminSetupEmail(
-                email,
-                name,
-                setupToken,
-                accessPath,
-                accessKey
-            );
-
-            return NextResponse.json({
-                success: true,
-                user: result.rows[0],
-                message: "Admin user created successfully"
-            });
-        } catch (error) {
-            await client.query('ROLLBACK');
-            console.error("Error creating admin user:", error);
-            return NextResponse.json(
-                { error: "Error creating admin user", details: error instanceof Error ? error.message : String(error) },
-                { status: 500 }
-            );
+            return NextResponse.json(formattedUsers);
         } finally {
             client.release();
         }
     } catch (error) {
-        console.error("Error creating admin user:", error);
+        console.error("Error fetching users:", error);
         return NextResponse.json(
-            { error: "Error creating admin user", details: error instanceof Error ? error.message : String(error) },
+            { message: "Internal server error" },
             { status: 500 }
         );
     }

@@ -1,332 +1,97 @@
--- Ensure we are using the correct database
-\c ecommerce_db1;
+-- SQL Script with All Statements Commented Out
 
--- Drop existing tables if they exist (for clean initialization)
-DROP TABLE IF EXISTS users, sessions, subscriptions, products, cart, verification_tokens CASCADE;
+-- Create pgvector extension if it doesn't exist
+-- CREATE EXTENSION IF NOT EXISTS vector;
 
--- Create users table with flexible ID handling
-CREATE TABLE users (
-    id VARCHAR(255) PRIMARY KEY,  -- Changed from SERIAL to VARCHAR to handle Google IDs
-    name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password VARCHAR(255),  -- Made nullable for OAuth users
-    auth_provider VARCHAR(50),  -- 'email', 'google', etc.
-    subscription_status VARCHAR(50) DEFAULT 'none',
-    subscription_renewal_date TIMESTAMP WITH TIME ZONE,
-    verified BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
+-- Create users table if not exists
+-- CREATE TABLE IF NOT EXISTS users (
+--                                     id SERIAL PRIMARY KEY,
+--                                     name VARCHAR(255) NOT NULL,
+--     email VARCHAR(255) UNIQUE NOT NULL,
+--     password VARCHAR(255) NOT NULL,
+--     role VARCHAR(50) NOT NULL DEFAULT 'client',
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+--     );
 
--- Create verification_tokens table with updated user_id type
-CREATE TABLE verification_tokens (
-    id SERIAL PRIMARY KEY,
-    user_id VARCHAR(255) NOT NULL REFERENCES users(id) ON DELETE CASCADE,  -- Updated type
-    token VARCHAR(255) NOT NULL,
-    type VARCHAR(50) NOT NULL, -- 'email_verification' or 'email_change'
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
-    new_email VARCHAR(255) NULL, -- Only used for email change
-    UNIQUE(token)
-);
+-- Create chatbots table if not exists
+-- CREATE TABLE IF NOT EXISTS chatbots (
+--                                         id SERIAL PRIMARY KEY,
+--                                         name VARCHAR(255) NOT NULL,
+--     description TEXT,
+--     api_key VARCHAR(255) UNIQUE NOT NULL,
+--     industry VARCHAR(100),
+--     platform VARCHAR(100),
+--     product_api_url TEXT,
+--     custom_prompt TEXT,
+--     user_id INTEGER REFERENCES users(id),
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+--     );
 
--- Create admin users table (unchanged as it's for internal admin users)
-CREATE TABLE admin_users (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password VARCHAR(255),
-    is_super_admin BOOLEAN DEFAULT FALSE,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    last_login TIMESTAMP WITH TIME ZONE
-);
+-- Create widget_configs table if not exists
+-- CREATE TABLE IF NOT EXISTS widget_configs (
+--                                               id SERIAL PRIMARY KEY,
+--                                               chatbot_id INTEGER REFERENCES chatbots(id),
+--     primary_color VARCHAR(20) DEFAULT '#007bff',
+--     secondary_color VARCHAR(20) DEFAULT '#e0f7fa',
+--     button_size INTEGER DEFAULT 60,
+--     window_width INTEGER DEFAULT 360,
+--     window_height INTEGER DEFAULT 500,
+--     header_text VARCHAR(100) DEFAULT 'Chat with us',
+--     font_family VARCHAR(255) DEFAULT 'Helvetica Neue, Helvetica, Arial, sans-serif',
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+--     );
 
--- Create table for secure admin access URLs (unchanged)
-CREATE TABLE admin_access_tokens (
-    id SERIAL PRIMARY KEY,
-    url_path VARCHAR(255) NOT NULL,
-    access_key VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
-    created_by INTEGER REFERENCES admin_users(id),
-    last_used_at TIMESTAMP WITH TIME ZONE,
-    is_active BOOLEAN DEFAULT TRUE
-);
+-- Create analytics table if not exists
+-- CREATE TABLE IF NOT EXISTS analytics (
+--                                          id SERIAL PRIMARY KEY,
+--                                          chatbot_id INTEGER REFERENCES chatbots(id),
+--     conversation_count INTEGER DEFAULT 0,
+--     message_count INTEGER DEFAULT 0,
+--     avg_response_time FLOAT DEFAULT 0,
+--     conversion_rate FLOAT DEFAULT 0,
+--     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+--     );
 
--- Create admin settings table (unchanged)
-CREATE TABLE admin_settings (
-    id SERIAL PRIMARY KEY,
-    setting_key VARCHAR(255) UNIQUE NOT NULL,
-    setting_value TEXT NOT NULL,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_by INTEGER REFERENCES admin_users(id)
-);
+-- Create conversations table if not exists
+-- CREATE TABLE IF NOT EXISTS conversations (
+--                                              id SERIAL PRIMARY KEY,
+--                                              api_key VARCHAR(255) NOT NULL,
+--     user_id VARCHAR(255) NOT NULL,
+--     message_role VARCHAR(50) NOT NULL,
+--     message_content TEXT NOT NULL,
+--     metadata JSONB,
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+--     );
 
--- Create sessions table with updated user_id type
-CREATE TABLE sessions (
-    id SERIAL PRIMARY KEY,
-    user_id VARCHAR(255) REFERENCES users(id),  -- Updated type
-    expires TIMESTAMP WITH TIME ZONE NOT NULL,
-    session_token VARCHAR(255) UNIQUE NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
+-- Create subscriptions table if not exists
+-- CREATE TABLE IF NOT EXISTS subscriptions (
+--                                              id SERIAL PRIMARY KEY,
+--                                              user_id INTEGER REFERENCES users(id),
+--     plan_id VARCHAR(100) NOT NULL,
+--     plan_name VARCHAR(100) NOT NULL,
+--     price DECIMAL(10, 2) NOT NULL,
+--     status VARCHAR(50) DEFAULT 'active',
+--     current_period_start TIMESTAMP NOT NULL,
+--     current_period_end TIMESTAMP NOT NULL,
+--     cancel_at_period_end BOOLEAN DEFAULT FALSE,
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+--     );
 
--- Create subscriptions table with updated user_id type
-CREATE TABLE subscriptions (
-    id SERIAL PRIMARY KEY,
-    user_id VARCHAR(255) REFERENCES users(id),  -- Updated type
-    user_email VARCHAR(255) REFERENCES users(email),
-    plan_type VARCHAR(50) NOT NULL,
-    price NUMERIC,
-    status VARCHAR(50) NOT NULL,
-    current_period_start TIMESTAMP WITH TIME ZONE NOT NULL,
-    current_period_renewal TIMESTAMP WITH TIME ZONE NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
+-- Create an admin user for testing (updated password hash for "adminPassword123")
+-- INSERT INTO users (name, email, password, role)
+-- VALUES ('Admin User', 'admin@lulai.com', '$2a$10$zqY1Cnn0N3WgRcbKAGXY8eq5o/DrkIJwFTjnzBwdEkYJ1j4v7Zmky', 'admin')
+--     ON CONFLICT (email) DO NOTHING;
 
--- Add indexes
-CREATE INDEX users_email_idx ON users(email);
-CREATE INDEX sessions_token_idx ON sessions(session_token);
-CREATE INDEX subscriptions_user_id_idx ON subscriptions(user_id);
-CREATE INDEX verification_tokens_token_idx ON verification_tokens(token);
-CREATE INDEX verification_tokens_user_id_idx ON verification_tokens(user_id);
+-- Create a test client user (password: clientPassword123)
+-- INSERT INTO users (name, email, password, role)
+-- VALUES ('Test Client', 'client@example.com', '$2a$10$2hKGQ3JGVhyf0y1RWCGNJej5V/aJ2lGysJZKpOw2V0sMR/eELJmQW', 'client')
+--     ON CONFLICT (email) DO NOTHING;
 
--- Insert test user with explicit ID
-INSERT INTO users (id, name, email, password, verified, auth_provider) VALUES 
-('1', 'BossLeModern', 'test@hotmail.com', '$2b$10$c6N89mld2qWN/qS.kQptP.5hcn.nRFVkCG1AkermebvKPDCUZlmg2', true, 'email');
-
--- Insert default settings
-INSERT INTO admin_settings (setting_key, setting_value)
-VALUES
-('access_token_renewal_frequency', 'weekly'),
-('admin_email', 'boss2909@hotmail.com'),
-('setup_completed', 'false');
-
--- Drop existing tables if they exist (for clean initialization)
-DROP TABLE IF EXISTS chatbot_feedback CASCADE;
-DROP TABLE IF EXISTS conversation_messages CASCADE;
-DROP TABLE IF EXISTS conversations CASCADE;
-DROP TABLE IF EXISTS chatbot_analytics CASCADE;
-DROP TABLE IF EXISTS chatbot_responses CASCADE;
-DROP TABLE IF EXISTS chatbots CASCADE;
-DROP TABLE IF EXISTS chatbot_templates CASCADE;
-DROP TABLE IF EXISTS industries CASCADE;
-
--- Create industries table
-CREATE TABLE industries (
-                            id SERIAL PRIMARY KEY,
-                            name VARCHAR(50) UNIQUE NOT NULL,
-                            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- Create chatbot_templates table
-/* CREATE TABLE chatbot_templates (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    industry_id INTEGER REFERENCES industries(id),
-    description TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-); */
-
--- Create chatbots table
-CREATE TABLE chatbots (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    industry_id INTEGER NOT NULL REFERENCES industries(id) ON DELETE CASCADE,
-    platform VARCHAR(50) NOT NULL,  -- platform is mandatory
-    api_url TEXT,  -- api_url can be NULL
-    api_key TEXT,  -- api_key can be NULL
-    custom_prompt TEXT,  -- custom_prompt can be NULL
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- Create chatbot_responses table
-/* CREATE TABLE chatbot_responses (
-    id SERIAL PRIMARY KEY,
-    chatbot_id INTEGER REFERENCES chatbots(id) ON DELETE CASCADE,
-    template_id INTEGER REFERENCES chatbot_templates(id) NULL,
-    trigger_phrase TEXT NOT NULL,
-    response_text TEXT NOT NULL,
-    is_ai_enhanced BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-); */
-
--- Create conversations table to track complete chat sessions
-CREATE TABLE conversations (
-                               id SERIAL PRIMARY KEY,
-                               chatbot_id INTEGER REFERENCES chatbots(id) ON DELETE CASCADE,
-                               session_id VARCHAR(255) NOT NULL, -- Client-side session identifier
-                               visitor_id VARCHAR(255), -- Anonymous visitor identifier
-                               user_id VARCHAR(255), -- Authenticated user ID if available
-                               started_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                               ended_at TIMESTAMP WITH TIME ZONE, -- NULL if conversation is ongoing
-                               source_url TEXT, -- Page where the conversation started
-                               platform VARCHAR(50), -- Device/platform (mobile, desktop, etc.)
-                               led_to_conversion BOOLEAN DEFAULT FALSE, -- Whether this conversation led to a purchase
-                               conversion_value DECIMAL(10, 2), -- Value of the conversion if applicable
-                               conversion_at TIMESTAMP WITH TIME ZONE -- When the conversion happened
-);
-
--- Create conversation_messages table to store individual messages
-CREATE TABLE conversation_messages (
-                                       id SERIAL PRIMARY KEY,
-                                       conversation_id INTEGER REFERENCES conversations(id) ON DELETE CASCADE,
-                                       is_from_user BOOLEAN NOT NULL, -- TRUE if message is from user, FALSE if from chatbot
-                                       message_text TEXT NOT NULL,
-                                       response_id INTEGER REFERENCES chatbot_responses(id), -- NULL if response was generated by AI
-                                       is_ai_generated BOOLEAN DEFAULT FALSE,
-                                       matched_triggers TEXT[], -- Keywords/triggers that matched this message
-                                       confidence_score DECIMAL(5, 2), -- Confidence level of the match/response (0-100)
-                                       sent_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- Create chatbot_feedback table to store user feedback
-CREATE TABLE chatbot_feedback (
-                                  id SERIAL PRIMARY KEY,
-                                  conversation_id INTEGER REFERENCES conversations(id) ON DELETE CASCADE,
-                                  message_id INTEGER REFERENCES conversation_messages(id), -- Specific message being rated
-                                  rating INTEGER CHECK (rating >= 1 AND rating <= 5), -- 1-5 star rating
-                                  feedback_text TEXT, -- Optional user comment
-                                  submitted_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- Create chatbot_analytics table for aggregated daily metrics
-CREATE TABLE chatbot_analytics (
-                                   id SERIAL PRIMARY KEY,
-                                   chatbot_id INTEGER REFERENCES chatbots(id) ON DELETE CASCADE,
-                                   date DATE NOT NULL,
-                                   conversation_count INTEGER DEFAULT 0,
-                                   message_count INTEGER DEFAULT 0,
-                                   unique_visitors INTEGER DEFAULT 0,
-                                   average_conversation_length DECIMAL(10, 2) DEFAULT 0, -- In number of messages
-                                   average_response_time DECIMAL(10, 2) DEFAULT 0, -- In seconds
-                                   successful_matches INTEGER DEFAULT 0, -- Number of successful trigger matches
-                                   ai_fallbacks INTEGER DEFAULT 0, -- Number of times fell back to AI generation
-                                   average_feedback_score DECIMAL(3, 2), -- Average feedback score (1-5)
-                                   conversion_count INTEGER DEFAULT 0, -- Number of conversions
-                                   conversion_rate DECIMAL(5, 2) DEFAULT 0, -- Percentage of conversations that led to conversion
-                                   total_conversion_value DECIMAL(10, 2) DEFAULT 0, -- Total value of conversions
-                                   UNIQUE (chatbot_id, date)
-);
-
--- Insert standard industries
-INSERT INTO industries (name) VALUES
-                                  ('general'),
-                                  ('fashion'),
-                                  ('electronics'),
-                                  ('food'),
-                                  ('beauty');
-
--- Insert template data for each industry
--- General templates
-INSERT INTO chatbot_templates (name, industry_id, description)
-VALUES ('General Business',
-        (SELECT id FROM industries WHERE name = 'general'),
-        'Basic template suitable for any business with standard customer service responses.');
-
--- Fashion templates
-INSERT INTO chatbot_templates (name, industry_id, description)
-VALUES ('Fashion Retail',
-        (SELECT id FROM industries WHERE name = 'fashion'),
-        'Template for fashion stores with common questions about sizing, materials, and returns.');
-
--- Electronics templates
-INSERT INTO chatbot_templates (name, industry_id, description)
-VALUES ('Electronics Store',
-        (SELECT id FROM industries WHERE name = 'electronics'),
-        'Template for electronics stores with technical support, warranty, and compatibility questions.');
-
--- Food templates
-INSERT INTO chatbot_templates (name, industry_id, description)
-VALUES ('Food & Restaurant',
-        (SELECT id FROM industries WHERE name = 'food'),
-        'Template for food-related businesses with answers about ingredients, allergens, and ordering.');
-
--- Beauty templates
-INSERT INTO chatbot_templates (name, industry_id, description)
-VALUES ('Beauty & Cosmetics',
-        (SELECT id FROM industries WHERE name = 'beauty'),
-        'Template for beauty stores with responses about ingredients, testing, and product recommendations.');
-
--- Add template responses for General template
-DO $$
-DECLARE
-template_id INTEGER;
-BEGIN
-SELECT id INTO template_id FROM chatbot_templates WHERE name = 'General Business';
-
-INSERT INTO chatbot_responses (template_id, trigger_phrase, response_text, is_ai_enhanced) VALUES
-                                                                                               (template_id, 'business hours', 'Our standard business hours are Monday to Friday, 9 AM to 5 PM.', FALSE),
-                                                                                               (template_id, 'contact', 'You can reach our customer service team at support@example.com or call us at (123) 456-7890.', FALSE),
-                                                                                               (template_id, 'help', 'I can help with various topics! Just ask about our products, services, or general information.', TRUE);
-END $$;
-
--- Add template responses for Fashion template
-DO $$
-DECLARE
-template_id INTEGER;
-BEGIN
-SELECT id INTO template_id FROM chatbot_templates WHERE name = 'Fashion Retail';
-
-INSERT INTO chatbot_responses (template_id, trigger_phrase, response_text, is_ai_enhanced) VALUES
-                                                                                               (template_id, 'size guide', 'You can find our size guide on the product page. We recommend measuring yourself and comparing with our size chart for the best fit.', FALSE),
-                                                                                               (template_id, 'return policy', 'We offer a 30-day return policy for unworn items in original packaging. Please visit our returns page for more information.', FALSE),
-                                                                                               (template_id, 'shipping time', 'Standard shipping takes 3-5 business days. Express shipping takes 1-2 business days.', FALSE);
-END $$;
-
--- Add template responses for Electronics template
-DO $$
-DECLARE
-template_id INTEGER;
-BEGIN
-SELECT id INTO template_id FROM chatbot_templates WHERE name = 'Electronics Store';
-
-INSERT INTO chatbot_responses (template_id, trigger_phrase, response_text, is_ai_enhanced) VALUES
-                                                                                               (template_id, 'warranty', 'All our electronics come with a standard 1-year manufacturer warranty. Extended warranties are available for purchase.', FALSE),
-                                                                                               (template_id, 'technical support', 'For technical support, please contact our support team at support@example.com or call 1-800-TECH-HELP.', FALSE),
-                                                                                               (template_id, 'compatibility', 'You can find compatibility information on the product specifications tab on each product page.', FALSE);
-END $$;
-
--- Add template responses for Food template
-DO $$
-DECLARE
-template_id INTEGER;
-BEGIN
-SELECT id INTO template_id FROM chatbot_templates WHERE name = 'Food & Restaurant';
-
-INSERT INTO chatbot_responses (template_id, trigger_phrase, response_text, is_ai_enhanced) VALUES
-                                                                                               (template_id, 'menu', 'You can view our full menu on our website under the "Menu" section.', FALSE),
-                                                                                               (template_id, 'allergens', 'We take allergens seriously. Please inform our staff of any allergies when ordering. Detailed allergen information is available upon request.', FALSE),
-                                                                                               (template_id, 'delivery time', 'Our average delivery time is 30-45 minutes depending on your location and current order volume.', FALSE);
-END $$;
-
--- Add template responses for Beauty template
-DO $$
-DECLARE
-template_id INTEGER;
-BEGIN
-SELECT id INTO template_id FROM chatbot_templates WHERE name = 'Beauty & Cosmetics';
-
-INSERT INTO chatbot_responses (template_id, trigger_phrase, response_text, is_ai_enhanced) VALUES
-                                                                                               (template_id, 'cruelty free', 'Yes, all our products are cruelty-free and we never test on animals.', FALSE),
-                                                                                               (template_id, 'ingredients', 'You can find a full list of ingredients on each product page under the "Ingredients" tab.', FALSE),
-                                                                                               (template_id, 'product recommendation', 'For personalized product recommendations, please tell us about your skin type and concerns.', TRUE);
-END $$;
-
--- Add indexes
-CREATE INDEX IF NOT EXISTS chatbots_industry_id_idx ON chatbots(industry_id);
-CREATE INDEX IF NOT EXISTS chatbot_responses_chatbot_id_idx ON chatbot_responses(chatbot_id);
-CREATE INDEX IF NOT EXISTS chatbot_responses_template_id_idx ON chatbot_responses(template_id);
-CREATE INDEX IF NOT EXISTS chatbot_responses_trigger_idx ON chatbot_responses USING gin(to_tsvector('english', trigger_phrase));
-
--- Analytics indexes
-CREATE INDEX IF NOT EXISTS conversations_chatbot_id_idx ON conversations(chatbot_id);
-CREATE INDEX IF NOT EXISTS conversations_session_id_idx ON conversations(session_id);
-CREATE INDEX IF NOT EXISTS conversations_started_at_idx ON conversations(started_at);
-CREATE INDEX IF NOT EXISTS conversations_conversion_idx ON conversations(led_to_conversion);
-CREATE INDEX IF NOT EXISTS conversation_messages_conversation_id_idx ON conversation_messages(conversation_id);
-CREATE INDEX IF NOT EXISTS conversation_messages_sent_at_idx ON conversation_messages(sent_at);
-CREATE INDEX IF NOT EXISTS chatbot_feedback_conversation_id_idx ON chatbot_feedback(conversation_id);
-CREATE INDEX IF NOT EXISTS chatbot_analytics_chatbot_id_date_idx ON chatbot_analytics(chatbot_id, date);
+-- Add indexes for better performance
+-- CREATE INDEX IF NOT EXISTS idx_conversations_api_key ON conversations(api_key);
+-- CREATE INDEX IF NOT EXISTS idx_conversations_user_id ON conversations(user_id);
+-- CREATE INDEX IF NOT EXISTS idx_chatbots_user_id ON chatbots(user_id);
+-- CREATE INDEX IF NOT EXISTS idx_chatbots_api_key ON chatbots(api_key);

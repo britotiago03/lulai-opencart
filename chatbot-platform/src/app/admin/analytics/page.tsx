@@ -1,630 +1,351 @@
 // src/app/admin/analytics/page.tsx
 "use client";
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { Card, CardContent } from "@/components/ui/card";
 import {
-    BarChart,
-    Bar,
-    LineChart,
-    Line,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    Legend,
-    ResponsiveContainer,
-    PieChart,
-    Pie,
-    Cell
-} from 'recharts';
-import {
+    BarChart2,
     Users,
     MessageSquare,
-    CreditCard,
     TrendingUp,
-    Calendar,
-    Download
-} from 'lucide-react';
+    Filter,
+    RefreshCw,
+    Calendar
+} from "lucide-react";
+import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
+import dynamic from 'next/dynamic';
 
-interface AnalyticsData {
-    userStats: {
-        totalUsers: number;
-        newUsersToday: number;
-        activeUsers: number;
-        userGrowth: number;
-    };
-    chatbotStats: {
-        totalChatbots: number;
-        activeChatbots: number;
-        chatbotsCreatedToday: number;
-        averageChatbotsPerUser: number;
-    };
-    conversationStats: {
-        totalConversations: number;
-        conversationsToday: number;
-        averageMessagesPerConversation: number;
-        conversionRate: number;
-    };
-    subscriptionStats: {
-        totalSubscriptions: number;
-        activeSubscriptions: number;
-        trialSubscriptions: number;
-        mrr: number;
-        arr: number;
-    };
-    userGrowthData: {
-        date: string;
-        users: number;
-    }[];
-    conversationData: {
-        date: string;
-        conversations: number;
-        messages: number;
-    }[];
-    revenueData: {
-        date: string;
-        revenue: number;
-    }[];
-    planDistribution: {
-        name: string;
-        value: number;
-        color: string;
-    }[];
-    industryDistribution: {
-        name: string;
-        value: number;
-        color: string;
-    }[];
-    topFeaturesUsed: {
-        name: string;
-        count: number;
-    }[];
-}
+// Dynamically import chart components
+const DynamicBarChart = dynamic(() => import('@/components/charts/BarChart'), { ssr: false });
+const DynamicPieChart = dynamic(() => import('@/components/charts/PieChart'), { ssr: false });
+const DynamicLineChart = dynamic(() => import('@/components/charts/LineChart'), { ssr: false });
 
 export default function AdminAnalyticsPage() {
-    const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [dateRange, setDateRange] = useState<'7days' | '30days' | '90days' | 'year'>('30days');
-    const [error, setError] = useState<string | null>(null);
+    const { data: session, status } = useSession();
+    const router = useRouter();
+    const [loading, setLoading] = useState(true);
+    const [analyticsData, setAnalyticsData] = useState(null);
+    const [error, setError] = useState(null);
+    const [timeRange, setTimeRange] = useState("30"); // "7", "30", "90"
 
     useEffect(() => {
-        // In a real application, this would be an API call
-        const fetchAnalyticsData = async () => {
-            setLoading(true);
+        if (status === "unauthenticated") {
+            router.push("/auth/signin");
+            return;
+        }
+
+        if (status === "authenticated" && session?.user?.role !== "admin") {
+            router.push("/dashboard");
+            return;
+        }
+
+        const fetchAnalytics = async () => {
             try {
-                // Simulate API delay
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                setLoading(true);
+                const response = await fetch(`/api/analytics?timeRange=${timeRange}`);
 
-                // Mocked analytics data
-                const mockData: AnalyticsData = {
-                    userStats: {
-                        totalUsers: 245,
-                        newUsersToday: 8,
-                        activeUsers: 187,
-                        userGrowth: 12.5
-                    },
-                    chatbotStats: {
-                        totalChatbots: 376,
-                        activeChatbots: 298,
-                        chatbotsCreatedToday: 5,
-                        averageChatbotsPerUser: 1.53
-                    },
-                    conversationStats: {
-                        totalConversations: 15789,
-                        conversationsToday: 432,
-                        averageMessagesPerConversation: 8.2,
-                        conversionRate: 6.8
-                    },
-                    subscriptionStats: {
-                        totalSubscriptions: 212,
-                        activeSubscriptions: 187,
-                        trialSubscriptions: 25,
-                        mrr: 8950,
-                        arr: 107400
-                    },
-                    userGrowthData: [
-                        { date: '2023-01-01', users: 120 },
-                        { date: '2023-02-01', users: 132 },
-                        { date: '2023-03-01', users: 145 },
-                        { date: '2023-04-01', users: 160 },
-                        { date: '2023-05-01', users: 178 },
-                        { date: '2023-06-01', users: 190 },
-                        { date: '2023-07-01', users: 212 },
-                        { date: '2023-08-01', users: 225 },
-                        { date: '2023-09-01', users: 245 }
-                    ],
-                    conversationData: [
-                        { date: '2023-01-01', conversations: 980, messages: 7840 },
-                        { date: '2023-02-01', conversations: 1120, messages: 8960 },
-                        { date: '2023-03-01', conversations: 1340, messages: 10720 },
-                        { date: '2023-04-01', conversations: 1560, messages: 12480 },
-                        { date: '2023-05-01', conversations: 1780, messages: 14240 },
-                        { date: '2023-06-01', conversations: 1920, messages: 15360 },
-                        { date: '2023-07-01', conversations: 2240, messages: 17920 },
-                        { date: '2023-08-01', conversations: 2460, messages: 19680 },
-                        { date: '2023-09-01', conversations: 2690, messages: 21520 }
-                    ],
-                    revenueData: [
-                        { date: '2023-01-01', revenue: 5400 },
-                        { date: '2023-02-01', revenue: 5800 },
-                        { date: '2023-03-01', revenue: 6200 },
-                        { date: '2023-04-01', revenue: 6800 },
-                        { date: '2023-05-01', revenue: 7400 },
-                        { date: '2023-06-01', revenue: 7900 },
-                        { date: '2023-07-01', revenue: 8200 },
-                        { date: '2023-08-01', revenue: 8600 },
-                        { date: '2023-09-01', revenue: 8950 }
-                    ],
-                    planDistribution: [
-                        { name: 'Basic', value: 92, color: '#6B7280' },
-                        { name: 'Professional', value: 85, color: '#3B82F6' },
-                        { name: 'Enterprise', value: 35, color: '#8B5CF6' }
-                    ],
-                    industryDistribution: [
-                        { name: 'Retail', value: 68, color: '#10B981' },
-                        { name: 'Fashion', value: 45, color: '#F59E0B' },
-                        { name: 'Electronics', value: 32, color: '#3B82F6' },
-                        { name: 'Food', value: 25, color: '#EF4444' },
-                        { name: 'Beauty', value: 20, color: '#EC4899' },
-                        { name: 'Other', value: 55, color: '#6B7280' }
-                    ],
-                    topFeaturesUsed: [
-                        { name: 'AI Responses', count: 4250 },
-                        { name: 'Product Recommendations', count: 3780 },
-                        { name: 'Order Tracking', count: 2950 },
-                        { name: 'FAQ Responses', count: 2680 },
-                        { name: 'Shipping Information', count: 2120 }
-                    ]
-                };
+                if (!response.ok) {
+                    throw new Error(`Error fetching analytics: ${response.status}`);
+                }
 
-                setAnalyticsData(mockData);
-            } catch (error) {
-                console.error('Error fetching analytics data:', error);
-                setError('Failed to load analytics data. Please try again.');
+                const data = await response.json();
+                setAnalyticsData(data);
+            } catch (err) {
+                console.error("Error fetching analytics:", err);
+                setError("Failed to load analytics data. Please try again.");
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchAnalyticsData();
-    }, [dateRange]);
+        fetchAnalytics();
+    }, [timeRange, session, status, router]);
 
-    // Format currency
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-            maximumFractionDigits: 0
-        }).format(amount);
-    };
-
-    // Format date for display
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' }).format(date);
-    };
-
-    // Determine date range for display in charts
-    const getFilteredData = (data: any[]) => {
-        if (!data || data.length === 0) return [];
-
-        const today = new Date();
-        let cutoffDate;
-
-        switch (dateRange) {
-            case '7days':
-                cutoffDate = new Date(today.setDate(today.getDate() - 7));
-                break;
-            case '90days':
-                cutoffDate = new Date(today.setDate(today.getDate() - 90));
-                break;
-            case 'year':
-                cutoffDate = new Date(today.setFullYear(today.getFullYear() - 1));
-                break;
-            case '30days':
-            default:
-                cutoffDate = new Date(today.setDate(today.getDate() - 30));
-                break;
-        }
-
-        return data.filter(item => new Date(item.date) >= cutoffDate);
+    const refreshData = () => {
+        setLoading(true);
+        fetch(`/api/analytics?timeRange=${timeRange}`)
+            .then(res => res.json())
+            .then(data => {
+                setAnalyticsData(data);
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error("Error refreshing data:", err);
+                setError("Failed to refresh data");
+                setLoading(false);
+            });
     };
 
     if (loading) {
-        return (
-            <div className="max-w-7xl mx-auto p-6">
-                <div className="flex justify-center items-center py-20">
-                    <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
-                    <span className="ml-3">Loading analytics data...</span>
-                </div>
-            </div>
-        );
+        return <LoadingSkeleton />;
     }
 
-    if (error) {
+    if (error || !analyticsData) {
         return (
             <div className="max-w-7xl mx-auto p-6">
                 <Card className="bg-[#1b2539] border-0">
-                    <CardContent className="p-6 text-center text-red-400">
-                        {error}
+                    <CardContent className="p-6 text-center">
+                        <p className="text-red-400 mb-4">{error || "Failed to load analytics data."}</p>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                        >
+                            Try Again
+                        </button>
                     </CardContent>
                 </Card>
             </div>
         );
     }
 
-    if (!analyticsData) {
-        return null;
-    }
+    // Format data for charts
+    const formatActivityData = () => {
+        if (!analyticsData.recentActivity || analyticsData.recentActivity.length === 0) {
+            return [];
+        }
+
+        return analyticsData.recentActivity.map(day => ({
+            date: new Date(day.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+            count: parseInt(day.count)
+        }));
+    };
+
+    const formatIntentData = () => {
+        if (!analyticsData.intentDistribution || analyticsData.intentDistribution.length === 0) {
+            return [];
+        }
+
+        return analyticsData.intentDistribution.map(item => ({
+            name: item.intent || 'unknown',
+            value: parseInt(item.count)
+        }));
+    };
 
     return (
         <div className="max-w-7xl mx-auto p-6">
-            <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <h1 className="text-2xl font-bold">Platform Analytics</h1>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                <h1 className="text-2xl font-bold">Global Analytics Dashboard</h1>
 
-                <div className="flex flex-wrap gap-2">
-                    <div className="flex bg-[#232b3c] border border-gray-700 rounded-md overflow-hidden">
+                <div className="flex space-x-4 items-center">
+                    <div className="flex bg-[#1b2539] rounded-md">
                         <button
-                            className={`px-3 py-2 text-sm ${dateRange === '7days' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800'}`}
-                            onClick={() => setDateRange('7days')}
+                            onClick={() => setTimeRange("7")}
+                            className={`px-4 py-2 text-sm rounded-md transition-colors ${
+                                timeRange === "7" ? "bg-blue-600 text-white" : "text-gray-400 hover:text-white"
+                            }`}
                         >
                             7 Days
                         </button>
                         <button
-                            className={`px-3 py-2 text-sm ${dateRange === '30days' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800'}`}
-                            onClick={() => setDateRange('30days')}
+                            onClick={() => setTimeRange("30")}
+                            className={`px-4 py-2 text-sm rounded-md transition-colors ${
+                                timeRange === "30" ? "bg-blue-600 text-white" : "text-gray-400 hover:text-white"
+                            }`}
                         >
                             30 Days
                         </button>
                         <button
-                            className={`px-3 py-2 text-sm ${dateRange === '90days' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800'}`}
-                            onClick={() => setDateRange('90days')}
+                            onClick={() => setTimeRange("90")}
+                            className={`px-4 py-2 text-sm rounded-md transition-colors ${
+                                timeRange === "90" ? "bg-blue-600 text-white" : "text-gray-400 hover:text-white"
+                            }`}
                         >
                             90 Days
                         </button>
-                        <button
-                            className={`px-3 py-2 text-sm ${dateRange === 'year' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800'}`}
-                            onClick={() => setDateRange('year')}
-                        >
-                            1 Year
-                        </button>
                     </div>
 
-                    <button className="px-4 py-2 border border-gray-600 text-gray-300 rounded-md hover:bg-gray-800 transition-colors flex items-center">
-                        <Download className="h-4 w-4 mr-2" />
-                        <span>Export</span>
+                    <button
+                        onClick={refreshData}
+                        className="p-2 bg-[#1b2539] text-gray-400 hover:text-white rounded-md transition-colors"
+                        title="Refresh data"
+                    >
+                        <RefreshCw className="h-5 w-5" />
                     </button>
                 </div>
             </div>
 
             {/* Key Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                {/* Users */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 <Card className="bg-[#1b2539] border-0">
-                    <CardContent className="p-6">
-                        <div className="flex justify-between mb-4">
+                    <CardContent className="p-4">
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <p className="text-sm text-gray-400">Total Users</p>
+                                <p className="text-2xl font-bold">{analyticsData.totalUsers || 0}</p>
+                            </div>
                             <div className="bg-blue-600/20 p-3 rounded-full">
-                                <Users className="h-6 w-6 text-blue-500" />
+                                <Users className="h-5 w-5 text-blue-500" />
                             </div>
-                            <div className="text-sm px-2 py-1 bg-green-900/30 text-green-400 rounded-full flex items-center">
-                                +{analyticsData.userStats.userGrowth}%
-                            </div>
-                        </div>
-                        <h3 className="text-lg font-medium text-gray-200">Total Users</h3>
-                        <div className="text-3xl font-bold mt-1">{analyticsData.userStats.totalUsers}</div>
-                        <div className="text-sm text-gray-400 mt-1">
-                            {analyticsData.userStats.newUsersToday} new today
                         </div>
                     </CardContent>
                 </Card>
 
-                {/* Chatbots */}
                 <Card className="bg-[#1b2539] border-0">
-                    <CardContent className="p-6">
-                        <div className="flex justify-between mb-4">
+                    <CardContent className="p-4">
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <p className="text-sm text-gray-400">Total Chatbots</p>
+                                <p className="text-2xl font-bold">{analyticsData.totalChatbots || 0}</p>
+                            </div>
                             <div className="bg-purple-600/20 p-3 rounded-full">
-                                <MessageSquare className="h-6 w-6 text-purple-500" />
+                                <MessageSquare className="h-5 w-5 text-purple-500" />
                             </div>
-                            <div className="text-sm px-2 py-1 bg-green-900/30 text-green-400 rounded-full flex items-center">
-                                {analyticsData.chatbotStats.chatbotsCreatedToday} new
-                            </div>
-                        </div>
-                        <h3 className="text-lg font-medium text-gray-200">Total Chatbots</h3>
-                        <div className="text-3xl font-bold mt-1">{analyticsData.chatbotStats.totalChatbots}</div>
-                        <div className="text-sm text-gray-400 mt-1">
-                            {analyticsData.chatbotStats.activeChatbots} active now
                         </div>
                     </CardContent>
                 </Card>
 
-                {/* Conversations */}
                 <Card className="bg-[#1b2539] border-0">
-                    <CardContent className="p-6">
-                        <div className="flex justify-between mb-4">
+                    <CardContent className="p-4">
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <p className="text-sm text-gray-400">Total Conversations</p>
+                                <p className="text-2xl font-bold">{analyticsData.totalConversations || 0}</p>
+                            </div>
                             <div className="bg-green-600/20 p-3 rounded-full">
-                                <TrendingUp className="h-6 w-6 text-green-500" />
+                                <BarChart2 className="h-5 w-5 text-green-500" />
                             </div>
-                            <div className="text-sm px-2 py-1 bg-green-900/30 text-green-400 rounded-full flex items-center">
-                                {analyticsData.conversationStats.conversationsToday} today
-                            </div>
-                        </div>
-                        <h3 className="text-lg font-medium text-gray-200">Conversations</h3>
-                        <div className="text-3xl font-bold mt-1">{analyticsData.conversationStats.totalConversations.toLocaleString()}</div>
-                        <div className="text-sm text-gray-400 mt-1">
-                            {analyticsData.conversationStats.conversionRate}% conversion rate
                         </div>
                     </CardContent>
                 </Card>
 
-                {/* MRR */}
                 <Card className="bg-[#1b2539] border-0">
-                    <CardContent className="p-6">
-                        <div className="flex justify-between mb-4">
-                            <div className="bg-yellow-600/20 p-3 rounded-full">
-                                <CreditCard className="h-6 w-6 text-yellow-500" />
+                    <CardContent className="p-4">
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <p className="text-sm text-gray-400">Avg. Conversion Rate</p>
+                                <p className="text-2xl font-bold">{analyticsData.averageConversionRate?.toFixed(1) || 0}%</p>
                             </div>
-                            <div className="text-sm px-2 py-1 bg-blue-900/30 text-blue-400 rounded-full flex items-center">
-                                {analyticsData.subscriptionStats.activeSubscriptions} active
+                            <div className="bg-red-600/20 p-3 rounded-full">
+                                <TrendingUp className="h-5 w-5 text-red-500" />
                             </div>
-                        </div>
-                        <h3 className="text-lg font-medium text-gray-200">Monthly Revenue</h3>
-                        <div className="text-3xl font-bold mt-1">{formatCurrency(analyticsData.subscriptionStats.mrr)}</div>
-                        <div className="text-sm text-gray-400 mt-1">
-                            ARR: {formatCurrency(analyticsData.subscriptionStats.arr)}
                         </div>
                     </CardContent>
                 </Card>
             </div>
 
-            {/* Charts Row 1 */}
+            {/* Chart Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                {/* User Growth Chart */}
+                {/* Activity Chart */}
                 <Card className="bg-[#1b2539] border-0">
-                    <CardContent className="p-6">
-                        <h3 className="text-lg font-medium text-gray-200 mb-4">User Growth</h3>
-                        <div className="h-80">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <LineChart
-                                    data={getFilteredData(analyticsData.userGrowthData)}
-                                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                                >
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                                    <XAxis
-                                        dataKey="date"
-                                        stroke="#6B7280"
-                                        tickFormatter={formatDate}
-                                    />
-                                    <YAxis stroke="#6B7280" />
-                                    <Tooltip
-                                        contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151' }}
-                                        labelStyle={{ color: '#E5E7EB' }}
-                                        formatter={(value: any) => [value, 'Users']}
-                                        labelFormatter={(label) => formatDate(label)}
-                                    />
-                                    <Legend />
-                                    <Line
-                                        type="monotone"
-                                        dataKey="users"
-                                        name="Total Users"
-                                        stroke="#3B82F6"
-                                        strokeWidth={2}
-                                        activeDot={{ r: 8 }}
-                                    />
-                                </LineChart>
-                            </ResponsiveContainer>
+                    <CardContent className="p-4">
+                        <div className="flex items-center mb-4">
+                            <Calendar className="h-5 w-5 text-blue-500 mr-2" />
+                            <h3 className="text-lg font-semibold">Conversation Activity</h3>
+                        </div>
+                        <div className="h-80 w-full">
+                            {formatActivityData().length > 0 ? (
+                                <DynamicLineChart
+                                    data={formatActivityData()}
+                                    xDataKey="date"
+                                    yDataKey="count"
+                                    primaryColor="#3b82f6"
+                                />
+                            ) : (
+                                <div className="h-full flex items-center justify-center text-gray-500">
+                                    No activity data available
+                                </div>
+                            )}
                         </div>
                     </CardContent>
                 </Card>
 
-                {/* Revenue Chart */}
+                {/* Intent Distribution Chart */}
                 <Card className="bg-[#1b2539] border-0">
-                    <CardContent className="p-6">
-                        <h3 className="text-lg font-medium text-gray-200 mb-4">Monthly Revenue</h3>
-                        <div className="h-80">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart
-                                    data={getFilteredData(analyticsData.revenueData)}
-                                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                                >
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                                    <XAxis
-                                        dataKey="date"
-                                        stroke="#6B7280"
-                                        tickFormatter={formatDate}
-                                    />
-                                    <YAxis
-                                        stroke="#6B7280"
-                                        tickFormatter={(value) => `$${value}`}
-                                    />
-                                    <Tooltip
-                                        contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151' }}
-                                        labelStyle={{ color: '#E5E7EB' }}
-                                        formatter={(value: any) => [`$${value}`, 'Revenue']}
-                                        labelFormatter={(label) => formatDate(label)}
-                                    />
-                                    <Legend />
-                                    <Bar
-                                        dataKey="revenue"
-                                        name="Monthly Revenue"
-                                        fill="#10B981"
-                                        radius={[4, 4, 0, 0]}
-                                    />
-                                </BarChart>
-                            </ResponsiveContainer>
+                    <CardContent className="p-4">
+                        <h3 className="text-lg font-semibold mb-4">Intent Distribution</h3>
+                        <div className="h-80 w-full">
+                            {formatIntentData().length > 0 ? (
+                                <DynamicPieChart
+                                    data={formatIntentData()}
+                                    dataKey="value"
+                                    nameKey="name"
+                                    colors={['#3b82f6', '#8b5cf6', '#06b6d4', '#ec4899', '#f97316']}
+                                />
+                            ) : (
+                                <div className="h-full flex items-center justify-center text-gray-500">
+                                    No intent data available
+                                </div>
+                            )}
                         </div>
                     </CardContent>
                 </Card>
             </div>
 
-            {/* Charts Row 2 */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                {/* Conversations Chart */}
-                <Card className="bg-[#1b2539] border-0 col-span-1 lg:col-span-2">
-                    <CardContent className="p-6">
-                        <h3 className="text-lg font-medium text-gray-200 mb-4">Conversations & Messages</h3>
-                        <div className="h-80">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <LineChart
-                                    data={getFilteredData(analyticsData.conversationData)}
-                                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                                >
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                                    <XAxis
-                                        dataKey="date"
-                                        stroke="#6B7280"
-                                        tickFormatter={formatDate}
-                                    />
-                                    <YAxis
-                                        stroke="#6B7280"
-                                        yAxisId="left"
-                                    />
-                                    <YAxis
-                                        stroke="#6B7280"
-                                        yAxisId="right"
-                                        orientation="right"
-                                    />
-                                    <Tooltip
-                                        contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151' }}
-                                        labelStyle={{ color: '#E5E7EB' }}
-                                        labelFormatter={(label) => formatDate(label)}
-                                    />
-                                    <Legend />
-                                    <Line
-                                        type="monotone"
-                                        dataKey="conversations"
-                                        name="Conversations"
-                                        stroke="#8B5CF6"
-                                        strokeWidth={2}
-                                        yAxisId="left"
-                                    />
-                                    <Line
-                                        type="monotone"
-                                        dataKey="messages"
-                                        name="Messages"
-                                        stroke="#F59E0B"
-                                        strokeWidth={2}
-                                        yAxisId="right"
-                                    />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Plan Distribution */}
-                <Card className="bg-[#1b2539] border-0">
-                    <CardContent className="p-6">
-                        <h3 className="text-lg font-medium text-gray-200 mb-4">Subscription Plans</h3>
-                        <div className="h-80 flex flex-col justify-center">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie
-                                        data={analyticsData.planDistribution}
-                                        cx="50%"
-                                        cy="50%"
-                                        labelLine={false}
-                                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                                        outerRadius={80}
-                                        fill="#8884d8"
-                                        dataKey="value"
-                                    >
-                                        {analyticsData.planDistribution.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={entry.color} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip
-                                        contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151' }}
-                                        formatter={(value: any, name: any) => [`${value} users`, name]}
-                                    />
-                                </PieChart>
-                            </ResponsiveContainer>
-                            <div className="grid grid-cols-3 gap-2 mt-2">
-                                {analyticsData.planDistribution.map((plan, index) => (
-                                    <div key={index} className="text-center">
-                                        <div className="text-sm font-medium">{plan.name}</div>
-                                        <div className="text-gray-400 text-xs">{plan.value} users</div>
-                                    </div>
+            {/* Top Performing Chatbots */}
+            {analyticsData.topPerformingChatbots && (
+                <Card className="bg-[#1b2539] border-0 mb-6">
+                    <CardContent className="p-4">
+                        <h3 className="text-lg font-semibold mb-4">Top Performing Chatbots</h3>
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead>
+                                <tr className="border-b border-gray-700">
+                                    <th className="py-2 px-3 text-left">Name</th>
+                                    <th className="py-2 px-3 text-left">Users</th>
+                                    <th className="py-2 px-3 text-left">Conversions</th>
+                                    <th className="py-2 px-3 text-left">Conversion Rate</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {analyticsData.topPerformingChatbots.map((bot, index) => (
+                                    <tr key={index} className="border-b border-gray-800 hover:bg-[#232b3c]">
+                                        <td className="py-2 px-3">{bot.name}</td>
+                                        <td className="py-2 px-3">{bot.total_users}</td>
+                                        <td className="py-2 px-3">{bot.conversions}</td>
+                                        <td className="py-2 px-3">
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                            parseFloat(bot.conversion_rate) > 10
+                                ? 'bg-green-900/30 text-green-400'
+                                : 'bg-blue-900/30 text-blue-400'
+                        }`}>
+                          {bot.conversion_rate}%
+                        </span>
+                                        </td>
+                                    </tr>
                                 ))}
-                            </div>
+                                </tbody>
+                            </table>
                         </div>
                     </CardContent>
                 </Card>
-            </div>
+            )}
 
-            {/* Charts Row 3 */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Industry Distribution */}
+            {/* Top Active Chatbots */}
+            {analyticsData.topChatbots && (
                 <Card className="bg-[#1b2539] border-0">
-                    <CardContent className="p-6">
-                        <h3 className="text-lg font-medium text-gray-200 mb-4">Industries</h3>
-                        <div className="h-80">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart
-                                    data={analyticsData.industryDistribution}
-                                    layout="vertical"
-                                    margin={{ top: 5, right: 30, left: 70, bottom: 5 }}
-                                >
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" horizontal={false} />
-                                    <XAxis type="number" stroke="#6B7280" />
-                                    <YAxis
-                                        type="category"
-                                        dataKey="name"
-                                        stroke="#6B7280"
-                                        tick={{ fontSize: 14 }}
-                                    />
-                                    <Tooltip
-                                        contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151' }}
-                                        formatter={(value: any) => [`${value} users`, 'Count']}
-                                    />
-                                    <Bar
-                                        dataKey="value"
-                                        radius={[0, 4, 4, 0]}
-                                    >
-                                        {analyticsData.industryDistribution.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={entry.color} />
-                                        ))}
-                                    </Bar>
-                                </BarChart>
-                            </ResponsiveContainer>
+                    <CardContent className="p-4">
+                        <h3 className="text-lg font-semibold mb-4">Most Active Chatbots</h3>
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead>
+                                <tr className="border-b border-gray-700">
+                                    <th className="py-2 px-3 text-left">Name</th>
+                                    <th className="py-2 px-3 text-left">Users</th>
+                                    <th className="py-2 px-3 text-left">Messages</th>
+                                    <th className="py-2 px-3 text-left">Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {analyticsData.topChatbots.map((bot, index) => (
+                                    <tr key={index} className="border-b border-gray-800 hover:bg-[#232b3c]">
+                                        <td className="py-2 px-3">{bot.name}</td>
+                                        <td className="py-2 px-3">{bot.user_count}</td>
+                                        <td className="py-2 px-3">{bot.message_count}</td>
+                                        <td className="py-2 px-3">
+                                            <a href={`/admin/chatbots?api_key=${bot.api_key}`} className="text-blue-500 hover:text-blue-400">
+                                                View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
                         </div>
                     </CardContent>
                 </Card>
-
-                {/* Top Features Used */}
-                <Card className="bg-[#1b2539] border-0">
-                    <CardContent className="p-6">
-                        <h3 className="text-lg font-medium text-gray-200 mb-4">Top Features Used</h3>
-                        <div className="h-80">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart
-                                    data={analyticsData.topFeaturesUsed}
-                                    layout="vertical"
-                                    margin={{ top: 5, right: 30, left: 100, bottom: 5 }}
-                                >
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" horizontal={false} />
-                                    <XAxis type="number" stroke="#6B7280" />
-                                    <YAxis
-                                        type="category"
-                                        dataKey="name"
-                                        stroke="#6B7280"
-                                        tick={{ fontSize: 14 }}
-                                    />
-                                    <Tooltip
-                                        contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151' }}
-                                        formatter={(value: any) => [`${value} uses`, 'Count']}
-                                    />
-                                    <Bar
-                                        dataKey="count"
-                                        fill="#3B82F6"
-                                        radius={[0, 4, 4, 0]}
-                                    />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
+            )}
         </div>
     );
 }

@@ -9,6 +9,8 @@ type ThemeProviderProps = {
     children: React.ReactNode;
     defaultTheme?: Theme;
     storageKey?: string;
+    attribute?: string;
+    enableSystem?: boolean;
 };
 
 type ThemeProviderState = {
@@ -27,6 +29,8 @@ export function ThemeProvider({
                                   children,
                                   defaultTheme = "system",
                                   storageKey = "ui-theme",
+                                  attribute = "class",
+                                  enableSystem = true,
                                   ...props
                               }: ThemeProviderProps) {
     const [theme, setTheme] = useState<Theme>(
@@ -38,14 +42,14 @@ export function ThemeProvider({
 
         root.classList.remove("light", "dark");
 
-        if (theme === "system") {
+        if (theme === "system" && enableSystem) {
             const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
             root.classList.add(systemTheme);
             return;
         }
 
         root.classList.add(theme);
-    }, [theme]);
+    }, [theme, enableSystem]);
 
     const value = {
         theme,

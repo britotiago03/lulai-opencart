@@ -1,3 +1,4 @@
+// lulai-opencart/lulai-chatbot/nextjs-chatbot/app/api7chat/route.ts
 import OpenAI from "openai";
 import { Pool } from 'pg';
 import 'dotenv/config';

@@ -1,49 +1,29 @@
 // src/app/layout.tsx
-import { Geist, Geist_Mono } from "next/font/google";
+import "./global.css";
+import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import "./globals.css";
-import { initializeAdminSystem } from "@/lib/admin-init";
+import { AuthProvider } from "@/context/AuthContext";
 
-const geistSans = Geist({
-    variable: "--font-geist-sans",
-    subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-    variable: "--font-geist-mono",
-    subsets: ["latin"],
-});
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-    title: "LuIAI - AI Powered Retail Chatbots",
-    description: "Create, train and deploy your own AI retail agent with LuIAI",
+    title: "LulAI Chatbot Platform",
+    description: "Create, integrate, and manage AI chatbots for your business",
 };
-
-// Ensure the admin system initializes only once
-let initialized = false;
-if (typeof window === "undefined" && !initialized) {
-    initializeAdminSystem();
-    initialized = true;
-}
 
 export default function RootLayout({
                                        children,
-                                   }: Readonly<{
+                                   }: {
     children: React.ReactNode;
-}>) {
+}) {
     return (
         <html lang="en" suppressHydrationWarning>
-        <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-        <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-        >
-            {children}
-        </ThemeProvider>
+        <body className={inter.className}>
+        <AuthProvider>
+            <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+                {children}
+            </ThemeProvider>
+        </AuthProvider>
         </body>
         </html>
     );
