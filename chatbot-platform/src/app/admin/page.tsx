@@ -12,9 +12,9 @@ import {
     Settings,
     ShieldAlert
 } from "lucide-react";
-import { SessionProvider } from 'next-auth/react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import AdminSessionProvider from '@/components/admin/AdminSessionProvider';
 
 function AdminDashboardPageContent() {
     const [userCount, setUserCount] = useState<number>(0);
@@ -26,41 +26,90 @@ function AdminDashboardPageContent() {
     const { data: session, status } = useSession();        
 
     useEffect(() => {
-        // Ensure admin user is logged in or redirect to home page
-        // TODO: Ensure the authenticated user is admin
-        if (status === "unauthenticated") {
-            router.push("/home"); 
-            router.refresh();
-            return;
-        }
+        const checkAdminAccess = async () => {
+            // Temporary admin session data check
+            // NB: Remove when finished with implementing solution
+            console.log('Admin session data:', {
+                session,
+                status,
+                token: document.cookie
+            });
 
-        // In the future, this would fetch real data from your API
-        const fetchAdminStats = async () => {
-            try {
-                setLoading(true);
 
-                // Simulate API data
-                setTimeout(() => {
-                    setUserCount(42);
-                    setChatbotCount(78);
-                    setActiveSubscriptions(35);
-                    setConversationCount(1243);
-                    setLoading(false);
-                }, 1000);
+            if (status === "unauthenticated") {
+                router.push("/home");
+                return;
+            }
 
-                // In the future, you'd replace the above with real API calls:
-                // const userData = await fetch('/api/admin/users/count');
-                // const chatbotData = await fetch('/api/admin/chatbots/count');
-                // etc.
+            if (status === "authenticated") {
+                try {
+                     // Debugging: Log session info
+                     console.log('Session info:', {
+                        adminAuthOrigin: session?.user?.adminAuthOrigin,
+                        isAdmin: session?.user?.isAdmin
+                    });
 
-            } catch (error) {
-                console.error('Error fetching admin stats:', error);
-                setLoading(false);
+                    // Check for admin origin flag
+                    if (!session?.user?.adminAuthOrigin) {
+                        console.log('Redirecting to 404 - Missing adminAuthOrigin');
+                        router.push("/404");
+                        return;
+                    }
+
+                    const response = await fetch('/api/admin/verify-admin', {
+                        credentials: 'include' // Important for cookies
+                    });
+                    
+                    if (!response.ok) {
+                        console.log('Redirecting to 404 - Backend verification failed');
+                        throw new Error('Admin verification failed');
+                    }
+                    
+                    const data = await response.json();
+                    if (!data.isAdmin) {
+                        console.log('Redirecting to 404 - Not admin according to backend');
+                        router.push("/404");
+                    }
+                } catch (error) {
+                    console.error('Admin verification error:', error);
+                    router.push("/404");
+                }
             }
         };
 
-        fetchAdminStats();
-    }, [session, router]);
+        checkAdminAccess();
+    }, [session, status, router]);
+
+    useEffect(() => {
+        // Only fetch data if authenticated and verified as admin
+        if (status === "authenticated") {
+            const fetchAdminStats = async () => {
+                try {
+                    setLoading(true);
+
+                    // Simulate API data
+                    setTimeout(() => {
+                        setUserCount(42);
+                        setChatbotCount(78);
+                        setActiveSubscriptions(35);
+                        setConversationCount(1243);
+                        setLoading(false);
+                    }, 1000);
+
+                    // In the future, you'd replace the above with real API calls:
+                    // const userData = await fetch('/api/admin/users/count');
+                    // const chatbotData = await fetch('/api/admin/chatbots/count');
+                    // etc.
+
+                } catch (error) {
+                    console.error('Error fetching admin stats:', error);
+                    setLoading(false);
+                }
+            };
+
+            fetchAdminStats();
+        }
+    }, [session, status]);
 
     const adminCards = [
         {
@@ -113,6 +162,18 @@ function AdminDashboardPageContent() {
         }
     ];
 
+    // Show loading state while checking authentication
+    if (status === "loading" || (status === "authenticated" && loading)) {
+        return (
+            <div className="max-w-7xl mx-auto p-6">
+                <div className="text-center py-12">
+                    <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+                    <p className="mt-4">Verifying access...</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="max-w-7xl mx-auto p-6">
             <div className="mb-8">
@@ -158,8 +219,8 @@ function AdminDashboardPageContent() {
 
 export default function AdminDashboardPage() {
     return (
-        <SessionProvider>
+        <AdminSessionProvider>
             <AdminDashboardPageContent />
-        </SessionProvider>
+        </AdminSessionProvider>
     )
 }

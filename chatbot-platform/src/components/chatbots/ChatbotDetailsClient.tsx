@@ -82,12 +82,6 @@ function ChatbotDetailsClientContent({ id }: { id: string }) {
                         Back
                     </Link>
                     <Link
-                        href={`/dashboard/chatbots/${id}/test`}
-                        className="px-4 py-2 border border-green-600 text-green-600 rounded-md hover:bg-green-50 transition-colors"
-                    >
-                        Test Chatbot
-                    </Link>
-                    <Link
                         href={`/dashboard/chatbots/${chatbot.id}/edit`}
                         className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                     >

@@ -14,6 +14,7 @@ import {
     ShieldAlert
 } from "lucide-react";
 import { useState, useCallback, useEffect } from "react";
+import { signOut } from "next-auth/react";
 
 interface AdminSidebarProps {
     onClose?: () => void;
@@ -29,6 +30,40 @@ export function AdminSidebar({ onClose }: AdminSidebarProps) {
             setExpanded(null);
         } else {
             setExpanded(key);
+        }
+    };
+
+    // Handle admin logout
+    const handleAdminSignOut = async () => {
+        console.log("Admin signout initiated");
+
+        try {
+            // Clear admin-auth cookie
+            document.cookie = [
+                'admin-auth=',
+                'Path/admin=',
+                'Expires=Thu, 01 Jan 1970 00:00:00 GMT',
+                'SameSite=Strict',
+                'Secure',
+            ].join('; ');
+
+            // sign out from next-auth
+            await signOut({ 
+                redirect: false, 
+                callbackUrl: "/home"
+            });
+
+            // Clear any session storage
+            if (typeof window !== "undefined") {
+                sessionStorage.removeItem("admin-auth");
+            }
+
+            // force reload to ensure cookie is cleared
+            window.location.href = "/home";
+
+        } catch(error) {
+            console.error('Admin signout error:', error);
+            window.location.href = "/home";
         }
     };
 
@@ -147,11 +182,7 @@ export function AdminSidebar({ onClose }: AdminSidebarProps) {
                     </div>
                     <button
                         className="p-1 rounded-md hover:bg-[#232b3c] text-gray-400 hover:text-white"
-                        onClick={() => {
-                            // Replace with actual logout logic
-                            console.log("Logging out...");
-                            window.location.href = "/home";
-                        }}
+                        onClick={handleAdminSignOut}
                     >
                         <LogOut className="h-5 w-5" />
                     </button>
