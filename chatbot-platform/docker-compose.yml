@@ -1,12 +1,12 @@
 services:
   postgres:
     image: postgres:latest
-    container_name: postgres_db1
+    container_name: chatbot
     restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: ecommerce_db1  # Docker creates this automatically
+      POSTGRES_DB: chatbot  # Docker creates this automatically
     ports:
       - "5432:5432"
     volumes:
@@ -22,7 +22,8 @@ services:
     depends_on:
       - postgres
     environment:
-      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/ecommerce_db1"
+      #DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/ecommerce_db1"
+      DATABASE_URL: "postgresql://postgres:postgres@lulai-chatbot-db:5432/chatbot"
 
 volumes:
   postgres_data:
