@@ -28,7 +28,7 @@ function AdminDashboardPageContent() {
             return;
         }
 
-        if (status === "authenticated" && session?.user?.role !== "admin") {
+        if (status === "authenticated" && !session?.user.adminAuthOrigin) {
             router.push("/dashboard");
             return;
         }
