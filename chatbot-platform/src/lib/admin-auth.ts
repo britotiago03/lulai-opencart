@@ -63,24 +63,37 @@ export const AdminCredentialsProvider: CredentialsConfig = {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" }
     },
-    async authorize(credentials) {
+    async authorize(credentials: Record<string, string> | undefined) {
         try {
+            if (!credentials?.email || !credentials?.password) {
+                return null;
+            }
+
             const adminResult = await verifyAdminCredentials(
-                credentials?.email ?? "",
-                credentials?.password ?? ""
+                credentials.email,
+                credentials.password
             );
 
-            if (!adminResult || 'error' in adminResult) return null;
+            if (!adminResult) {
+                return null;
+            }
 
-            // Return with ALL required claims
+            // Check if we got an error back
+            if ('error' in adminResult) {
+                console.error(`Admin authorization error: ${adminResult.error}`);
+                return null;
+            }
+
+            // Return admin with isAdmin flag for session as a valid User object
             return {
                 id: adminResult.id.toString(),
                 email: adminResult.email,
                 name: adminResult.name,
+                subscription: null,
+                subscription_status: null,
+                subscription_end_date: null,
                 isAdmin: true,
-                isSuperAdmin: adminResult.is_super_admin,
-                adminAuthOrigin: true, // MUST be set
-                subscription: null, // Add subscription field as required by User type
+                isSuperAdmin: adminResult.is_super_admin
             } as User;
         } catch (error) {
             console.error("Admin authorization error:", error);

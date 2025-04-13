@@ -4,25 +4,22 @@ import pool from "@/lib/db";
 import AdminLoginPage from "@/components/admin/AdminLoginPage";
 
 export default async function AdminRoute({ params }: { params: { adminRoute?: string[] } }) {
+    // Safely destructure params 
     const awaitedParams = await Promise.resolve(params);
     const adminRouteParts = awaitedParams.adminRoute ?? [];
 
-    // Skip 404 path check to prevent loops
-    if (adminRouteParts.includes('404')) {
-        return null;
-    }
-
     if (adminRouteParts.length === 0) {
-        return redirect("/home");
+        console.error("Invalid or missing adminRouteParts:", adminRouteParts);
+        return redirect("/404");
     }
 
+    // Construct the secure path
     const path = `/${adminRouteParts.join("/")}`;
-    const isSecurePattern = /^\/secure-admin-\d{4}$/.test(path);
 
+    // Validate admin path format
+    const isSecurePattern = /^\/secure-admin-\d{4}$/.test(path);
     if (!isSecurePattern) {
-        if (path !== '/404') { // Only log if not 404
-            console.warn("Unauthorized admin path attempted:", path);
-        }
+        console.warn("Unauthorized admin path attempted:", path);
         return redirect("/404");
     }
 
