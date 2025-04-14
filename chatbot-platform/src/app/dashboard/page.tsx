@@ -1,28 +1,38 @@
+// src/app/dashboard/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
-import { useAuth } from "@/context/AuthContext";
-import { useSession, SessionProvider } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { RetrievedSubscription } from "@/types/subscription";
+import { MessageSquare } from "lucide-react";
+import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
 
 interface Chatbot {
     id: string;
     name: string;
     description: string;
     industry: string;
-    userId: string;
+    user_id: string;
     created_at: string;
     updated_at: string;
-    responses: any[];
 }
 
-function DashboardPageContent() {
-    const { user } = useAuth();
+interface Conversation {
+    id: string;
+    user_id: string;
+    api_key: string;
+    message_role: string;
+    message_content: string;
+    created_at: string;
+    chatbot_name?: string;
+}
+
+export default function DashboardPage() {
     const [loading, setLoading] = useState(true);
     const [chatbots, setChatbots] = useState<Chatbot[]>([]);
+    const [recentConversations, setRecentConversations] = useState<Conversation[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [stats, setStats] = useState({
         totalChatbots: 0,
@@ -30,90 +40,62 @@ function DashboardPageContent() {
         conversionRate: 0,
         averageResponseTime: 0,
     });
-    const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
     const { data: session, status } = useSession();
     const router = useRouter();
-    const [subscription, setSubscription] = useState<RetrievedSubscription | null>(null);
 
-    // Fetch chatbots
+    // Fetch chatbots and statistics
     useEffect(() => {
-        setIsLoggedIn(true);
-
-        // Ensure user is logged in or redirect to home page
         if(status === "unauthenticated") {
-            router.push("/auth/signin"); 
-            router.refresh();
+            router.push("/auth/signin");
             return;
         }
 
-        const fetchChatbots = async () => {
-            if (!user) {
-                setLoading(false);
-                return;
-            }
+        const fetchData = async () => {
             try {
                 setLoading(true);
-                const response = await fetch("/api/chatbots");
-                if (!response.ok) {
+
+                // Fetch chatbots
+                const chatbotsResponse = await fetch("/api/chatbots");
+                if (!chatbotsResponse.ok) {
                     throw new Error("Failed to fetch chatbots");
                 }
+                const chatbotsData = await chatbotsResponse.json();
+                setChatbots(chatbotsData);
 
-                const allChatbots = await response.json();
-                const userChatbots = allChatbots.filter(
-                    (chatbot: Chatbot) => chatbot.userId === user.id
-                );
+                // Fetch analytics
+                if (chatbotsData.length > 0) {
+                    const analyticsResponse = await fetch("/api/analytics");
+                    if (analyticsResponse.ok) {
+                        const analyticsData = await analyticsResponse.json();
+                        setStats({
+                            totalChatbots: chatbotsData.length,
+                            totalConversations: analyticsData.totalConversations || 0,
+                            conversionRate: analyticsData.conversionRate || 0,
+                            averageResponseTime: analyticsData.averageResponseTime || 0,
+                        });
+                    }
+                }
 
-                setChatbots(userChatbots);
-
-                if (userChatbots.length > 0) {
-                    setStats({
-                        totalChatbots: userChatbots.length,
-                        totalConversations: 178,
-                        conversionRate: 5.2,
-                        averageResponseTime: 1.8,
-                    });
+                // Fetch recent conversations
+                const conversationsResponse = await fetch("/api/conversations?limit=5");
+                if (conversationsResponse.ok) {
+                    const conversationsData = await conversationsResponse.json();
+                    setRecentConversations(conversationsData);
                 }
             } catch (err) {
-                console.error("Error fetching chatbots:", err);
-                setError("Failed to load your chatbots. Please try again.");
+                console.error("Error fetching dashboard data:", err);
+                setError("Failed to load your dashboard data. Please try again.");
             } finally {
                 setLoading(false);
             }
         };
 
-        // Fetch subscription data here
-        const fetchSubscription = async () => {
-            try {
-                const response = await fetch("/api/subscriptions/data");
-
-                if (!response.ok) {
-                    throw new Error("Failed to fetch subscription data");
-                }
-
-                const data = await response.json();
-                setSubscription(data.subscription || null);
-            } catch (err) {
-                console.error("Error fetching subscription:", err);
-                setError("Failed to load subscription data. Please try again.");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchChatbots();
-        fetchSubscription();
-    }, [user, session, router]);
+        fetchData();
+    }, [session, router, status]);
 
     // Loading
     if (loading) {
-        return (
-            <div className="max-w-7xl mx-auto p-6">
-                <div className="text-center py-8">
-                    <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent"></div>
-                    <div className="mt-4">Loading your dashboard...</div>
-                </div>
-            </div>
-        );
+        return <LoadingSkeleton />;
     }
 
     // Error
@@ -125,10 +107,10 @@ function DashboardPageContent() {
                         <div className="text-center py-4">
                             <p className="text-red-400 mb-4">{error}</p>
                             <Link
-                                href="/dashboard/chatbots"
+                                href="/dashboard/integrations"
                                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                             >
-                                View My Chatbots
+                                Create New Chatbot
                             </Link>
                         </div>
                     </CardContent>
@@ -137,19 +119,12 @@ function DashboardPageContent() {
         );
     }
 
-    // Main Return
     return (
         <div className="max-w-7xl mx-auto p-4 sm:p-6">
             {/* Header */}
             <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h1 className="text-2xl font-bold">Dashboard</h1>
                 <div className="flex flex-wrap gap-2">
-                    <Link
-                        href="/dashboard/chatbots"
-                        className="px-4 py-2 border border-blue-600 text-blue-500 rounded-md hover:bg-blue-900/20 transition-colors text-sm sm:text-base"
-                    >
-                        All Chatbots
-                    </Link>
                     <Link
                         href="/dashboard/analytics"
                         className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm sm:text-base"
@@ -176,23 +151,23 @@ function DashboardPageContent() {
                                 </svg>
                             </div>
                             <div>
-                                <h2 className="text-xl sm:text-2xl font-semibold">Welcome back, {session?.user.name || 'User'}</h2>
-                                <p className="text-gray-400 mt-1">Here's an overview of your chatbots and their performance</p>
+                                <h2 className="text-xl sm:text-2xl font-semibold">Welcome back, {session?.user?.name || 'User'}</h2>
+                                <p className="text-gray-400 mt-1">Here's an overview of your chatbot and its performance</p>
                             </div>
                         </Link>
                         {chatbots.length === 0 ? (
                             <Link
-                                href="/dashboard/chatbots/create"
+                                href="/dashboard/integrations"
                                 className="mt-4 md:mt-0 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                             >
                                 Create Your First Chatbot
                             </Link>
                         ) : (
                             <Link
-                                href="/dashboard/chatbots/create"
+                                href="/dashboard/integrations"
                                 className="mt-4 md:mt-0 px-4 py-2 border border-blue-600 text-blue-500 rounded-md hover:bg-blue-900/20 transition-colors"
                             >
-                                Create New Chatbot
+                                Manage Chatbot
                             </Link>
                         )}
                     </div>
@@ -309,18 +284,18 @@ function DashboardPageContent() {
                 <Card className="bg-[#1b2539] border-0 mt-6">
                     <CardContent className="p-4 sm:p-6">
                         <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-lg font-semibold">Your Chatbots</h3>
+                            <h3 className="text-lg font-semibold">Your Chatbot</h3>
                             <Link
-                                href="/dashboard/chatbots"
+                                href="/dashboard/agents"
                                 className="text-sm text-blue-500 hover:text-blue-400"
                             >
-                                View All →
+                                Manage →
                             </Link>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {chatbots.slice(0, 3).map((chatbot) => (
-                                <Link key={chatbot.id} href={`/dashboard/chatbots/${chatbot.id}`}>
+                            {chatbots.map((chatbot) => (
+                                <Link key={chatbot.id} href={`/dashboard/agents/${chatbot.id}`}>
                                     <div className="border border-gray-700 rounded-lg p-4 hover:bg-[#232b3c] transition-colors cursor-pointer h-full">
                                         <div className="flex items-start justify-between mb-2">
                                             <div className="font-medium line-clamp-1">{chatbot.name}</div>
@@ -332,7 +307,7 @@ function DashboardPageContent() {
                                             {chatbot.description || "No description"}
                                         </p>
                                         <div className="text-xs text-gray-500">
-                                            {chatbot.responses?.length || 0} responses configured
+                                            Created: {new Date(chatbot.created_at).toLocaleDateString()}
                                         </div>
                                     </div>
                                 </Link>
@@ -357,7 +332,7 @@ function DashboardPageContent() {
                             Create your first chatbot to start engaging with your customers
                         </p>
                         <Link
-                            href="/dashboard/chatbots/create"
+                            href="/dashboard/integrations"
                             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                         >
                             Create Your First Chatbot
@@ -367,7 +342,7 @@ function DashboardPageContent() {
             )}
 
             {/* Recent Conversations Section */}
-            {chatbots.length > 0 && (
+            {recentConversations && recentConversations.length > 0 ? (
                 <Card className="bg-[#1b2539] border-0 mt-6">
                     <CardContent className="p-4 sm:p-6">
                         <div className="flex justify-between items-center mb-4">
@@ -381,82 +356,42 @@ function DashboardPageContent() {
                         </div>
 
                         <div className="space-y-4">
-                            {[1, 2, 3].map((i) => (
-                                <div
-                                    key={i}
-                                    className="border border-gray-700 rounded-lg p-4 hover:bg-[#232b3c] transition-colors"
-                                >
-                                    <div className="flex justify-between mb-2">
-                                        <div className="flex items-center text-sm text-gray-400">
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                className="h-4 w-4 mr-1"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                            >
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                            </svg>
-                                            Today,{" "}
-                                            {new Date().toLocaleTimeString([], {
-                                                hour: "2-digit",
-                                                minute: "2-digit",
-                                            })}
+                            {recentConversations.map((convo) => (
+                                <Link key={convo.id} href={`/dashboard/conversations/${convo.id}`}>
+                                    <div className="border border-gray-700 rounded-lg p-4 hover:bg-[#232b3c] transition-colors cursor-pointer">
+                                        <div className="flex justify-between mb-2">
+                                            <div className="flex items-center text-sm text-gray-400">
+                                                <MessageSquare className="h-4 w-4 mr-1" />
+                                                {new Date(convo.created_at).toLocaleTimeString([], {
+                                                    hour: "2-digit",
+                                                    minute: "2-digit",
+                                                })}
+                                            </div>
+                                            <div className="text-xs px-2 py-1 bg-blue-900/30 text-blue-400 rounded-full">
+                                                {convo.chatbot_name}
+                                            </div>
                                         </div>
-                                        <div className="text-xs px-2 py-1 bg-green-900/30 text-green-400 rounded-full">
-                                            Converted
-                                        </div>
+                                        <p className="font-medium truncate">{convo.message_content}</p>
+                                        <p className="text-sm text-gray-400 mt-2">
+                                            User: {convo.user_id}
+                                        </p>
                                     </div>
-                                    <p className="font-medium truncate">How do I track my order?</p>
-                                    <p className="text-sm text-gray-400 truncate">
-                                        I ordered a product yesterday and wanted to check on shipping status.
-                                    </p>
-                                </div>
+                                </Link>
                             ))}
                         </div>
                     </CardContent>
                 </Card>
-            )}
-
-            {/* Subscription Info 
-             TODO: EDIT this page to display current subscription */}
-            <Card className="bg-[#1b2539] border-0 mt-6">
-                <CardContent className="p-4 sm:p-6">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between">
-                        <div>
-                            <h3 className="text-lg font-semibold">Your Subscription</h3>
-                            <p className="text-gray-400 mt-1">{subscription?.plan_type || "none"} - ${subscription?.price}/month</p>
-                            <div className="mt-2 text-sm">
-                <span className="px-2 py-1 bg-blue-900/30 text-blue-400 rounded-full">
-                  Active
-                </span>
-                                <span className="ml-2 text-gray-400">
-                  Next billing:{subscription?.renewal_date ? new Date(subscription.renewal_date).toLocaleDateString() : "N/A"}
-                </span>
-                            </div>
-                        </div>
-                        <div className="mt-4 md:mt-0">
-                        <Link
-                            href="/subscriptions"
-                            className="px-4 py-2 border border-blue-600 text-blue-500 rounded-md hover:bg-blue-900/20 transition-colors mr-2"
-                        >
-                            Upgrade Plan
-                        </Link>
-                            <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-                                Manage Billing
-                            </button>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
+            ) : chatbots.length > 0 ? (
+                <Card className="bg-[#1b2539] border-0 mt-6">
+                    <CardContent className="p-4 sm:p-6 text-center">
+                        <MessageSquare className="h-12 w-12 text-gray-500 mx-auto mb-4" />
+                        <h3 className="text-xl font-medium mb-2">No Conversations Yet</h3>
+                        <p className="text-gray-400 mb-6">
+                            When your chatbot starts engaging with users, conversations will appear here
+                        </p>
+                    </CardContent>
+                </Card>
+            ) : null}
         </div>
-    );
-}
-
-export default function DashboardPage() {
-    return (
-        <SessionProvider>
-            <DashboardPageContent />
-        </SessionProvider>
     );
 }

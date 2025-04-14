@@ -1,3 +1,4 @@
+// lulai-opencart/lulai-chatbot/nextjs-chatbot/app/storage/page.tsx
 "use client";
 
 import { useState } from "react";

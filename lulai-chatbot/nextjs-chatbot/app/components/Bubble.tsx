@@ -1,3 +1,4 @@
+// lulai-opencart/lulai-chatbot/nextjs-chatbot/app/components/Bubble.tsx
 import React from "react";
 
 type BubbleProps = {

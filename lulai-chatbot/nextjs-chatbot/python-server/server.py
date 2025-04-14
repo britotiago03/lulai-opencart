@@ -1,4 +1,4 @@
-# lulai-chatbot/nextjs-chatbot/python-server/server.py
+# lulai-opencart/lulai-chatbot/nextjs-chatbot/python-server/server.py
 from fastapi import FastAPI, UploadFile, File, HTTPException, Request
 from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware

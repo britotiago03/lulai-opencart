@@ -1,15 +1,41 @@
 // src/app/dashboard/layout.tsx
 "use client";
 
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { MobileNav, useMobileNav } from "@/components/dashboard/MobileNav";
+import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
 
-export default function DashboardLayoutContent({
+export default function DashboardLayout({
                                             children,
                                         }: {
     children: React.ReactNode;
 }) {
+    const { data: session, status } = useSession();
+    const router = useRouter();
+    const [loading, setLoading] = useState(true);
     const { isOpen, isMobile, toggle } = useMobileNav();
+
+    useEffect(() => {
+        if (status === "unauthenticated") {
+            router.push("/auth/signin");
+            return;
+        }
+
+        if (status === "authenticated") {
+            if (session?.user?.role === "admin") {
+                router.push("/admin");
+                return;
+            }
+            setLoading(false);
+        }
+    }, [session, status, router]);
+
+    if (loading) {
+        return <LoadingSkeleton />;
+    }
 
     return (
         <div className="flex h-screen overflow-hidden bg-[#0f1729]">

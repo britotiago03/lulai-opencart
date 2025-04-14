@@ -1,160 +1,92 @@
 // src/components/admin/AdminSidebar.tsx
-"use client";
-
-import { usePathname } from "next/navigation";
+import React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
     Users,
-    CreditCard,
+    BarChart2,
     MessageSquare,
-    BarChart3,
+    MessageCircle,
+    Bell,
     Settings,
-    Home,
+    Layout,
+    Database,
+    User,
     LogOut,
-    ShieldAlert
 } from "lucide-react";
-import { useState, useCallback, useEffect } from "react";
+import { signOut } from "next-auth/react";
+import Image from "next/image";
 
-interface AdminSidebarProps {
-    onClose?: () => void;
-}
-
-export function AdminSidebar({ onClose }: AdminSidebarProps) {
+export function AdminSidebar({ onClose }: { onClose?: () => void }) {
     const pathname = usePathname();
-    const [expanded, setExpanded] = useState<string | null>(null);
-    const [username, setUsername] = useState("Admin User");
 
-    const toggleExpand = (key: string) => {
-        if (expanded === key) {
-            setExpanded(null);
-        } else {
-            setExpanded(key);
-        }
-    };
-
-    // Navigation items
-    const sidebarNavItems = [
-        {
-            title: "Dashboard",
-            href: "/admin",
-            icon: Home,
-        },
-        {
-            title: "User Management",
-            href: "/admin/users",
-            icon: Users,
-        },
-        {
-            title: "Subscriptions",
-            href: "/admin/subscriptions",
-            icon: CreditCard,
-        },
-        {
-            title: "Chatbots",
-            href: "/admin/chatbots",
-            icon: MessageSquare,
-        },
-        {
-            title: "Analytics",
-            href: "/admin/analytics",
-            icon: BarChart3,
-        },
-        {
-            title: "System Alerts",
-            href: "/admin/alerts",
-            icon: ShieldAlert,
-        },
-        {
-            title: "Settings",
-            href: "/admin/settings",
-            icon: Settings,
-        },
+    const links = [
+        { name: "Dashboard", href: "/admin", icon: Layout },
+        { name: "User Management", href: "/admin/users", icon: Users },
+        { name: "Chatbots", href: "/admin/chatbots", icon: MessageSquare },
+        { name: "Conversations", href: "/admin/conversations", icon: MessageCircle },
+        { name: "Analytics", href: "/admin/analytics", icon: BarChart2 },
+        { name: "System Alerts", href: "/admin/alerts", icon: Bell },
+        { name: "Settings", href: "/admin/settings", icon: Settings },
     ];
 
-    // Fetch admin data here 
-    const fetchAdminData = useCallback(async () => {
-        // Fetch admin data here
-        try {
-            const adminResponse = await fetch("/api/admin/data");
+    const isActive = (path: string) => {
+        return pathname === path || pathname.startsWith(`${path}/`);
+    };
 
-            if (!adminResponse.ok) {
-                console.error("Failed to load admin data");
-                return;
-            }
-
-            const userData = await adminResponse.json();
-
-            setUsername(userData.name);
-        } catch (error) {
-            console.error("Error fetching user data:", error);
-        }
-    }, []);
-
-    useEffect(() => {
-        (async () => {
-            await fetchAdminData();
-        })();
-    }, [fetchAdminData]);
+    const handleSignOut = async () => {
+        await signOut({ redirect: true, callbackUrl: "/" });
+    };
 
     return (
-        <div className="h-full bg-[#1b2539] text-white flex flex-col">
-            {/* Sidebar Header */}
-            <div className="flex items-center p-4 h-14 border-b border-[#2c3e50] bg-[#1b2539]">
-                <Link href="/admin" className="flex items-center">
-                    <div className="h-8 w-8 bg-blue-600 flex items-center justify-center rounded-md mr-2">
-                        <span className="font-bold text-white">L</span>
-                    </div>
-                    <span className="font-bold text-xl">LuIAI Admin</span>
+        <div className="flex flex-col h-full bg-[#0f1729] text-white border-r border-gray-800">
+            <div className="p-4 border-b border-gray-800 flex items-center justify-between">
+                <Link href="/admin" className="flex items-center space-x-2">
+                    <Image
+                        src="/images/logo.png"
+                        alt="LulAI Logo"
+                        width={36}
+                        height={36}
+                        className="w-9 h-9"
+                    />
+                    <span className="font-bold text-xl">LulAI Admin</span>
                 </Link>
             </div>
 
-            {/* Navigation */}
-            <div className="flex-1 overflow-auto">
-                <nav className="px-2 py-4">
-                    <ul className="space-y-1">
-                        {sidebarNavItems.map((item, index) => {
-                            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+            <div className="flex-1 overflow-y-auto">
+                <div className="px-3 py-4">
+                    <div className="space-y-1">
+                        {links.map((link) => {
+                            const LinkIcon = link.icon;
                             return (
-                                <li key={index}>
-                                    <Link
-                                        href={item.href}
-                                        onClick={() => onClose && onClose()}
-                                        className={`flex items-center px-3 py-2 rounded-md transition-colors ${
-                                            isActive
-                                                ? "bg-blue-600/20 text-blue-400"
-                                                : "text-gray-400 hover:bg-[#232b3c] hover:text-white"
-                                        }`}
-                                    >
-                                        <item.icon className="h-5 w-5 mr-3" />
-                                        <span>{item.title}</span>
-                                    </Link>
-                                </li>
+                                <Link
+                                    key={link.name}
+                                    href={link.href}
+                                    onClick={onClose}
+                                    className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                                        isActive(link.href)
+                                            ? "bg-[#1D2739] text-white"
+                                            : "text-gray-300 hover:bg-[#1D2739] hover:text-white"
+                                    }`}
+                                >
+                                    <LinkIcon className="mr-3 h-5 w-5" />
+                                    {link.name}
+                                </Link>
                             );
                         })}
-                    </ul>
-                </nav>
-            </div>
+                    </div>
 
-            {/* Sidebar Footer */}
-            <div className="p-4 border-t border-[#2c3e50]">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                        <div className="h-8 w-8 bg-gray-600 rounded-full"></div>
-                        <div className="ml-2">
-                            <p className="text-sm font-medium">{username}</p>
-                            <p className="text-xs text-gray-500">admin@luiai.com</p>
+                    <div className="mt-8">
+                        <div className="mt-2 space-y-1">
+                            <button
+                                onClick={handleSignOut}
+                                className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-[#1D2739] hover:text-white"
+                            >
+                                <LogOut className="mr-3 h-5 w-5" />
+                                Sign out
+                            </button>
                         </div>
                     </div>
-                    <button
-                        className="p-1 rounded-md hover:bg-[#232b3c] text-gray-400 hover:text-white"
-                        onClick={() => {
-                            // Replace with actual logout logic
-                            console.log("Logging out...");
-                            window.location.href = "/home";
-                        }}
-                    >
-                        <LogOut className="h-5 w-5" />
-                    </button>
                 </div>
             </div>
         </div>
