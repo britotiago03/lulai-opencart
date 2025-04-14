@@ -1,250 +1,195 @@
 // src/app/dashboard/conversations/page.tsx
 "use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { SessionProvider, useSession } from 'next-auth/react';
-import Link from 'next/link';
-import { Card } from '@/components/ui/card';
-import { Calendar, Clock, MessageCircle } from 'lucide-react';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { Card, CardContent } from "@/components/ui/card";
+import { MessageSquare, Calendar, Search } from "lucide-react";
+import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
 
-function ConversationsPageContent() {
-    const [loading, setLoading] = useState(true);
-    const [chatbots, setChatbots] = useState<any[]>([]);
-    const [selectedChatbotId, setSelectedChatbotId] = useState<string | null>(null);
-    const [conversations, setConversations] = useState<any[]>([]);
-    const [error, setError] = useState<string | null>(null);
-    const [isMobile, setIsMobile] = useState(false);
+interface Conversation {
+    id: string;
+    user_id: string;
+    api_key: string;
+    message_role: string;
+    message_content: string;
+    created_at: string;
+    chatbot_name?: string;
+    threadId?: string;
+    messageCount?: number;
+    firstMessage?: any;
+}
+
+export default function ConversationsPage() {
     const { data: session, status } = useSession();
     const router = useRouter();
+    const [loading, setLoading] = useState(true);
+    const [conversations, setConversations] = useState<Conversation[]>([]);
+    const [search, setSearch] = useState("");
+    const [error, setError] = useState<string | null>(null);
 
-    // Ensure user is logged in and has a valid session
     useEffect(() => {
-        if(status === "unauthenticated") {
-            router.push('/auth/signin');
-            router.refresh();
+        if (status === "unauthenticated") {
+            router.push("/auth/signin");
             return;
         }
-    },[session, router]);
-
-
-    // Check if we're on a mobile device
-    useEffect(() => {
-        const checkIfMobile = () => {
-            setIsMobile(window.innerWidth < 1024);
-        };
-
-        // Initial check
-        checkIfMobile();
-
-        // Add event listener for window resize
-        window.addEventListener('resize', checkIfMobile);
-
-        // Cleanup
-        return () => window.removeEventListener('resize', checkIfMobile);
-    }, []);
-
-    // Fetch available chatbots
-    useEffect(() => {
-        const fetchChatbots = async () => {
-            try {
-                const response = await fetch('/api/chatbots');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch chatbots');
-                }
-                const data = await response.json();
-                setChatbots(data);
-
-                // If we have chatbots, select the first one by default
-                if (data.length > 0) {
-                    setSelectedChatbotId(data[0].id);
-                }
-            } catch (error) {
-                console.error('Error fetching chatbots:', error);
-                setError('Failed to load chatbots. Please try again.');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchChatbots();
-    }, []);
-
-    // Fetch conversations for selected chatbot
-    useEffect(() => {
-        if (!selectedChatbotId) return;
 
         const fetchConversations = async () => {
             try {
                 setLoading(true);
-                const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-                const endDate = new Date().toISOString().split('T')[0];
-
-                const response = await fetch(
-                    `/api/analytics/${selectedChatbotId}?metric=conversations&startDate=${startDate}&endDate=${endDate}&limit=10&offset=0`
-                );
-
+                const response = await fetch("/api/conversations");
                 if (!response.ok) {
-                    throw new Error('Failed to fetch conversations');
+                    throw new Error("Failed to fetch conversations");
                 }
 
                 const data = await response.json();
-                setConversations(data.conversations?.conversations || []);
-            } catch (error) {
-                console.error('Error fetching conversations:', error);
-                setError('Failed to load conversations. Please try again.');
+
+                // Group conversations by user_id and chatbot
+                const groupedByUser = data.reduce((acc, convo) => {
+                    const key = `${convo.user_id}-${convo.api_key}`;
+                    if (!acc[key]) {
+                        acc[key] = [];
+                    }
+                    acc[key].push(convo);
+                    return acc;
+                }, {});
+
+                // Get the most recent message for each user-chatbot combination
+                const latestMessages = Object.values(groupedByUser).map((convos: any[]) => {
+                    // Sort by timestamp descending
+                    const sorted = [...convos].sort((a, b) =>
+                        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+                    );
+
+                    // Return the most recent message with thread information
+                    const latest = sorted[0];
+                    return {
+                        ...latest,
+                        threadId: `${latest.user_id}-${latest.api_key}`,
+                        messageCount: convos.length,
+                        firstMessage: sorted[sorted.length - 1]
+                    };
+                });
+
+                setConversations(latestMessages);
+            } catch (err) {
+                console.error("Error fetching conversations:", err);
+                setError("Failed to load conversations. Please try again.");
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchConversations();
-    }, [selectedChatbotId]);
+        if (status === "authenticated") {
+            fetchConversations();
+        }
+    }, [session, status, router]);
 
-    // Handle chatbot selection change
-    const handleChatbotChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setSelectedChatbotId(e.target.value);
-    };
+    // Filter conversations based on search
+    const filteredConversations = search
+        ? conversations.filter((convo) =>
+            convo.message_content.toLowerCase().includes(search.toLowerCase())
+        )
+        : conversations;
 
-    // Format date for display
-    const formatDate = (date: string) => {
-        return new Date(date).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric'
-        });
-    };
+    // Group conversations by date
+    const groupedConversations = filteredConversations.reduce((groups, convo) => {
+        const date = new Date(convo.created_at).toLocaleDateString();
+        if (!groups[date]) {
+            groups[date] = [];
+        }
+        groups[date].push(convo);
+        return groups;
+    }, {} as Record<string, Conversation[]>);
 
     if (loading) {
-        return (
-            <div className="p-4 sm:p-6">
-                <div className="text-center py-8 text-white">Loading conversations...</div>
-            </div>
-        );
+        return <LoadingSkeleton />;
     }
 
-    if (error) {
-        return (
-            <div className="p-4 sm:p-6">
-                <Card className="bg-[#1b2539] text-white border-0">
-                    <div className="p-6">
-                        <h2 className="text-xl font-bold mb-4">Error</h2>
+    return (
+        <div className="max-w-7xl mx-auto p-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                <h1 className="text-2xl font-bold">Conversations</h1>
+
+                <div className="relative w-full md:w-64">
+                    <input
+                        type="text"
+                        placeholder="Search conversations..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 bg-[#1b2539] border border-gray-700 rounded-md text-white"
+                    />
+                    <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                </div>
+            </div>
+
+            {error ? (
+                <Card className="bg-[#1b2539] border-0">
+                    <CardContent className="p-6 text-center">
                         <p className="text-red-400 mb-4">{error}</p>
-                    </div>
-                </Card>
-            </div>
-        );
-    }
-
-    if (chatbots.length === 0) {
-        return (
-            <div className="p-4 sm:p-6">
-                <Card className="bg-[#1b2539] text-white border-0">
-                    <div className="p-6">
-                        <h2 className="text-xl font-bold mb-4">No Chatbots Available</h2>
-                        <p className="mb-4">You don't have any chatbots yet. Create a chatbot to view conversations.</p>
-                        <Link
-                            href="/dashboard/chatbots/create"
+                        <button
+                            onClick={() => window.location.reload()}
                             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                         >
-                            Create New Chatbot
-                        </Link>
-                    </div>
+                            Try Again
+                        </button>
+                    </CardContent>
                 </Card>
-            </div>
-        );
-    }
-
-    return (
-        <div className="p-4 sm:p-6">
-            <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <h1 className="text-2xl font-bold">All Conversations</h1>
-                <div>
-                    <select
-                        value={selectedChatbotId || ''}
-                        onChange={handleChatbotChange}
-                        className="p-2 border rounded-md bg-[#232b3c] text-white border-gray-700"
-                    >
-                        {chatbots.map((chatbot) => (
-                            <option key={chatbot.id} value={chatbot.id}>
-                                {chatbot.name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-            </div>
-
-            {conversations.length > 0 ? (
-                <div className="space-y-4">
-                    {conversations.map((conversation) => (
-                        <Link
-                            key={conversation.id}
-                            href={`/dashboard/chatbots/${selectedChatbotId}/conversations/${conversation.id}`}
-                        >
-                            <Card className="bg-[#1b2539] text-white border-0 hover:bg-[#232b3c] transition-colors cursor-pointer">
-                                <div className="p-4">
-                                    <div className="flex justify-between mb-2 flex-wrap gap-2">
-                                        <div className="flex items-center text-sm text-gray-400 flex-wrap gap-2">
-                                            <Calendar className="w-4 h-4 mr-1" />
-                                            {formatDate(conversation.startedAt)}
-                                            <Clock className="w-4 h-4 ml-2 mr-1" />
-                                            {new Date(conversation.startedAt).toLocaleTimeString('en-US', {
-                                                hour: '2-digit',
-                                                minute: '2-digit'
-                                            })}
-                                        </div>
-                                        {conversation.ledToConversion && (
-                                            <span className="text-xs text-green-400 bg-green-900/30 px-2 py-1 rounded-full">
-                        Converted {conversation.conversionValue && `($${conversation.conversionValue})`}
-                      </span>
-                                        )}
-                                    </div>
-
-                                    <div className="mb-2">
-                                        <p className="font-medium truncate">{conversation.firstMessage}</p>
-                                        <p className="text-sm text-gray-400 truncate">{conversation.lastMessage}</p>
-                                    </div>
-
-                                    <div className="flex items-center mt-3 text-sm text-gray-400">
-                                        <MessageCircle className="w-4 h-4 mr-1" />
-                                        {conversation.messageCount} {conversation.messageCount === 1 ? 'message' : 'messages'}
-                                    </div>
-                                </div>
-                            </Card>
-                        </Link>
-                    ))}
-
-                    <div className="flex justify-center mt-4">
-                        <Link
-                            href={`/dashboard/chatbots/${selectedChatbotId}/conversations`}
-                            className="text-blue-400 hover:underline"
-                        >
-                            View all conversations →
-                        </Link>
-                    </div>
-                </div>
+            ) : filteredConversations.length === 0 ? (
+                <Card className="bg-[#1b2539] border-0">
+                    <CardContent className="p-6 text-center">
+                        <MessageSquare className="h-12 w-12 text-gray-500 mx-auto mb-4" />
+                        <h3 className="text-xl font-medium mb-2">No Conversations Yet</h3>
+                        <p className="text-gray-400 mb-6">
+                            When your chatbot starts engaging with users, conversations will appear here
+                        </p>
+                    </CardContent>
+                </Card>
             ) : (
-                <Card className="bg-[#1b2539] text-white border-0">
-                    <div className="p-6 text-center">
-                        <MessageCircle className="h-12 w-12 mx-auto mb-4 text-gray-500" />
-                        <p className="text-gray-400">No conversations yet for this chatbot.</p>
-                        <Link
-                            href={`/dashboard/chatbots/${selectedChatbotId}/test`}
-                            className="mt-4 inline-block px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                        >
-                            Test Your Chatbot
-                        </Link>
-                    </div>
-                </Card>
+                <div className="space-y-8">
+                    {Object.entries(groupedConversations).map(([date, convos]) => (
+                        <div key={date}>
+                            <div className="flex items-center mb-4">
+                                <Calendar className="h-5 w-5 text-gray-400 mr-2" />
+                                <h2 className="text-lg font-medium text-gray-300">{date}</h2>
+                            </div>
+
+                            <div className="space-y-4">
+                                {convos.map((convo) => (
+                                    <Link
+                                        key={convo.threadId || convo.id}
+                                        href={`/dashboard/conversations/thread/${convo.threadId}`}
+                                    >
+                                        <Card className="bg-[#1b2539] border-0 hover:bg-[#232b3c] transition-colors cursor-pointer">
+                                            <CardContent className="p-4">
+                                                <div className="flex justify-between mb-2">
+                                                    <div className="flex items-center text-sm text-gray-400">
+                                                        <MessageSquare className="h-4 w-4 mr-1" />
+                                                        {new Date(convo.created_at).toLocaleTimeString([], {
+                                                            hour: "2-digit",
+                                                            minute: "2-digit",
+                                                        })}
+                                                    </div>
+                                                    <div className="text-xs px-2 py-1 bg-blue-900/30 text-blue-400 rounded-full">
+                                                        {convo.messageCount} messages
+                                                    </div>
+                                                </div>
+                                                <p className="font-medium truncate">{convo.message_content}</p>
+                                                <p className="text-sm text-gray-400 mt-2">
+                                                    User: {convo.user_id}
+                                                    {convo.chatbot_name && ` • Via: ${convo.chatbot_name}`}
+                                                </p>
+                                            </CardContent>
+                                        </Card>
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
             )}
         </div>
-    );
-}
-
-export default function ConversationsPage() {
-    return (
-        <SessionProvider>
-            <ConversationsPageContent />
-        </SessionProvider>
     );
 }

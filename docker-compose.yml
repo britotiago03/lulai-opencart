@@ -1,4 +1,4 @@
-#version: '3.9'
+version: '3.9'
 
 services:
   # ===============================
@@ -18,7 +18,7 @@ services:
       - ecommerce_postgres_data:/var/lib/postgresql/data
       - ./ecommerce-store/db/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
-    - lulai-network
+      - lulai-network
 
   ecommerce_nextjs:
     build:
@@ -42,26 +42,27 @@ services:
       NEXT_PUBLIC_APP_URL: "http://localhost:3000"
       API_URL: "http://localhost:3000"
     networks:
-    - lulai-network
+      - lulai-network
 
   # ===============================
   # 2) Chatbot Platform Services
   # ===============================
-  chatbot_platform_postgres:
-    image: postgres:latest
-    container_name: chatbot_platform_postgres_db
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: ecommerce_db1
-    ports:
-      - "5433:5432"  # changed host port to avoid conflict
-    volumes:
-      - chatbot_platform_postgres_data:/var/lib/postgresql/data
-      - ./chatbot-platform/db/init.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
-    - lulai-network
+  # This service is commented out since we're now using a single database
+  # chatbot_platform_postgres_db:
+  #   image: postgres:latest
+  #   container_name: chatbot_platform_postgres_db
+  #   restart: always
+  #   environment:
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: postgres
+  #     POSTGRES_DB: ecommerce_db1
+  #   ports:
+  #     - "5433:5432"
+  #   volumes:
+  #     - chatbot_platform_postgres_data:/var/lib/postgresql/data
+  #     - ./chatbot-platform/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+  #   networks:
+  #   - lulai-network
 
   chatbot_platform_nextjs:
     build:
@@ -71,20 +72,23 @@ services:
     ports:
       - "3001:3000"  # changed host port to avoid conflict with ecommerce
     depends_on:
-      - chatbot_platform_postgres
+      - lulai_chatbot_db
     environment:
-      # Database connection
-      DB_HOST: "chatbot_platform_postgres"
+      # Database connection - now pointing to the lulai database
+      DB_HOST: "lulai-chatbot-db"
       DB_USER: "postgres"
       DB_PASSWORD: "postgres"
-      DB_NAME: "ecommerce_db1"
+      DB_NAME: "chatbot"
       DB_PORT: "5432"
+      DATABASE_URL: "postgresql://postgres:postgres@lulai-chatbot-db:5432/chatbot"
       # Next.js configuration
       NEXTAUTH_URL: "http://localhost:3001"
       NEXT_PUBLIC_APP_URL: "http://localhost:3001"
       API_URL: "http://localhost:3001"
+      # Chatbot service URL
+      CHATBOT_SERVICE_URL: "http://lulai_chatbot:3000"
     networks:
-    - lulai-network
+      - lulai-network
 
   # ===============================
   # 3) Lulai Chatbot Services
@@ -94,9 +98,9 @@ services:
     container_name: lulai-db
     restart: always
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-lulai}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: chatbot
     volumes:
       - lulai_postgres_data:/var/lib/postgresql/data
       - ./chatbot/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
@@ -110,61 +114,59 @@ services:
     networks:
       - lulai-network
 
-  lulai_web:
-    build:
-      context: ./chatbot/lulai-website
-      dockerfile: Dockerfile
-    container_name: lulai-web
-    restart: always
-    depends_on:
-      - lulai_db
-      - lulai_python_api
-    environment:
-      - DATABASE_URL=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@lulai_db:5432/${POSTGRES_DB:-lulai}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - NEXT_PUBLIC_BACKEND_URL=http://localhost:3002
-      - PYTHON_API_URL=http://lulai_python_api:8000
-      - EMAIL_USER=${EMAIL_USER}
-      - EMAIL_PASS=${EMAIL_PASS}
-      - EMAIL_HOST=${EMAIL_HOST}
-      - EMAIL_PORT=${EMAIL_PORT}
-    ports:
-      - "3002:3000"  # changed host port to avoid conflict
-    volumes:
-      - ./chatbot/uploads:/app/uploads
-    networks:
-      - lulai-network
-
-  lulai_python_api:
-    build:
-      context: ./chatbot/python-server
-      dockerfile: Dockerfile
-    container_name: lulai-python-api
-    restart: always
-    environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-    ports:
-      - "8000:8000"
-    networks:
-      - lulai-network
+ # lulai_web:
+ #   build:
+#      context: ./chatbot/lulai-website
+#      dockerfile: Dockerfile
+#    container_name: lulai-web
+#    restart: always
+#    depends_on:
+#      - lulai_db
+#      - lulai_python_api
+#    environment:
+#     - DATABASE_URL=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@lulai_db:5432/${POSTGRES_DB:-lulai}
+#      - OPENAI_API_KEY=${OPENAI_API_KEY}
+#      - NEXT_PUBLIC_BACKEND_URL=http://localhost:3002
+#      - PYTHON_API_URL=http://lulai_python_api:8000
+#      - EMAIL_USER=${EMAIL_USER}
+#      - EMAIL_PASS=${EMAIL_PASS}
+#      - EMAIL_HOST=${EMAIL_HOST}
+#      - EMAIL_PORT=${EMAIL_PORT}
+#    ports:
+#      - "3002:3000"  # changed host port to avoid conflict
+#    volumes:
+#      - ./chatbot/uploads:/app/uploads
+#    networks:
+#      - lulai-network
+#
+#  lulai_python_api:
+#    build:
+#      context: ./chatbot/python-server
+#      dockerfile: Dockerfile
+#    container_name: lulai-python-api
+#  environment:
+#      - OPENAI_API_KEY=${OPENAI_API_KEY}
+#    ports:
+#      - "8000:8000"
+#    networks:
+#      - lulai-network
 
   # ===============================
-  # 4) Lulai-Chatbot (Newly Added)
+  # 4) Lulai-Chatbot (Centralized DB approach)
   # ===============================
   lulai_chatbot_nextjs:
     build:
       context: ./lulai-chatbot/nextjs-chatbot
     container_name: lulai_chatbot
     restart: always
-    # Mapping 3005 on the host to 3001 inside container (instead of 3001:3001 to avoid conflict)
     ports:
       - "3005:3000"
     env_file:
       - ./lulai-chatbot/nextjs-chatbot/.env.local
     environment:
-      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@lulai-chatbot-db:5432/${POSTGRES_DB}"
+      DATABASE_URL: "postgresql://postgres:postgres@lulai-chatbot-db:5432/chatbot"
     volumes:
-    - ./lulai-chatbot/nextjs-chatbot:/app
+      - ./lulai-chatbot/nextjs-chatbot:/app
     command: ["npm", "run", "dev"]
     depends_on:
       - lulai_chatbot_python_server
@@ -178,7 +180,6 @@ services:
       dockerfile: Dockerfile
     container_name: lulai_chatbot_python_server
     restart: always
-    # Mapping 8001 on the host to 8000 inside container to avoid conflict with lulai_python_api
     ports:
       - "8001:8000"
     env_file:
@@ -191,15 +192,14 @@ services:
     container_name: lulai-chatbot-db
     restart: always
     env_file:
-    - ./lulai-chatbot/nextjs-chatbot/.env.local
+      - ./lulai-chatbot/nextjs-chatbot/.env.local
     environment:
-      POSTGRES_USER: "${POSTGRES_USER}"
-      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
-      POSTGRES_DB: "${POSTGRES_DB}"
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: chatbot
     volumes:
       - ./lulai-chatbot/nextjs-chatbot/db/init.sql:/docker-entrypoint-initdb.d/init.sql
       - lulai_chatbot_db_data:/var/lib/postgresql/data
-      
     ports:
       - "5435:5432"
     healthcheck:
@@ -209,8 +209,6 @@ services:
       retries: 5
     networks:
       - lulai-network
-
-
 
 # ===========================================================
 # Networks
@@ -224,6 +222,6 @@ networks:
 # ===========================================================
 volumes:
   ecommerce_postgres_data:
-  chatbot_platform_postgres_data:
+  # chatbot_platform_postgres_data:  # Commented out since we're not using this anymore
   lulai_postgres_data:
   lulai_chatbot_db_data:

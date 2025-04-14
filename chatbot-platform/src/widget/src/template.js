@@ -16,24 +16,24 @@ class LulaiChatWidget extends HTMLElement {
     this.audioSource = null;
     this.lastScrollPosition = 0;
     this.ttsVoiceId = null;
-    
+
     // Track product data
     this.lastMentionedProducts = [];
     this.currentProduct = null;
-    
+
     // Cart status
     this.cartStatus = {
       status: 'idle',
       message: ''
     };
-  
+
     // Get or create user ID
     this.userId = localStorage.getItem('lulai_user_id');
     if (!this.userId) {
       this.userId = 'user_' + Math.random().toString(36).substring(2, 15);
       localStorage.setItem('lulai_user_id', this.userId);
     }
-  
+
     this.config = {
       primaryColor: "{{primaryColor}}",
       secondaryColor: "{{secondaryColor}}",
@@ -44,13 +44,13 @@ class LulaiChatWidget extends HTMLElement {
       fontFamily: "{{fontFamily}}",
       pythonApiUrl: "http://localhost:8001",
       apiBaseUrl: "http://localhost:3000"
-    };          
+    };
   }
 
   connectedCallback() {
     this.detectCurrentProduct();
     this.render();
-    
+
     // Listen for URL changes to detect product context changes
     window.addEventListener('popstate', () => this.detectCurrentProduct());
     window.addEventListener('product-view-changed', (e) => {
@@ -58,12 +58,12 @@ class LulaiChatWidget extends HTMLElement {
         this.currentProduct = e.detail.product;
       }
     });
-    
+
     // Add listener for link clicks in the chat
     this.shadowRoot.addEventListener('click', (e) => {
       if (e.target.tagName === 'A') {
         const linkUrl = e.target.getAttribute('href');
-        
+
         if (linkUrl && linkUrl.startsWith('http')) {
           this.lastMentionedProducts = [{
             url: linkUrl,
@@ -77,13 +77,13 @@ class LulaiChatWidget extends HTMLElement {
 
   extractProductIdFromUrl(url) {
     if (!url) return null;
-    
+
     // Check for /product/123 pattern
     const match = url.match(/\/product\/(\d+)/);
     if (match && match[1]) {
       return parseInt(match[1], 10);
     }
-    
+
     // Also check for query parameter ?product_id=123
     try {
       const urlObj = new URL(url.startsWith('http') ? url : `http://example.com${url}`);
@@ -94,23 +94,23 @@ class LulaiChatWidget extends HTMLElement {
     } catch (e) {
       // URL parsing failed
     }
-    
+
     return null;
   }
 
   extractProductLinks(content) {
     if (!content) return [];
-    
+
     const links = [];
     const linkRegex = /<a href="([^"]+)"[^>]*>([^<]+)<\/a>/g;
     let match;
-    
+
     while ((match = linkRegex.exec(content)) !== null) {
       const url = match[1];
       const text = match[2];
-      
-      // Enhanced product detection 
-      const isProduct = url.includes('/product/');          
+
+      // Enhanced product detection
+      const isProduct = url.includes('/product/');
       if (isProduct) {
         links.push({
           url: url,
@@ -120,38 +120,38 @@ class LulaiChatWidget extends HTMLElement {
         });
       }
     }
-    
+
     if (links.length > 0) {
       this.lastMentionedProducts = links;
     }
-    
+
     return links;
   }
 
   async handleCartOperation(operation, productId, quantity = 1) {
     if (!productId) return false;
-    
+
     this.cartStatus = { status: 'processing', message: 'Processing...' };
     this.updateCartStatus();
-    
-    const actionVerb = operation === 'add' ? 'Adding' : 
-                      operation === 'remove' ? 'Removing' : 
-                      'Updating';
-                    
-    const confirmMessage = { 
-      role: 'assistant', 
+
+    const actionVerb = operation === 'add' ? 'Adding' :
+        operation === 'remove' ? 'Removing' :
+            'Updating';
+
+    const confirmMessage = {
+      role: 'assistant',
       content: `${actionVerb} item to your cart...`,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
     this.addMessage(confirmMessage);
-    
+
     const action = {
       type: 'cart',
       operation: operation,
       productId: productId,
       quantity: quantity
     };
-    
+
     await this.handleCartAction(action);
     return true;
   }
@@ -160,18 +160,18 @@ class LulaiChatWidget extends HTMLElement {
     const productIdMatch = window.location.pathname.match(/\/product\/(\d+)/);
     if (productIdMatch) {
       const productId = parseInt(productIdMatch[1], 10);
-      
+
       fetch(`${this.config.apiBaseUrl}/api/products/${productId}`)
-        .then(response => response.json())
-        .then(productData => {
-          this.currentProduct = {
-            id: productId,
-            ...productData
-          };
-        })
-        .catch(() => {
-          this.currentProduct = null;
-        });
+          .then(response => response.json())
+          .then(productData => {
+            this.currentProduct = {
+              id: productId,
+              ...productData
+            };
+          })
+          .catch(() => {
+            this.currentProduct = null;
+          });
     } else {
       this.currentProduct = null;
     }
@@ -182,7 +182,7 @@ class LulaiChatWidget extends HTMLElement {
     if (chatMessages) {
       this.lastScrollPosition = chatMessages.scrollTop;
     }
-  
+
     const widgetContainer = `
       <style>
         :host {
@@ -399,15 +399,15 @@ class LulaiChatWidget extends HTMLElement {
         }
       </style>
       <div id="widget-container">
-        ${this.cartStatus.status !== 'idle' ? 
-          `<div id="cart-status" class="cart-status ${this.cartStatus.status}">${this.cartStatus.message}</div>` : 
-          ''}
+        ${this.cartStatus.status !== 'idle' ?
+        `<div id="cart-status" class="cart-status ${this.cartStatus.status}">${this.cartStatus.message}</div>` :
+        ''}
         ${this.isChatOpen ? this.getChatWindowHTML() : ''}
         <button class="chat-button" id="chatToggle">${this.isChatOpen ? '–' : '+'}</button>
       </div>
     `;
     this.shadowRoot.innerHTML = widgetContainer;
-  
+
     // Attach listener for toggling the chat window
     this.shadowRoot.getElementById('chatToggle').addEventListener('click', () => {
       this.isChatOpen = !this.isChatOpen;
@@ -416,7 +416,7 @@ class LulaiChatWidget extends HTMLElement {
         this.setupChatListeners();
       }
     });
-  
+
     // If the chat is open, ensure all other listeners are attached
     if (this.isChatOpen) {
       this.setupChatListeners();
@@ -430,33 +430,33 @@ class LulaiChatWidget extends HTMLElement {
       <div class="chat-window">
         <div class="chat-header">
           <span>${this.config.headerText}</span>
-          ${this.currentProduct ? 
-            `<div class="current-product-indicator">Viewing: ${this.currentProduct.name}</div>` : ''}
+          ${this.currentProduct ?
+        `<div class="current-product-indicator">Viewing: ${this.currentProduct.name}</div>` : ''}
           <button id="closeChat" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">×</button>
         </div>
         <div class="chat-messages" id="chatMessages">
           ${this.messages
-            .map(
-              (msg, index) => `
+        .map(
+            (msg, index) => `
                 <div class="message-container ${msg.role}">
                   <div class="avatar">${msg.role === 'user' ? 'U' : 'A'}</div>
                   <div class="bubble ${msg.role}">
                     ${this.parseMarkdown(msg.content)}
                     <div class="timestamp">${msg.timestamp || ''}</div>
                     ${
-                      msg.role === 'assistant'
-                        ? `
+                msg.role === 'assistant'
+                    ? `
                       <button class="tts-button" data-index="${index}">
                         ${this.getTTSButtonContent(index)}
                       </button>
                       `
-                        : ''
-                    }
+                    : ''
+            }
                   </div>
                 </div>
               `
-            )
-            .join('')}
+        )
+        .join('')}
           ${this.isLoading ? this.getTypingAnimation() : ''}
         </div>
         <div class="chat-input-container">
@@ -469,7 +469,7 @@ class LulaiChatWidget extends HTMLElement {
       </div>
     `;
   }
-  
+
   getTypingAnimation() {
     return `
       <div class="message-container assistant">
@@ -484,30 +484,30 @@ class LulaiChatWidget extends HTMLElement {
       </div>
     `;
   }
-  
+
   getTTSButtonContent(index) {
     if (this.isProcessingTTS && this.speakingMessageIndex === index) {
       return '⏳';
     }
     return this.speakingMessageIndex === index ? '⏹' : '🔊';
   }
-  
+
   setupChatListeners() {
     this.shadowRoot.getElementById('closeChat').addEventListener('click', () => {
       this.isChatOpen = false;
       this.render();
     });
-  
+
     this.shadowRoot.getElementById('sendButton').addEventListener('click', () => this.handleSubmit());
     this.shadowRoot.getElementById('chatInput').addEventListener('keypress', (e) => {
       if (e.key === 'Enter') this.handleSubmit();
     });
-  
+
     this.shadowRoot.getElementById('recordButton').addEventListener('click', () => {
       if (this.isListening) this.stopRecording();
       else this.startRecording();
     });
-  
+
     this.shadowRoot.querySelectorAll('.tts-button').forEach(button => {
       button.addEventListener('click', (e) => {
         const index = parseInt(e.target.dataset.index);
@@ -519,103 +519,103 @@ class LulaiChatWidget extends HTMLElement {
 
   extractTextFromJson(content) {
     if (!content || !content.includes('"response"')) return content;
-    
+
     try {
       const jsonStart = content.indexOf('{');
       const jsonEnd = content.lastIndexOf('}');
-      
+
       if (jsonStart >= 0 && jsonEnd > jsonStart) {
         const jsonStr = content.substring(jsonStart, jsonEnd + 1);
         const jsonObj = JSON.parse(jsonStr);
-        
+
         if (jsonObj.response) return jsonObj.response;
       }
     } catch (e) {
       // JSON parsing failed, return original content
     }
-    
+
     return content;
   }
-  
+
   parseMarkdown(text) {
     if (!text) return '';
-    
+
     let cleanText = this.extractTextFromJson(text);
-    
+
     // Basic formatting
     cleanText = cleanText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                         .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                         .replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
-    
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
+
     // Handle links with product detection
     cleanText = cleanText.replace(
-      /\[([^\[]+)\]\((https?:\/\/[^\/]+)(\/[^\)]+)\)/g, 
-      (match, text, domain, path) => {
-        // Store this as a mentioned product if it looks like one
-        if (path.includes('/product/')) {
-          this.lastMentionedProducts = [{
-            url: `${this.config.apiBaseUrl}${path}`,
-            text: text,
-            full: `<a href="${this.config.apiBaseUrl}${path}" target="_self">${text}</a>`,
-            productId: this.extractProductIdFromUrl(path)
-          }];
+        /\[([^\[]+)\]\((https?:\/\/[^\/]+)(\/[^\)]+)\)/g,
+        (match, text, domain, path) => {
+          // Store this as a mentioned product if it looks like one
+          if (path.includes('/product/')) {
+            this.lastMentionedProducts = [{
+              url: `${this.config.apiBaseUrl}${path}`,
+              text: text,
+              full: `<a href="${this.config.apiBaseUrl}${path}" target="_self">${text}</a>`,
+              productId: this.extractProductIdFromUrl(path)
+            }];
+          }
+
+          return `<a href="${this.config.apiBaseUrl}${path}" target="_self">${text}</a>`;
         }
-        
-        return `<a href="${this.config.apiBaseUrl}${path}" target="_self">${text}</a>`;
-      }
     );
-    
+
     // Handle regular URLs
     cleanText = cleanText.replace(
-      /(https?:\/\/[^\/]+)(\/[^\s]+)/g,
-      (match, domain, path) => {
-        if (!match.includes(this.config.apiBaseUrl) && path.includes('/product/')) {
-          const productId = this.extractProductIdFromUrl(path);
-          this.lastMentionedProducts = [{
-            url: `${this.config.apiBaseUrl}${path}`,
-            text: `Product ${productId}`,
-            full: `<a href="${this.config.apiBaseUrl}${path}" target="_self">${path}</a>`,
-            productId: productId
-          }];
-          return `<a href="${this.config.apiBaseUrl}${path}" target="_self">${path}</a>`;
+        /(https?:\/\/[^\/]+)(\/[^\s]+)/g,
+        (match, domain, path) => {
+          if (!match.includes(this.config.apiBaseUrl) && path.includes('/product/')) {
+            const productId = this.extractProductIdFromUrl(path);
+            this.lastMentionedProducts = [{
+              url: `${this.config.apiBaseUrl}${path}`,
+              text: `Product ${productId}`,
+              full: `<a href="${this.config.apiBaseUrl}${path}" target="_self">${path}</a>`,
+              productId: productId
+            }];
+            return `<a href="${this.config.apiBaseUrl}${path}" target="_self">${path}</a>`;
+          }
+          return match;
         }
-        return match;
-      }
     );
-    
+
     // Headings
     cleanText = cleanText.replace(/^### (.*)/gm, '<h3>$1</h3>')
-                         .replace(/^## (.*)/gm, '<h2>$1</h2>')
-                         .replace(/^# (.*)/gm, '<h1>$1</h1>');
-    
+        .replace(/^## (.*)/gm, '<h2>$1</h2>')
+        .replace(/^# (.*)/gm, '<h1>$1</h1>');
+
     // Lists
     cleanText = cleanText.replace(/^\* (.*)/gm, '<li>$1</li>')
-                         .replace(/^- (.*)/gm, '<li>$1</li>')
-                         .replace(/^(\d+)\. (.*)/gm, '<li>$2</li>')
-                         .replace(/(<li>.*<\/li>)(\s*)(<li>)/g, '$1$3')
-                         .replace(/(<li>.*<\/li>)(?!\s*<li>)/g, '<ul>$1</ul>');
-    
+        .replace(/^- (.*)/gm, '<li>$1</li>')
+        .replace(/^(\d+)\. (.*)/gm, '<li>$2</li>')
+        .replace(/(<li>.*<\/li>)(\s*)(<li>)/g, '$1$3')
+        .replace(/(<li>.*<\/li>)(?!\s*<li>)/g, '<ul>$1</ul>');
+
     // Blockquotes and paragraphs
     cleanText = cleanText.replace(/^> (.*)/gm, '<blockquote>$1</blockquote>')
-                         .replace(/\n\n([^<\n].*)/g, '<p>$1</p>');
-    
+        .replace(/\n\n([^<\n].*)/g, '<p>$1</p>');
+
     if (cleanText.includes('<a href')) {
       this.extractProductLinks(cleanText);
     }
-    
+
     return cleanText;
   }
 
   updateCartStatus() {
     const widgetContainer = this.shadowRoot.getElementById('widget-container');
     let statusEl = this.shadowRoot.getElementById('cart-status');
-    
+
     if (!statusEl && this.cartStatus.status !== 'idle') {
       statusEl = document.createElement('div');
       statusEl.id = 'cart-status';
       widgetContainer.prepend(statusEl);
     }
-    
+
     if (statusEl) {
       if (this.cartStatus.status === 'idle') {
         statusEl.remove();
@@ -632,7 +632,7 @@ class LulaiChatWidget extends HTMLElement {
       this.lastScrollPosition = messagesContainer.scrollTop;
     }
   }
-  
+
   restoreScrollPosition() {
     const messagesContainer = this.shadowRoot.getElementById('chatMessages');
     if (messagesContainer) {
@@ -647,17 +647,17 @@ class LulaiChatWidget extends HTMLElement {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       this.audioChunks = [];
       this.mediaRecorder = new MediaRecorder(stream);
-  
+
       this.mediaRecorder.ondataavailable = (e) => {
         if (e.data.size > 0) this.audioChunks.push(e.data);
       };
-  
+
       this.mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
         await this.processAudio(audioBlob);
         stream.getTracks().forEach(track => track.stop());
       };
-  
+
       this.mediaRecorder.start();
       this.isListening = true;
       this.render();
@@ -665,7 +665,7 @@ class LulaiChatWidget extends HTMLElement {
       // Error accessing microphone
     }
   }
-  
+
   stopRecording() {
     if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
       this.mediaRecorder.stop();
@@ -674,19 +674,19 @@ class LulaiChatWidget extends HTMLElement {
       this.setupChatListeners();
     }
   }
-  
+
   async processAudio(audioBlob) {
     const formData = new FormData();
     formData.append('file', audioBlob, 'recording.webm');
-  
+
     try {
       const response = await fetch(`${this.config.pythonApiUrl}/whisper`, {
         method: 'POST',
         body: formData
       });
-  
+
       if (!response.ok) throw new Error('Transcription failed');
-      
+
       const data = await response.json();
       if (data.transcription) {
         this.handleSubmit(data.transcription);
@@ -695,27 +695,27 @@ class LulaiChatWidget extends HTMLElement {
       // Error processing audio
     }
   }
-  
+
   async prefetchTTS(text) {
     try {
       const requestBody = { input: text };
-      
+
       const response = await fetch(`${this.config.pythonApiUrl}/tts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody)
       });
-      
+
       if (!response.ok) {
         throw new Error(`TTS API error: ${response.status}`);
       }
-      
+
       return await response.arrayBuffer();
     } catch (error) {
       return new ArrayBuffer(0);
     }
   }
-  
+
   stopTTS() {
     this.isPlayingTTS = false;
     this.isProcessingTTS = false;
@@ -730,18 +730,18 @@ class LulaiChatWidget extends HTMLElement {
     }
     this.updateMessages();
   }
-  
+
   async handleCartAction(action) {
     if (!action || action.type !== 'cart') return;
-    
+
     this.cartStatus = { status: 'processing', message: 'Processing...' };
     this.updateCartStatus();
-    
+
     try {
       let endpoint = '';
       let method = 'POST';
       let body = { productId: action.productId };
-      
+
       if (action.operation === 'add') {
         endpoint = `${this.config.apiBaseUrl}/api/cart/add`;
         body.quantity = action.quantity || 1;
@@ -754,21 +754,21 @@ class LulaiChatWidget extends HTMLElement {
         method = 'PUT';
         body = { productId: action.productId, quantity: action.quantity || 1 };
       }
-      
+
       const response = await fetch(endpoint, {
         method,
         headers: method !== 'DELETE' ? { 'Content-Type': 'application/json' } : undefined,
         body: body ? JSON.stringify(body) : undefined
       });
-      
+
       const data = await response.json();
-      
+
       if (response.ok && data.success) {
         this.cartStatus = {
           status: 'success',
           message: action.operation === 'add' ? 'Added to cart successfully!' : 'Cart updated successfully!'
         };
-        
+
         window.dispatchEvent(new Event('cart-updated'));
       } else {
         this.cartStatus = {
@@ -782,30 +782,30 @@ class LulaiChatWidget extends HTMLElement {
         message: error.message || 'Failed to update cart'
       };
     }
-    
+
     this.updateCartStatus();
-    
+
     setTimeout(() => {
       this.cartStatus = { status: 'idle', message: '' };
       this.updateCartStatus();
     }, 5000);
   }
-  
+
   splitTextIntoChunks(text, maxChunkSize = 150) {
     const cleanText = text
-      .replace(/<[^>]*>/g, '')
-      .replace(/[*_~`]/g, '')
-      .replace(/\s+/g, ' ')
-      .trim();
-  
+        .replace(/<[^>]*>/g, '')
+        .replace(/[*_~`]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+
     const lines = cleanText.split(/\n+/);
     const chunks = [];
-    
+
     for (const line of lines) {
       const isListItem = /^\s*(\d+\.|[-*+•])\s+/.test(line);
       const sentences = line.split(/(?<=[.!?])\s+/);
       let currentChunk = '';
-  
+
       for (const sentence of sentences) {
         if (currentChunk.length + sentence.length > maxChunkSize && currentChunk) {
           chunks.push(currentChunk.trim());
@@ -814,41 +814,41 @@ class LulaiChatWidget extends HTMLElement {
           currentChunk += (currentChunk ? ' ' : '') + sentence;
         }
       }
-  
+
       if (currentChunk) {
         chunks.push(currentChunk.trim() + (isListItem && !/[.!?]$/.test(currentChunk) ? '.' : ''));
       }
     }
-  
+
     return chunks.map(chunk => chunk.replace(/([^.!?])$/, '$1.'));
   }
-  
+
   updateMessages() {
     const messagesContainer = this.shadowRoot.getElementById('chatMessages');
     if (messagesContainer) {
       messagesContainer.innerHTML =
-        this.messages
-          .map(
-            (msg, index) => `
+          this.messages
+              .map(
+                  (msg, index) => `
               <div class="message-container ${msg.role}">
                 <div class="avatar">${msg.role === 'user' ? 'U' : 'A'}</div>
                 <div class="bubble ${msg.role}">
                   ${this.parseMarkdown(msg.content)}
                   <div class="timestamp">${msg.timestamp || ''}</div>
                   ${
-                    msg.role === 'assistant'
-                      ? `
+                      msg.role === 'assistant'
+                          ? `
                     <button class="tts-button" data-index="${index}">
                       ${this.getTTSButtonContent(index)}
                     </button>
                     `
-                      : ''
+                          : ''
                   }
                 </div>
               </div>
             `
-          )
-          .join('') + (this.isLoading ? this.getTypingAnimation() : '');
+              )
+              .join('') + (this.isLoading ? this.getTypingAnimation() : '');
 
       messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
@@ -859,12 +859,12 @@ class LulaiChatWidget extends HTMLElement {
           else this.playMessageAudio(this.messages[index].content, index);
         });
       });
-      
+
       // Save messages to sessionStorage after every update
       sessionStorage.setItem('lulai_chat_messages', JSON.stringify(this.messages));
     }
   }
-  
+
   addMessage(message) {
     if (!message.timestamp) {
       message.timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -872,67 +872,67 @@ class LulaiChatWidget extends HTMLElement {
     this.messages.push(message);
     this.updateMessages();
   }
-  
+
   handleSubmit(text) {
     const inputEl = this.shadowRoot.getElementById('chatInput');
     const inputValue = text !== undefined ? text.trim() : inputEl.value.trim();
     if (!inputValue) return;
-    
-    const userMessage = { 
-      role: 'user', 
+
+    const userMessage = {
+      role: 'user',
       content: inputValue,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
     this.addMessage(userMessage);
-    
+
     // Check if this is a product navigation request
     const productKeywords = ['galaxy', 'tab', 'iphone', 'product', 'show me', 'take me to'];
     const inputLower = inputValue.toLowerCase();
-    
+
     if (productKeywords.some(keyword => inputLower.includes(keyword))) {
       this.lastMentionedProducts = [];
       this.currentProduct = null; // Reset product context
     }
-    
+
     if (text === undefined) inputEl.value = '';
     this.fetchResponse();
   }
-  
+
   async playMessageAudio(message, index) {
     this.stopTTS();
-    
+
     this.isProcessingTTS = true;
     this.speakingMessageIndex = index;
     this.updateMessages();
-    
+
     const cleanText = this.extractTextFromJson(message);
     const chunks = this.splitTextIntoChunks(cleanText);
-    
+
     if (!chunks.length) {
       this.isProcessingTTS = false;
       this.speakingMessageIndex = null;
       this.updateMessages();
       return;
     }
-    
+
     try {
       this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      
+
       if (this.audioContext.state !== 'running') {
         await this.audioContext.resume();
       }
-      
+
       this.isPlayingTTS = true;
       this.isProcessingTTS = false;
       this.updateMessages();
-      
+
       let currentChunk = 0;
       let nextAudioPromise = this.prefetchTTS(chunks[currentChunk]);
-      
+
       while (currentChunk < chunks.length && this.isPlayingTTS) {
         try {
           const audioBuffer = await nextAudioPromise;
-          
+
           if (!audioBuffer || audioBuffer.byteLength === 0) {
             currentChunk++;
             if (currentChunk < chunks.length) {
@@ -940,27 +940,27 @@ class LulaiChatWidget extends HTMLElement {
             }
             continue;
           }
-          
+
           // Start prefetching the next chunk while playing the current one
           if (currentChunk < chunks.length - 1) {
             nextAudioPromise = this.prefetchTTS(chunks[currentChunk + 1]);
           }
-          
+
           const source = this.audioContext.createBufferSource();
-          
+
           try {
             source.buffer = await this.audioContext.decodeAudioData(audioBuffer);
             source.connect(this.audioContext.destination);
             this.audioSource = source;
             source.start(0);
-            
+
             await new Promise(resolve => {
               source.onended = resolve;
-              
+
               const timeoutId = setTimeout(() => {
                 if (this.isPlayingTTS) resolve();
               }, (source.buffer.duration * 1000) + 1000);
-              
+
               const checkInterval = setInterval(() => {
                 if (!this.isPlayingTTS) {
                   clearInterval(checkInterval);
@@ -973,7 +973,7 @@ class LulaiChatWidget extends HTMLElement {
           } catch (decodeError) {
             // Failed to decode audio
           }
-          
+
           currentChunk++;
         } catch (error) {
           currentChunk++;
@@ -992,20 +992,20 @@ class LulaiChatWidget extends HTMLElement {
 
     const apiEndpoint = this.getAttribute('api-endpoint') || 'http://localhost:3005/api/chat';
     const apiKey = this.getAttribute('api-key');
-    
+
     const contextWithProducts = {
       ...(this.currentProduct ? { currentProduct: this.currentProduct } : {}),
       url: window.location.href,
       lastMentionedProducts: this.lastMentionedProducts || []
     };
-    
+
     try {
       const payloadMessages = this.messages.filter(msg => msg.role !== 'assistant' || msg.content.trim() !== "");
       const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          messages: payloadMessages, 
+        body: JSON.stringify({
+          messages: payloadMessages,
           apiKey,
           userId: this.userId,
           context: contextWithProducts
@@ -1016,10 +1016,10 @@ class LulaiChatWidget extends HTMLElement {
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      
+
       let isFirstChunk = true;
-      let assistantMessage = { 
-        role: 'assistant', 
+      let assistantMessage = {
+        role: 'assistant',
         content: "",
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
@@ -1043,19 +1043,19 @@ class LulaiChatWidget extends HTMLElement {
             try {
               const parsedLine = line.replace("data: ", "").trim();
               if (!parsedLine) return;
-              
+
               const parsed = JSON.parse(parsedLine);
-              
+
               // Process action only once
               if (parsed.action && !actionDetected) {
                 actionDetected = true;
-                
+
                 if (parsed.action.type === 'cart') {
                   this.handleCartAction(parsed.action);
-                } 
+                }
                 else if (parsed.action.type === 'navigate' && !navigationTriggered) {
                   navigationTriggered = true;
-                  
+
                   // For the first chunk with navigation action, we'll display the message
                   if (parsed.content && parsed.content.trim() !== "" && !messageAdded) {
                     if (isFirstChunk) {
@@ -1067,22 +1067,22 @@ class LulaiChatWidget extends HTMLElement {
                       assistantMessage.content = parsed.content;
                       this.messages[this.messages.length - 1].content = parsed.content;
                     }
-                    
+
                     // Update UI immediately to show the message
                     this.isLoading = false;
                     this.updateMessages();
                   }
-                  
+
                   // Create a corrected navigation path
                   let path = parsed.action.path;
                   const baseUrl = this.config.apiBaseUrl || 'http://localhost:3000';
-                  
+
                   // Handle case where no specific product was mentioned or path is invalid
                   if (!path || path === '/404') {
                     // Try to use lastMentionedProducts if available and not empty
                     if (this.lastMentionedProducts && this.lastMentionedProducts.length > 0) {
                       const lastProduct = this.lastMentionedProducts[0];
-                      
+
                       // Extract path from URL if it's a full URL
                       if (lastProduct.url) {
                         try {
@@ -1108,7 +1108,7 @@ class LulaiChatWidget extends HTMLElement {
                       path = "/";
                     }
                   }
-                  
+
                   // Check if path already contains the full URL and fix it
                   if (path && path.includes('http')) {
                     try {
@@ -1125,22 +1125,22 @@ class LulaiChatWidget extends HTMLElement {
                       }
                     }
                   }
-                  
+
                   // Ensure path is valid before navigation
                   if (!path || path === '/404') {
                     path = "/"; // Default to home page if invalid
                   }
-                  
+
                   // Make sure the path is properly formed
                   if (path && !path.startsWith('/')) {
                     path = '/' + path;
                   }
-                  
+
                   // Cancel any existing navigation timeout
                   if (navigationTimeout) {
                     clearTimeout(navigationTimeout);
                   }
-                  
+
                   // Use the correct base URL for navigation
                   navigationTimeout = setTimeout(() => {
                     // Create the full URL with path only (not duplicating the domain)
@@ -1149,14 +1149,14 @@ class LulaiChatWidget extends HTMLElement {
                   }, 2000); // 2 second delay to ensure message is visible
                 }
               }
-              
+
               // Process regular content (non-action or in addition to action)
               if (parsed.content !== undefined) {
                 // Don't process content for navigation actions that have already been handled
                 if (navigationTriggered) {
                   return;
                 }
-                
+
                 // For regular conversational responses
                 if (!messageAdded) {
                   if (isFirstChunk) {
@@ -1167,7 +1167,7 @@ class LulaiChatWidget extends HTMLElement {
                   } else {
                     this.messages[this.messages.length - 1].content += parsed.content;
                   }
-                  
+
                   this.isLoading = false;
                   this.updateMessages();
                 } else {
@@ -1176,7 +1176,7 @@ class LulaiChatWidget extends HTMLElement {
                   this.updateMessages();
                 }
               }
-              
+
               // Check for final message with done flag
               if (parsed.done) {
                 messageComplete = true;
@@ -1187,7 +1187,7 @@ class LulaiChatWidget extends HTMLElement {
           }
         });
       }
-      
+
       // Handle any JSON extraction only after the full message is received
       if (messageComplete && !navigationTriggered && this.messages.length > 0) {
         const fullResponseText = this.messages[this.messages.length - 1].content;
@@ -1195,7 +1195,7 @@ class LulaiChatWidget extends HTMLElement {
           try {
             const jsonRegex = /\{[\s\S]*"response"\s*:\s*"([^"]+)"[\s\S]*\}/;
             const match = fullResponseText.match(jsonRegex);
-            
+
             if (match && match[1] && match[1].length > 5) { // Only use substantial content
               this.messages[this.messages.length - 1].content = match[1];
               this.updateMessages();
@@ -1205,11 +1205,11 @@ class LulaiChatWidget extends HTMLElement {
           }
         }
       }
-      
+
       // Prepare for text-to-speech if appropriate
       if (messageComplete && !navigationTriggered && this.messages.length > 0) {
         await new Promise(resolve => setTimeout(resolve, 100));
-        
+
         const lastMessageIndex = this.messages.length - 1;
         if (this.messages[lastMessageIndex].content.trim() !== "") {
           this.playMessageAudio(this.messages[lastMessageIndex].content, lastMessageIndex);
@@ -1217,17 +1217,17 @@ class LulaiChatWidget extends HTMLElement {
       }
 
     } catch (error) {
-      const errorMessage = { 
-        role: 'assistant', 
+      const errorMessage = {
+        role: 'assistant',
         content: 'Sorry, I encountered an error while processing your request.',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
-      
+
       // Don't add error message if navigation was triggered
       if (!navigationTriggered) {
         this.messages.push(errorMessage);
       }
-      
+
       this.isLoading = false;
       this.updateMessages();
     }
