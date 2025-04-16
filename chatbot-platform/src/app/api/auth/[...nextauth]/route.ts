@@ -3,7 +3,9 @@ import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { pool } from "@/lib/db";
 import bcrypt from "bcryptjs";
+import { userAuthOptions } from "@/lib/auth-config";
 
+/*
 export const authOptions: NextAuthOptions = {
     providers: [
         CredentialsProvider({
@@ -92,6 +94,7 @@ export const authOptions: NextAuthOptions = {
     debug: process.env.NODE_ENV === 'development',
     secret: process.env.NEXTAUTH_SECRET,
 };
+*/
 
-const handler = NextAuth(authOptions);
+const handler = NextAuth(userAuthOptions);
 export { handler as GET, handler as POST };

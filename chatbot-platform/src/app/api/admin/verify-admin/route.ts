@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
-import pool from '@/lib/db';
+import { pool } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
     try {

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import AdminSessionProvider from "./AdminSessionProvider";
+import AdminSessionProvider from "./AdminSessionProvider1";
 
 interface AdminLoginPageProps {
     securePath: string;
@@ -34,11 +34,11 @@ function AdminLoginFormContent({ securePath }: AdminLoginPageProps) {
                 return;
             }
     
-            // Set the admin-auth cookie with proper attributes
-            document.cookie = `admin-auth=true; Path=/admin; Max-Age=${8*60*60}; SameSite=Strict; Secure${process.env.NODE_ENV === 'production' ? '; HttpOnly' : ''}`;
+             // Set the admin-auth cookie with proper attributes
+             document.cookie = `admin-auth=true; Path=/admin; Max-Age=${8*60*60}; SameSite=Strict; Secure${process.env.NODE_ENV === 'production' ? '; HttpOnly' : ''}`;
             
-            // Force session update and redirect
-            window.location.href = "/admin"; // Full page reload ensures cookie is set
+             // Force session update and redirect
+             window.location.href = "/admin"; // Full page reload ensures cookie is set
             
     
         } catch (err) {

@@ -43,12 +43,25 @@ export default function DashboardPage() {
     const { data: session, status } = useSession();
     const router = useRouter();
 
-    // Fetch chatbots and statistics
+    interface RetrievedSubscription {
+        plan_type: string;
+        price: number;
+        renewal_date: string | null;
+    }
+
+    const [subscription, setSubscription] = useState<RetrievedSubscription | null>(null);
+
+    // Handle authentication state
     useEffect(() => {
-        if(status === "unauthenticated") {
+        if (status === "unauthenticated") {
             router.push("/auth/signin");
             return;
         }
+    }, [status, router]);
+
+    // Fetch chatbots and statistics
+    useEffect(() => {
+        if(status !== "authenticated") return;
 
         const fetchData = async () => {
             try {
@@ -90,11 +103,31 @@ export default function DashboardPage() {
             }
         };
 
+         // Fetch subscription data here
+         const fetchSubscription = async () => {
+            try {
+                const response = await fetch("/api/subscriptions/data");
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch subscription data");
+                }
+
+                const data = await response.json();
+                setSubscription(data.subscription || null);
+            } catch (err) {
+                console.error("Error fetching subscription:", err);
+                setError("Failed to load subscription data. Please try again.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
         fetchData();
-    }, [session, router, status]);
+        fetchSubscription();
+    }, [session, status]);
 
     // Loading
-    if (loading) {
+    if (status === "loading" || loading) {
         return <LoadingSkeleton />;
     }
 
@@ -392,6 +425,38 @@ export default function DashboardPage() {
                     </CardContent>
                 </Card>
             ) : null}
+
+            {/* Subscription Info 
+             TODO: EDIT this page to display current subscription */}
+            <Card className="bg-[#1b2539] border-0 mt-6">
+                <CardContent className="p-4 sm:p-6">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between">
+                        <div>
+                            <h3 className="text-lg font-semibold">Your Subscription</h3>
+                            <p className="text-gray-400 mt-1">{subscription?.plan_type || "none"} - ${subscription?.price}/month</p>
+                            <div className="mt-2 text-sm">
+                <span className="px-2 py-1 bg-blue-900/30 text-blue-400 rounded-full">
+                  Active
+                </span>
+                                <span className="ml-2 text-gray-400">
+                  Next billing:{subscription?.renewal_date ? new Date(subscription.renewal_date).toLocaleDateString() : "N/A"}
+                </span>
+                            </div>
+                        </div>
+                        <div className="mt-4 md:mt-0">
+                        <Link
+                            href="/subscriptions"
+                            className="px-4 py-2 border border-blue-600 text-blue-500 rounded-md hover:bg-blue-900/20 transition-colors mr-2"
+                        >
+                            Upgrade Plan
+                        </Link>
+                            <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                                Manage Billing
+                            </button>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
         </div>
     );
 }

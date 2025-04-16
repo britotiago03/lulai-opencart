@@ -1,5 +1,5 @@
 // lib/admin-auth.ts
-import pool from "@/lib/db";
+import { pool } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { CredentialsConfig } from "next-auth/providers/credentials";
 import { User } from "next-auth";
@@ -11,7 +11,7 @@ export async function verifyAdminCredentials(email: string, password: string) {
     try {
         // Get admin user by email
         const result = await pool.query(
-            "SELECT * FROM admin_users WHERE email = $1 AND is_active = true",
+            "SELECT * FROM users WHERE email = $1 AND is_active = true",
             [email]
         );
 
@@ -34,7 +34,7 @@ export async function verifyAdminCredentials(email: string, password: string) {
 
         // Update last login time
         await pool.query(
-            "UPDATE admin_users SET last_login = NOW() WHERE id = $1",
+            "UPDATE users SET last_login = NOW() WHERE id = $1",
             [admin.id]
         );
 
@@ -81,6 +81,7 @@ export const AdminCredentialsProvider: CredentialsConfig = {
                 isSuperAdmin: adminResult.is_super_admin,
                 adminAuthOrigin: true, // MUST be set
                 subscription: null, // Add subscription field as required by User type
+                role: "admin", // Add the required role property
             } as User;
         } catch (error) {
             console.error("Admin authorization error:", error);

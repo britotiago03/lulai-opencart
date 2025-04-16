@@ -1,6 +1,6 @@
 // app/[...adminRoute]/page.tsx
 import { redirect } from "next/navigation";
-import pool from "@/lib/db";
+import { pool } from "@/lib/db";
 import AdminLoginPage from "@/components/admin/AdminLoginPage";
 
 export default async function AdminRoute({ params }: { params: { adminRoute?: string[] } }) {

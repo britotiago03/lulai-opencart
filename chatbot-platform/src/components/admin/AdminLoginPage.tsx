@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import AdminSessionProvider from "./AdminSessionProvider";
+import AdminSessionProvider from "./AdminSessionProvider1";
 import Image from "next/image";
 import AdminLoginForm from "./AdminLoginForm";
 
@@ -78,8 +78,8 @@ function AdminLoginContent({securePath}: AdminLoginPageProps) {
                 {/* Basic page information */}
                 <div className="flex flex-col items-center justify-center w-full md:w-1/2 p-4 md:mr-32">
                     <Image
-                        src="/lulAI_logo.png"
-                        alt="Next.js logo"
+                        src="/images/logo.png"
+                        alt="LulAI Logo"
                         width={180 * 2}
                         height={38 * 2}
                         priority

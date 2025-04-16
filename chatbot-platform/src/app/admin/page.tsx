@@ -8,9 +8,13 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Users, MessageSquare, BarChart2, Settings, Bell, Database } from "lucide-react";
 import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
+import AdminSessionProvider from "@/components/admin/AdminSessionProvider1";
+import { useAdminSession } from "../hooks/UseAdminSession";
 
-export default function AdminDashboard() {
+function AdminDashboardContent() {
     const { data: session, status } = useSession();
+    useAdminSession(session, status);
+    
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({
@@ -181,5 +185,13 @@ export default function AdminDashboard() {
                 ))}
             </div>
         </div>
+    );
+}
+
+export default function AdminDashboard() {
+    return (
+        <AdminSessionProvider>
+            <AdminDashboardContent/>
+        </AdminSessionProvider>
     );
 }
