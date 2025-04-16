@@ -17,11 +17,8 @@ import {
     CreditCard,
     ShieldAlert,
 } from "lucide-react";
-import { useState, useCallback, useEffect } from "react";
-
-interface AdminSidebarProps {
-    onClose?: () => void;
-}
+import { signOut } from "next-auth/react";
+import Image from "next/image";
 
 export function AdminSidebar({ onClose }: { onClose?: () => void }) {
     const pathname = usePathname();
@@ -34,55 +31,6 @@ export function AdminSidebar({ onClose }: { onClose?: () => void }) {
         { name: "Analytics", href: "/admin/analytics", icon: BarChart2 },
         { name: "System Alerts", href: "/admin/alerts", icon: Bell },
         { name: "Settings", href: "/admin/settings", icon: Settings },
-    ];
-    const [expanded, setExpanded] = useState<string | null>(null);
-    const [username, setUsername] = useState("Admin User");
-
-    const toggleExpand = (key: string) => {
-        if (expanded === key) {
-            setExpanded(null);
-        } else {
-            setExpanded(key);
-        }
-    };
-
-    // Navigation items
-    const sidebarNavItems = [
-        {
-            title: "Dashboard",
-            href: "/admin",
-            icon: Home,
-        },
-        {
-            title: "User Management",
-            href: "/admin/users",
-            icon: Users,
-        },
-        {
-            title: "Subscriptions",
-            href: "/admin/subscriptions",
-            icon: CreditCard,
-        },
-        {
-            title: "Chatbots",
-            href: "/admin/chatbots",
-            icon: MessageSquare,
-        },
-        {
-            title: "Analytics",
-            href: "/admin/analytics",
-            icon: BarChart2,
-        },
-        {
-            title: "System Alerts",
-            href: "/admin/alerts",
-            icon: ShieldAlert,
-        },
-        {
-            title: "Settings",
-            href: "/admin/settings",
-            icon: Settings,
-        },
     ];
 
 
@@ -144,16 +92,6 @@ export function AdminSidebar({ onClose }: { onClose?: () => void }) {
                             </button>
                         </div>
                     </div>
-                    <button
-                        className="p-1 rounded-md hover:bg-[#232b3c] text-gray-400 hover:text-white"
-                        onClick={() => {
-                            // Replace with actual logout logic
-                            console.log("Logging out...");
-                            window.location.href = "/home";
-                        }}
-                    >
-                        <LogOut className="h-5 w-5" />
-                    </button>
                 </div>
             </div>
         </div>

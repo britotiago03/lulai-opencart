@@ -1,13 +1,13 @@
 // src/app/api/chatbots/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../auth/[...nextauth]/route";
 import { pool } from "@/lib/db";
+import { userAuthOptions } from "@/lib/auth-config";
 
 // GET: Retrieve all chatbots or chatbots for a specific user
 export async function GET(req: NextRequest) {
     try {
-        const session = await getServerSession(authOptions);
+        const session = await getServerSession(userAuthOptions);
 
         if (!session) {
             return NextResponse.json(
@@ -78,7 +78,7 @@ export async function GET(req: NextRequest) {
 // POST: Create a new chatbot
 export async function POST(req: NextRequest) {
     try {
-        const session = await getServerSession(authOptions);
+        const session = await getServerSession(userAuthOptions);
 
         if (!session) {
             return NextResponse.json(

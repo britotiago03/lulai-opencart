@@ -23,4 +23,19 @@ declare module "next-auth" {
         name: string;
         subscription: Subscription | null;
     }
+
+    interface CookiesOptions {
+        adminAuth: CookieOption;
+    }
+      
+    interface CookieOption {
+        name: string;
+        options: {
+          httpOnly: boolean;
+          sameSite: 'lax' | 'strict' | 'none';
+          path: string;
+          secure: boolean;
+          maxAge?: number;
+        };
+    }
 }

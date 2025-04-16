@@ -4,7 +4,7 @@ import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { verifyUser } from "@/lib/auth.service";
 import { AdminCredentialsProvider } from "@/lib/admin-auth";
-import pool from "@/lib/db"; // Adjust the path to your database module
+import { pool } from "@/lib/db"; // Adjust the path to your database module
 
 // Extend the Session and User types to include custom properties
 declare module "next-auth" {
@@ -16,6 +16,8 @@ declare module "next-auth" {
             subscription?: string | null;
             isAdmin: boolean;
             isSuperAdmin?: boolean;
+            adminAuthOrigin?: boolean;
+            role?: string; // Add the role property
         };
     }
 
@@ -23,6 +25,7 @@ declare module "next-auth" {
         id: string;
         email: string;
         isSuperAdmin?: boolean;
+        adminAuthOrigin?: boolean;
     }
 }
 
@@ -62,6 +65,7 @@ export const userAuthOptions: NextAuthOptions = {
                         name: user.name,
                         subscription: null,
                         isAdmin: false,
+                        role: "user", // Add the required role property
                     };
                 } catch (error) {
                     console.error("Authentication error:", error);
@@ -83,23 +87,27 @@ export const userAuthOptions: NextAuthOptions = {
             }
             return url.startsWith(baseUrl) ? url : baseUrl;
         },
-        async jwt({ token, user, account }) {
+        async jwt({ token, user }) {
             if (user) {
-                token.id = user.id;
-                token.email = user.email;
-                token.name = user.name;
-                token.subscription = user.subscription || 'none';
-                token.isAdmin = false; // Always false for user auth
+              // Store all user data directly in token properties
+              token.id = user.id;
+              token.email = user.email;
+              token.name = user.name;
+              token.subscription = user.subscription || 'none';
+              token.isAdmin = false;
+              token.role = 'client';
             }
             return token;
         },
         async session({ session, token }) {
             if (session.user) {
-                session.user.id = token.id as string;
-                session.user.email = token.email as string;
-                session.user.name = token.name as string;
-                session.user.subscription = token.subscription as string;
-                session.user.isAdmin = false;
+              // Access the same properties we set in jwt callback
+              session.user.id = token.id as string;
+              session.user.email = token.email as string;
+              session.user.name = token.name as string;
+              session.user.subscription = token.subscription as string;
+              session.user.isAdmin = token.isAdmin as boolean;
+              session.user.role = token.role as string;
             }
             return session;
         },
@@ -131,6 +139,20 @@ export const userAuthOptions: NextAuthOptions = {
             return true; // Allow credentials provider
           },
     },
+    cookies: {
+        sessionToken: {
+            name: `user-session-token`,
+            options: {
+                httpOnly: true,
+                sameSite: "lax",
+                path: "/",
+                secure: process.env.NODE_ENV === "production",
+                maxAge: 30 * 24 * 60 * 60, // 30 days to match session
+            },
+        },
+    },
+    secret: process.env.NEXTAUTH_SECRET, // Ensure this is set
+    useSecureCookies: process.env.NODE_ENV === "production",
     pages: {
         signIn: "/auth/signin",
         error: "/auth/signin",
@@ -139,50 +161,70 @@ export const userAuthOptions: NextAuthOptions = {
 
 // Separate auth options for admin users
 export const adminAuthOptions: NextAuthOptions = {
+    secret: process.env.NEXTAUTH_SECRET,
     session: {
-        strategy: "jwt" as const,
-        maxAge: 8 * 60 * 60, // 8 hours - shorter session for admins
+        strategy: "jwt",
+        maxAge: 8 * 60 * 60, // 8 hours
     },
     providers: [
-        // Admin authentication provider only
         AdminCredentialsProvider,
     ],
     callbacks: {
         async jwt({ token, user }) {
+            // Initial sign-in
             if (user) {
-                token.id = user.id;
-                token.email = user.email;
-                token.name = user.name;
-                token.isAdmin = true; // Always true for admin auth
-                token.isSuperAdmin = typeof user.isSuperAdmin === "boolean" ? user.isSuperAdmin : false;
+                return {
+                    ...token,
+                    id: user.id,
+                    email: user.email,
+                    name: user.name,
+                    isAdmin: true,
+                    isSuperAdmin: user.isSuperAdmin,
+                    adminAuthOrigin: true, // Force set
+                    role: 'admin'
+                };
             }
             return token;
         },
         async session({ session, token }) {
             if (session.user) {
-                session.user.id = token.id as string;
-                session.user.email = token.email as string;
-                session.user.name = token.name as string;
-                session.user.isAdmin = true; // Always true for admin auth
-                session.user.isSuperAdmin = typeof token.isSuperAdmin === "boolean" ? token.isSuperAdmin : false;
+                session.user = {
+                    ...session.user,
+                    id: token.id as string,
+                    email: token.email as string,
+                    name: token.name as string,
+                    isAdmin: true,
+                    isSuperAdmin: token.isSuperAdmin as boolean,
+                    adminAuthOrigin: true, // Force set
+                    role: 'admin'
+                };
             }
             return session;
-        },
+        }
     },
     cookies: {
-        // Use different cookie names for admin session
         sessionToken: {
             name: `admin-session-token`,
             options: {
                 httpOnly: true,
-                sameSite: 'lax',
-                path: '/',
+                sameSite: "lax",
+                path: "/",
                 secure: process.env.NODE_ENV === "production",
             },
         },
+        adminAuth: {
+            name: `admin-auth`,
+            options: {
+                httpOnly: true,
+                sameSite: "strict", // More restrictive than lax
+                path: "/admin", // Only sent for admin routes
+                secure: process.env.NODE_ENV === "production",
+                maxAge: 8 * 60 * 60, // 8 hours to match session
+            }
+        }
     },
     pages: {
-        signIn: "/auth/admin/login", // Custom login page for admins
+        signIn: "/auth/admin/login",
         error: "/auth/admin/login",
     },
 };

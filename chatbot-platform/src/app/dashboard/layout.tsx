@@ -19,6 +19,7 @@ export default function DashboardLayout({
     const { isOpen, isMobile, toggle } = useMobileNav();
 
     useEffect(() => {
+        if (status === "loading") return;
         if (status === "unauthenticated") {
             router.push("/auth/signin");
             return;
@@ -33,7 +34,7 @@ export default function DashboardLayout({
         }
     }, [session, status, router]);
 
-    if (loading) {
+    if (loading || status === "loading") {
         return <LoadingSkeleton />;
     }
 

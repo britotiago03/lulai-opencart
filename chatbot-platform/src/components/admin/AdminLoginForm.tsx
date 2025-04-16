@@ -3,45 +3,47 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import AdminSessionProvider from "./AdminSessionProvider";
+import AdminSessionProvider from "./AdminSessionProvider1";
 
 interface AdminLoginPageProps {
     securePath: string;
 }
 
-function AdminLoginFormContent({}: AdminLoginPageProps) {
+function AdminLoginFormContent({ securePath }: AdminLoginPageProps) {
     const router = useRouter();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-    
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
         setLoading(true);
-
-        try {    
+    
+        try {
             const result = await signIn("admin-credentials", {
                 redirect: false,
                 email,
                 password,
                 callbackUrl: "/admin"
             });
-
-            console.log("Signin result:", result);
-
-
+    
             if (result?.error) {
-                setError("Invalid email or password");
-            } else {
-                router.push("/admin");
-                router.refresh();
+                setError(result.error);
+                return;
             }
+    
+             // Set the admin-auth cookie with proper attributes
+             document.cookie = `admin-auth=true; Path=/admin; Max-Age=${8*60*60}; SameSite=Strict; Secure${process.env.NODE_ENV === 'production' ? '; HttpOnly' : ''}`;
+            
+             // Force session update and redirect
+             window.location.href = "/admin"; // Full page reload ensures cookie is set
+            
+    
         } catch (err) {
-            setError("Something went wrong. Please try again.");
             console.error("Login error:", err);
+            setError("Authentication failed");
         } finally {
             setLoading(false);
         }

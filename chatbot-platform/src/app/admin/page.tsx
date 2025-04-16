@@ -1,23 +1,20 @@
 // src/app/admin/page.tsx
 "use client";
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import Link from 'next/link';
-import {
-    Users,
-    CreditCard,
-    MessageSquare,
-    BarChart3,
-    Settings,
-    ShieldAlert
-} from "lucide-react";
-import { SessionProvider } from 'next-auth/react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { Card, CardContent } from "@/components/ui/card";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { Users, MessageSquare, BarChart2, Settings, Bell, Database } from "lucide-react";
+import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
+import AdminSessionProvider from "@/components/admin/AdminSessionProvider1";
+import { useAdminSession } from "../hooks/UseAdminSession";
 
-function AdminDashboardPageContent() {
+function AdminDashboardContent() {
     const { data: session, status } = useSession();
+    useAdminSession(session, status);
+    
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({
@@ -29,41 +26,61 @@ function AdminDashboardPageContent() {
     });
 
     useEffect(() => {
-        // Ensure admin user is logged in or redirect to home page
-        // TODO: Ensure the authenticated user is admin
         if (status === "unauthenticated") {
             router.push("/home"); 
             router.refresh();
             return;
         }
 
-        // In the future, this would fetch real data from your API
-        const fetchAdminStats = async () => {
+        if (status === "authenticated" && session?.user?.role !== "admin") {
+            router.push("/dashboard");
+            return;
+        }
+
+        // Fetch admin statistics from real database
+        const fetchStats = async () => {
             try {
-                setLoading(true);
+                // Fetch real data from analytics endpoint
+                const response = await fetch('/api/analytics', {
+                    headers: { 'Cache-Control': 'no-cache' }
+                });
 
-                // Simulate API data
-                setTimeout(() => {
-                    setUserCount(42);
-                    setChatbotCount(78);
-                    setActiveSubscriptions(35);
-                    setConversationCount(1243);
-                    setLoading(false);
-                }, 1000);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch analytics data');
+                }
 
-                // In the future, you'd replace the above with real API calls:
-                // const userData = await fetch('/api/admin/users/count');
-                // const chatbotData = await fetch('/api/admin/chatbots/count');
-                // etc.
+                const analyticsData = await response.json();
 
+                // Fetch chatbots count
+                const chatbotsResponse = await fetch('/api/chatbots');
+                const chatbotsData = await chatbotsResponse.json();
+
+                // Fetch users count
+                const usersResponse = await fetch('/api/admin/users/count');
+                const usersData = await usersResponse.json();
+
+                setStats({
+                    totalUsers: usersData.count || 0,
+                    activeSubscriptions: analyticsData.averageConversationsPerChatbot ?
+                        Math.round(analyticsData.averageConversationsPerChatbot) : 0,
+                    totalChatbots: chatbotsData.length || 0,
+                    totalConversations: analyticsData.totalConversations || 0,
+                    activeAlerts: analyticsData.totalCartActions ?
+                        (analyticsData.totalCartActions > 100 ? 1 : 0) : 0, // Set alert if high cart actions
+                });
+                setLoading(false);
             } catch (error) {
-                console.error('Error fetching admin stats:', error);
+                console.error("Error fetching admin stats:", error);
                 setLoading(false);
             }
         };
 
-        fetchAdminStats();
-    }, [session, router]);
+        fetchStats();
+    }, [session, status, router]);
+
+    if (loading) {
+        return <LoadingSkeleton />;
+    }
 
     const adminCards = [
         {
@@ -160,10 +177,10 @@ function AdminDashboardPageContent() {
     );
 }
 
-export default function AdminDashboardPage() {
+export default function AdminDashboard() {
     return (
-        <SessionProvider>
-            <AdminDashboardPageContent />
-        </SessionProvider>
-    )
+        <AdminSessionProvider>
+            <AdminDashboardContent/>
+        </AdminSessionProvider>
+    );
 }
