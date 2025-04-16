@@ -3,7 +3,6 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
 
 export function useAdminSession(session: any, status: string) {
     const router = useRouter();
