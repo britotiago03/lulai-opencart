@@ -220,9 +220,7 @@ const AIShoppingAssistant: React.FC = () => {
 
             // Handle navigation if needed
             if (shouldNavigate) {
-                setTimeout(() => {
-                    router.push(navigationPath);
-                }, 1500);
+                router.push(navigationPath);
             }
         } catch (error) {
             console.error('Error processing message:', error);
