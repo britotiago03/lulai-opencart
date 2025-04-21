@@ -3,10 +3,30 @@
 
 import { useTheme } from "@/components/ThemeProvider";
 import { Moon, Sun } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export function ThemeToggle({ className }: { className?: string }) {
     const { theme, setTheme } = useTheme();
+    const [mounted, setMounted] = useState(false);
 
+    // Prevent hydration mismatch
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) {
+        // During SSR and before hydration, render a placeholder
+        return (
+            <button
+                className={`p-2 rounded-md transition-colors ${className || ""}`}
+                aria-label="Toggle theme"
+            >
+                <div className="h-5 w-5" />
+            </button>
+        );
+    }
+
+    // After mounted, render the actual button with appropriate icon
     return (
         <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
