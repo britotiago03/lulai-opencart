@@ -21,7 +21,13 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
     ];
 
     const isActive = (path: string) => {
-        return pathname === path || pathname.startsWith(`${path}/`);
+        // Special case for the dashboard home
+        if (path === "/dashboard") {
+            return pathname === "/dashboard";
+        }
+
+        // For other routes, check if the pathname starts with the path
+        return pathname.startsWith(`${path}/`) || pathname === path;
     };
 
     const handleSignOut = async () => {
