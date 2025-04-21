@@ -5,7 +5,6 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
-import Image from 'next/image';
 
 export default function SignIn() {
     const [email, setEmail] = useState('');
@@ -34,7 +33,7 @@ export default function SignIn() {
 
             router.push('/dashboard');
             router.refresh();
-        } catch (error) {
+        } catch {
             setError('An error occurred during sign in');
             setIsLoading(false);
         }
@@ -44,7 +43,7 @@ export default function SignIn() {
         <div className="min-h-screen flex items-center justify-center bg-[#0f1729] px-4">
             <div className="w-full max-w-md">
                 <div className="flex justify-center mb-8">
-                    <Image src="/images/logo.png" alt="LulAI Logo" width={120} height={40} />
+                    <span className="text-3xl font-bold text-white">LulAI</span>
                 </div>
                 <div className="bg-[#1b2539] rounded-lg shadow-xl p-8">
                     <h2 className="text-2xl font-bold text-white mb-6 text-center">Sign in to your account</h2>
@@ -104,7 +103,7 @@ export default function SignIn() {
                     </form>
 
                     <p className="mt-4 text-center text-sm text-gray-400">
-                        Don't have an account?{' '}
+                        Don&apos;t have an account?{' '}
                         <Link href={`/auth/signup`} className="text-blue-500 hover:text-blue-400">
                             Sign up
                         </Link>

@@ -2,7 +2,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 export const Header = () => {
@@ -11,13 +10,6 @@ export const Header = () => {
     return (
         <header className="max-w-7xl mx-auto px-4 py-6 flex justify-between items-center">
             <div className="flex items-center">
-                <Image
-                    src="/images/logo.png"
-                    alt="LulAI Logo"
-                    width={40}
-                    height={40}
-                    className="mr-3"
-                />
                 <span className="text-xl font-bold">LulAI</span>
             </div>
 

@@ -4,7 +4,6 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 
 export default function SignUp() {
     const [name, setName] = useState('');
@@ -36,7 +35,7 @@ export default function SignUp() {
 
             // Automatically sign in after successful registration
             router.push('/auth/signin?registered=true');
-        } catch (err) {
+        } catch {
             // Simple error handling - avoid the throw/catch issue
             setError('An error occurred during registration');
             setIsLoading(false);
@@ -47,7 +46,7 @@ export default function SignUp() {
         <div className="min-h-screen flex items-center justify-center bg-[#0f1729] px-4">
             <div className="w-full max-w-md">
                 <div className="flex justify-center mb-8">
-                    <Image src="/images/logo.png" alt="LulAI Logo" width={120} height={40} />
+                    <span className="text-3xl font-bold text-white">LulAI</span>
                 </div>
                 <div className="bg-[#1b2539] rounded-lg shadow-xl p-8">
                     <h2 className="text-2xl font-bold text-white mb-6 text-center">Create your account</h2>
