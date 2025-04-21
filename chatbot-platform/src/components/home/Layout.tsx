@@ -1,4 +1,4 @@
-// src/components/Layout.tsx
+// src/components/home/Layout.tsx
 "use client";
 import { ReactNode } from "react";
 import { Header } from "@/components/home/Header";

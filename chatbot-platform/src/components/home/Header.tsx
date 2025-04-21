@@ -1,4 +1,4 @@
-// src/components/Header.tsx
+// src/components/home/Header.tsx
 "use client";
 
 import Link from "next/link";
@@ -27,7 +27,7 @@ export const Header = () => {
 
                 {isAuthenticated ? (
                     <Link
-                        href="/dashboard"
+                        href={`/dashboard`}
                         className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors"
                     >
                         Dashboard
@@ -35,13 +35,13 @@ export const Header = () => {
                 ) : (
                     <>
                         <Link
-                            href="/auth/signin"
+                            href={`/auth/signin`}
                             className="text-muted-foreground hover:text-foreground px-4 py-2 transition-colors"
                         >
                             Sign In
                         </Link>
                         <Link
-                            href="/auth/signup"
+                            href={`/auth/signup`}
                             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors"
                         >
                             Sign Up

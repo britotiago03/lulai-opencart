@@ -1,4 +1,4 @@
-// src/components/FeaturesSection.tsx
+// src/components/home/FeaturesSection.tsx
 "use client";
 import { useTheme } from "@/components/ThemeProvider";
 import React from "react";

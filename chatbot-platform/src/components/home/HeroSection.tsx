@@ -1,4 +1,4 @@
-// src/components/HeroSection.tsx
+// src/components/home/HeroSection.tsx
 "use client";
 import Link from "next/link";
 import { useTheme } from "@/components/ThemeProvider";

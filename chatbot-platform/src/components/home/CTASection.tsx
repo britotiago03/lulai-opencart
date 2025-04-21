@@ -1,4 +1,4 @@
-// src/components/CTASection.tsx
+// src/components/home/CTASection.tsx
 "use client";
 import Link from "next/link";
 import { useTheme } from "@/components/ThemeProvider";

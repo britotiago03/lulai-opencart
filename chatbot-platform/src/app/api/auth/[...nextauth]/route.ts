@@ -1,16 +1,17 @@
 // src/app/api/auth/[...nextauth]/route.ts
-import NextAuth, { NextAuthOptions } from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
-import { pool } from "@/lib/db";
-import bcrypt from "bcryptjs";
+import NextAuth from 'next-auth';
+import { NextAuthOptions } from 'next-auth';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import bcrypt from 'bcryptjs';
+import { pool } from '@/lib/db';
 
 export const authOptions: NextAuthOptions = {
     providers: [
         CredentialsProvider({
-            name: "Credentials",
+            name: 'Credentials',
             credentials: {
-                email: { label: "Email", type: "email" },
-                password: { label: "Password", type: "password" },
+                email: { label: 'Email', type: 'email' },
+                password: { label: 'Password', type: 'password' }
             },
             async authorize(credentials) {
                 if (!credentials?.email || !credentials?.password) {
@@ -18,53 +19,40 @@ export const authOptions: NextAuthOptions = {
                 }
 
                 try {
-                    const client = await pool.connect();
-                    try {
-                        console.log("Attempting login for:", credentials.email);
+                    // Find user by email
+                    const result = await pool.query(
+                        'SELECT * FROM users WHERE email = $1',
+                        [credentials.email]
+                    );
 
-                        // Use parameterized queries for security
-                        const result = await client.query(
-                            "SELECT * FROM users WHERE email = $1",
-                            [credentials.email.toLowerCase().trim()]
-                        );
+                    const user = result.rows[0];
 
-                        const user = result.rows[0];
-
-                        if (!user) {
-                            console.log("User not found");
-                            return null;
-                        }
-
-                        console.log("Found user:", user.email, "with role:", user.role);
-                        console.log("Stored password hash:", user.password);
-
-                        // Compare the provided password with the stored hash
-                        const passwordMatch = await bcrypt.compare(
-                            credentials.password,
-                            user.password
-                        );
-
-                        console.log("Password match result:", passwordMatch);
-
-                        if (!passwordMatch) {
-                            return null;
-                        }
-
-                        return {
-                            id: user.id,
-                            name: user.name,
-                            email: user.email,
-                            role: user.role,
-                        };
-                    } finally {
-                        client.release();
+                    if (!user) {
+                        console.log('User not found');
+                        return null;
                     }
+
+                    // Verify password
+                    const isValid = await bcrypt.compare(credentials.password, user.password);
+
+                    if (!isValid) {
+                        console.log('Invalid password');
+                        return null;
+                    }
+
+                    // Return user data (excluding password)
+                    return {
+                        id: user.id.toString(),
+                        name: user.name,
+                        email: user.email,
+                        role: user.role
+                    };
                 } catch (error) {
-                    console.error("Database error during authentication:", error);
+                    console.error('Auth error:', error);
                     return null;
                 }
-            },
-        }),
+            }
+        })
     ],
     callbacks: {
         async jwt({ token, user }) {
@@ -75,22 +63,24 @@ export const authOptions: NextAuthOptions = {
             return token;
         },
         async session({ session, token }) {
-            if (token) {
+            if (token && session.user) {
                 session.user.id = token.id as string;
                 session.user.role = token.role as string;
             }
             return session;
-        },
+        }
     },
     pages: {
-        signIn: "/auth/signin",
+        signIn: '/auth/signin',
+        signOut: '/auth/signout',
+        error: '/auth/error'
     },
     session: {
-        strategy: "jwt",
+        strategy: 'jwt',
         maxAge: 30 * 24 * 60 * 60, // 30 days
     },
+    secret: process.env.NEXTAUTH_SECRET || 'your-fallback-secret-should-be-changed-in-production',
     debug: process.env.NODE_ENV === 'development',
-    secret: process.env.NEXTAUTH_SECRET,
 };
 
 const handler = NextAuth(authOptions);

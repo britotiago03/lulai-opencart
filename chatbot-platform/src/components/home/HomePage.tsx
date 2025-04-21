@@ -1,4 +1,4 @@
-// src/components/HomePage.tsx
+// src/components/home/HomePage.tsx
 "use client";
 import { HeroSection } from "@/components/home/HeroSection";
 import { FeaturesSection } from "@/components/home/FeaturesSection";
