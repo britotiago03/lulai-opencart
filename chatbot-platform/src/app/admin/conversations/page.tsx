@@ -1,4 +1,4 @@
-// src/app/admin/conversations/page.tsx
+// src/app/admin-dashboard/conversations/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -8,14 +8,15 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { MessageSquare, Calendar, Search, ChevronRight } from "lucide-react";
 import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
+import { Conversation } from "@/types/conversation";
 
 export default function AdminConversationsPage() {
     const { data: session, status } = useSession();
     const router = useRouter();
     const [loading, setLoading] = useState(true);
-    const [conversations, setConversations] = useState([]);
+    const [conversations, setConversations] = useState<Conversation[]>([]);
     const [search, setSearch] = useState("");
-    const [error, setError] = useState(null);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (status === "unauthenticated") {
@@ -33,7 +34,8 @@ export default function AdminConversationsPage() {
                 setLoading(true);
                 const response = await fetch("/api/admin/conversations");
                 if (!response.ok) {
-                    throw new Error("Failed to fetch conversations");
+                    setError("Failed to fetch conversations");
+                    return;
                 }
 
                 const data = await response.json();
@@ -46,7 +48,7 @@ export default function AdminConversationsPage() {
             }
         };
 
-        fetchConversations();
+        void fetchConversations();
     }, [session, status, router]);
 
     // Filter conversations based on search
@@ -59,14 +61,14 @@ export default function AdminConversationsPage() {
         : conversations;
 
     // Group conversations by date
-    const groupedConversations = filteredConversations.reduce((groups, convo) => {
+    const groupedConversations: Record<string, Conversation[]> = filteredConversations.reduce((groups, convo) => {
         const date = new Date(convo.created_at).toLocaleDateString();
         if (!groups[date]) {
             groups[date] = [];
         }
         groups[date].push(convo);
         return groups;
-    }, {});
+    }, {} as Record<string, Conversation[]>);
 
     if (loading) {
         return <LoadingSkeleton />;
@@ -121,7 +123,7 @@ export default function AdminConversationsPage() {
                             </div>
 
                             <div className="space-y-4">
-                                {convos.map((convo) => (
+                                {convos.map((convo: Conversation) => (
                                     <Link key={convo.id} href={`/admin/conversations/thread/${convo.user_id}-${convo.api_key}`}>
                                         <Card className="bg-[#1b2539] border-0 hover:bg-[#232b3c] transition-colors cursor-pointer">
                                             <CardContent className="p-4">

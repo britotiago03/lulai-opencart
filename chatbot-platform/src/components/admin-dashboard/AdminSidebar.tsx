@@ -1,4 +1,4 @@
-// src/components/admin/AdminSidebar.tsx
+// src/components/admin.dashboard/AdminSidebar.tsx
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";

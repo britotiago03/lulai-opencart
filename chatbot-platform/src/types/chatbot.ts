@@ -12,3 +12,12 @@ export interface Chatbot {
     created_at: string;
     updated_at: string;
 }
+
+// Extended interface for the admin dashboard which includes additional fields
+export interface ChatbotWithStats extends Chatbot {
+    userName: string;
+    userEmail: string;
+    status: "active" | "inactive" | "error";
+    conversationCount: number;
+    lastActive: string;
+}

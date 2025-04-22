@@ -23,6 +23,7 @@ services:
       - postgres
     environment:
       DATABASE_URL: "postgresql://postgres:postgres@lulai-chatbot-db:5432/chatbot"
+      NEXTAUTH_SECRET: "6fbbJ2rDi+mCPnBefneSAdy0VZgxAHFw/81l/TlQMhs="
 
 volumes:
   postgres_data:

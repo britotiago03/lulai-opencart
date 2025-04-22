@@ -7,7 +7,6 @@ import Link from 'next/link';
 export default function CreateAdmin() {
     const [name, setName] = useState('Admin User');
     const [email, setEmail] = useState('admin@lulai.com');
-    const [password, setPassword] = useState('adminPassword123');
     const [token, setToken] = useState('create-admin-123456');
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
@@ -20,21 +19,28 @@ export default function CreateAdmin() {
         setMessage('');
 
         try {
-            const response = await fetch('/api/auth/create-admin', {
+            const response = await fetch('/api/auth/invite-admin', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, password, token }),
+                body: JSON.stringify({ name, email, token }),
             });
 
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || 'Failed to create admin');
+                setError(data.message || 'Failed to send admin invitation');
+                return;
             }
 
-            setMessage(data.message);
-        } catch (error: any) {
-            setError(error.message || 'An error occurred');
+            setMessage('Invitation email sent successfully! The admin will need to click the link in the email to set their password.');
+        } catch (error) {
+            console.error("Setup completion error:", error);
+            if (error instanceof Error) {
+                setError(error.message || 'An error occurred');
+            } else {
+                setError('An unexpected error occurred');
+            }
+            setLoading(false);
         } finally {
             setLoading(false);
         }
@@ -44,7 +50,7 @@ export default function CreateAdmin() {
         <div className="min-h-screen flex items-center justify-center bg-[#0f1729] px-4">
             <div className="w-full max-w-md">
                 <div className="bg-[#1b2539] rounded-lg shadow-xl p-8">
-                    <h2 className="text-2xl font-bold text-white mb-6 text-center">Create Admin User</h2>
+                    <h2 className="text-2xl font-bold text-white mb-6 text-center">Invite Admin User</h2>
 
                     {error && (
                         <div className="bg-red-500/10 border border-red-500/50 text-red-500 px-4 py-3 rounded mb-4">
@@ -87,20 +93,6 @@ export default function CreateAdmin() {
                             />
                         </div>
 
-                        <div className="mb-4">
-                            <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
-                                Password
-                            </label>
-                            <input
-                                id="password"
-                                type="text"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full px-3 py-2 bg-[#2a3349] border border-gray-600 rounded-md text-white"
-                                required
-                            />
-                        </div>
-
                         <div className="mb-6">
                             <label htmlFor="token" className="block text-sm font-medium text-gray-300 mb-1">
                                 Security Token
@@ -120,12 +112,12 @@ export default function CreateAdmin() {
                             disabled={loading}
                             className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md transition duration-200 flex justify-center"
                         >
-                            {loading ? 'Creating...' : 'Create Admin User'}
+                            {loading ? 'Sending Invitation...' : 'Send Admin Invitation'}
                         </button>
                     </form>
 
                     <div className="mt-4 text-center">
-                        <Link href="/auth/signin" className="text-blue-500 hover:text-blue-400">
+                        <Link href={`/auth/signin`} className="text-blue-500 hover:text-blue-400">
                             Back to Sign In
                         </Link>
                     </div>

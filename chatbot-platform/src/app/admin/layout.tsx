@@ -1,10 +1,10 @@
-// src/app/admin/layout.tsx
+// src/app/admin-dashboard/layout.tsx
 "use client";
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import React, { useEffect, useState } from "react";
+import { AdminSidebar } from "@/components/admin-dashboard/AdminSidebar";
 import { MobileNav, useMobileNav } from "@/components/dashboard/MobileNav";
 import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
 
@@ -16,7 +16,7 @@ export default function AdminLayout({
     const { data: session, status } = useSession();
     const router = useRouter();
     const [loading, setLoading] = useState(true);
-    const { isOpen, isMobile, toggle } = useMobileNav();
+    const { isOpen, isMobile, toggleAction } = useMobileNav();
 
     useEffect(() => {
         if (status === "unauthenticated") {
@@ -40,13 +40,13 @@ export default function AdminLayout({
     return (
         <div className="flex h-screen overflow-hidden bg-[#0f1729]">
             {/* Mobile Nav Toggle */}
-            {isMobile && <MobileNav isOpen={isOpen} toggle={toggle} />}
+            {isMobile && <MobileNav isOpen={isOpen} toggleAction={toggleAction} />}
 
             {/* Mobile Sidebar Overlay */}
             {isOpen && isMobile && (
                 <div
                     className="fixed inset-0 bg-black/50 z-40"
-                    onClick={toggle}
+                    onClick={toggleAction}
                     aria-hidden="true"
                 />
             )}
@@ -61,7 +61,7 @@ export default function AdminLayout({
                         : "sticky top-0 h-screen w-64 flex-shrink-0"
                 }`}
             >
-                <AdminSidebar onClose={toggle} />
+                <AdminSidebar onClose={toggleAction} />
             </div>
 
             {/* Main Content */}

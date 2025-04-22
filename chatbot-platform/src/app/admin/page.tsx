@@ -1,4 +1,4 @@
-// src/app/admin/page.tsx
+// src/app/admin-dashboard/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -36,18 +36,21 @@ export default function AdminDashboard() {
         const fetchStats = async () => {
             try {
                 // Fetch real data from analytics endpoint
-                const response = await fetch('/api/analytics', {
+                const response = await fetch('/api/admin/analytics', {
                     headers: { 'Cache-Control': 'no-cache' }
                 });
 
                 if (!response.ok) {
-                    throw new Error('Failed to fetch analytics data');
+                    // Instead of throwing an error, handle it directly
+                    console.error('Failed to fetch analytics data:', response.status);
+                    setLoading(false);
+                    return; // Exit the function early
                 }
 
                 const analyticsData = await response.json();
 
                 // Fetch chatbots count
-                const chatbotsResponse = await fetch('/api/chatbots');
+                const chatbotsResponse = await fetch('/api/admin/chatbots');
                 const chatbotsData = await chatbotsResponse.json();
 
                 // Fetch users count
@@ -70,7 +73,7 @@ export default function AdminDashboard() {
             }
         };
 
-        fetchStats();
+        void fetchStats();
     }, [session, status, router]);
 
     if (loading) {
@@ -82,7 +85,7 @@ export default function AdminDashboard() {
             title: "User Management",
             description: "View and manage all platform users",
             icon: Users,
-            link: "/admin/users",
+            link: "/admin-dashboard/users",
             stat: stats.totalUsers,
             statLabel: "Total Users",
         },
@@ -90,7 +93,7 @@ export default function AdminDashboard() {
             title: "Subscription Management",
             description: "Track payments, plans, and renewals",
             icon: Database,
-            link: "/admin/subscriptions",
+            link: "/admin-dashboard/subscriptions",
             stat: stats.activeSubscriptions,
             statLabel: "Active Subscriptions",
         },
@@ -98,15 +101,15 @@ export default function AdminDashboard() {
             title: "Chatbot Monitoring",
             description: "Monitor all chatbots across the platform",
             icon: MessageSquare,
-            link: "/admin/chatbots",
+            link: "/admin-dashboard/chatbots",
             stat: stats.totalChatbots,
             statLabel: "Total Chatbots",
         },
         {
             title: "Conversations",
             description: "View all user-chatbot interactions",
-            icon: MessageSquare, // Use MessageCircle if available
-            link: "/admin/conversations",
+            icon: MessageSquare,
+            link: "/admin-dashboard/conversations",
             stat: stats.totalConversations,
             statLabel: "Total Conversations",
         },
@@ -114,7 +117,7 @@ export default function AdminDashboard() {
             title: "Global Analytics",
             description: "View platform-wide metrics and usage data",
             icon: BarChart2,
-            link: "/admin/analytics",
+            link: "/admin-dashboard/analytics",
             stat: stats.totalConversations,
             statLabel: "Total Conversations",
         },
@@ -122,7 +125,7 @@ export default function AdminDashboard() {
             title: "Admin Settings",
             description: "Configure platform settings and defaults",
             icon: Settings,
-            link: "/admin/settings",
+            link: "/admin-dashboard/settings",
             stat: null,
             statLabel: null,
         },
@@ -130,7 +133,7 @@ export default function AdminDashboard() {
             title: "System Alerts",
             description: "Review system warnings and security logs",
             icon: Bell,
-            link: "/admin/alerts",
+            link: "/admin-dashboard/alerts",
             stat: stats.activeAlerts,
             statLabel: "Active Alerts",
         },

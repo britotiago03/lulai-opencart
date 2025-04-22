@@ -8,14 +8,14 @@ import Link from "next/link";
 
 // Components
 import GeneralSettings from "@/components/dashboard/agents/settings/GeneralSettings";
-import WidgetSettings from "./components/dashboard/agents/settings/WidgetSettings";
-import CustomPromptSettings from "./components/dashboard/agents/settings/CustomPromptSettings";
-import TabNavigation from "./components/dashboard/agents/settings/TabNavigation";
-import StatusMessage from "./components/dashboard/agents/settings/StatusMessage";
+import WidgetSettings from "@/components/dashboard/agents/settings/WidgetSettings";
+import CustomPromptSettings from "@/components/dashboard/agents/settings/CustomPromptSettings";
+import TabNavigation from "@/components/dashboard/agents/settings/TabNavigation";
+import StatusMessage from "@/components/dashboard/agents/settings/StatusMessage";
 
 // Hooks
-import useAgentSettings from "./hooks/useAgentSettings";
-import useSettingsActions from "./hooks/useSettingsActions";
+import useAgentSettings from "@/hooks/useAgentSettings";
+import useSettingsActions from "@/hooks/useSettingsActions";
 
 export default function AgentSettingsPage() {
     const { id } = useParams() as { id: string };

@@ -1,7 +1,29 @@
-export interface IntentItem   { intent:  string; count: number }
-export interface DailyItem    { date:    string; count: number; messages: number }
-export interface CartOpItem   { operation: string; count: number }
-export interface NavAction    { target: string; count: number }
+// Reusable base type for any chart-compatible data item
+export interface ChartDataItem {
+    [key: string]: string | number | Date | null;
+}
+
+export interface IntentItem {
+    intent: string;
+    count: number;
+}
+
+// Daily stats (used in charts, now extends ChartDataItem)
+export interface DailyItem extends ChartDataItem {
+    date: string;
+    count: number;
+    messages: number;
+}
+
+export interface CartOpItem {
+    operation: string;
+    count: number;
+}
+
+export interface NavAction {
+    target: string;
+    count: number;
+}
 
 export interface ChatbotStat {
     name: string;
@@ -10,6 +32,8 @@ export interface ChatbotStat {
     totalMessages: number;
     conversions: number;
     conversionRate: number;
+    cartOperations?: CartOpItem[];
+    navigationActions?: NavAction[];
 }
 
 export interface AnalyticsData {

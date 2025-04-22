@@ -1,4 +1,3 @@
-// src/components/dashboard/analytics/charts/PieChart.tsx
 'use client';
 
 import React from 'react';
@@ -11,7 +10,13 @@ import {
     ResponsiveContainer
 } from 'recharts';
 
-// Define a type for the data items
+import type {
+    ValueType,
+    NameType
+} from 'recharts/types/component/DefaultTooltipContent';
+
+import type { TooltipProps } from 'recharts';
+
 interface DataItem {
     [key: string]: string | number;
 }
@@ -26,14 +31,6 @@ interface PieChartProps {
     showLegend?: boolean;
 }
 
-interface TooltipProps {
-    active?: boolean;
-    payload?: Array<{
-        name: string;
-        value: number;
-    }>;
-}
-
 const CustomPieChart: React.FC<PieChartProps> = ({
                                                      data,
                                                      dataKey,
@@ -44,38 +41,28 @@ const CustomPieChart: React.FC<PieChartProps> = ({
                                                      showLegend = true
                                                  }) => {
     if (!data || data.length === 0) {
-        return <div className="h-full w-full flex items-center justify-center text-gray-400">No data available</div>;
+        return (
+            <div className="h-full w-full flex items-center justify-center text-gray-400">
+                No data available
+            </div>
+        );
     }
 
-    // Format names if they're system values or special cases
     const formattedData = data.map(item => {
-        let formattedName = item[nameKey] as string;
+        let formattedName = String(item[nameKey]);
 
-        // Replace underscores with spaces
         formattedName = formattedName.replace(/_/g, ' ');
 
-        // Special case for intent names
-        switch(formattedName) {
-            case 'cart add':
-                formattedName = 'Add to Cart';
-                break;
-            case 'product view':
-                formattedName = 'View Product';
-                break;
-            case 'navigate':
-                formattedName = 'Navigation';
-                break;
-            case 'question':
-                formattedName = 'Question';
-                break;
-            case 'other':
-                formattedName = 'Other';
-                break;
+        switch (formattedName) {
+            case 'cart add': formattedName = 'Add to Cart'; break;
+            case 'product view': formattedName = 'View Product'; break;
+            case 'navigate': formattedName = 'Navigation'; break;
+            case 'question': formattedName = 'Question'; break;
+            case 'other': formattedName = 'Other'; break;
             default:
-                // Capitalize first letter of each word
                 formattedName = formattedName
                     .split(' ')
-                    .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
                     .join(' ');
         }
 
@@ -85,13 +72,20 @@ const CustomPieChart: React.FC<PieChartProps> = ({
         };
     });
 
-    // Custom tooltip formatter
-    const customTooltip = ({ active, payload }: TooltipProps) => {
+    const customTooltip = ({
+                               active,
+                               payload
+                           }: TooltipProps<ValueType, NameType>): React.ReactElement | null => {
         if (active && payload && payload.length) {
+            const name = payload[0].name ?? "Unknown";
+            const value = Number(payload[0].value ?? 0);
+            const total = data.reduce((sum, item) => sum + Number(item[dataKey] || 0), 0);
+            const percent = ((value / total) * 100).toFixed(1);
+
             return (
                 <div className="bg-[#1f2937] border border-[#374151] p-3 rounded shadow">
-                    <p className="font-medium">{payload[0].name}</p>
-                    <p className="text-[#d1d5db]">{`${payload[0].value} (${((payload[0].value / data.reduce((sum, item) => sum + (Number(item[dataKey]) || 0), 0)) * 100).toFixed(1)}%)`}</p>
+                    <p className="font-medium">{name}</p>
+                    <p className="text-[#d1d5db]">{`${value} (${percent}%)`}</p>
                 </div>
             );
         }
