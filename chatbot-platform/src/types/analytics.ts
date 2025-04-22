@@ -1,97 +1,31 @@
-// src/types/analytics.ts
-export interface AnalyticsData {
-    totalUsers?: number;
-    totalChatbots?: number;
-    totalConversations: number;
-    totalMessages: number;
-    activeUsers?: number;
-    averageResponseTime: number;
-    conversionRate: number;
-    totalCartActions?: number;
-    timeRange?: number;
-    chatbotName?: string;
-
-    // Detailed statistics
-    recentActivity?: {
-        date: string;
-        count: number;
-        message_count?: number;
-    }[];
-    dailyStats?: {
-        date: string;
-        conversation_count: number;
-        message_count: number;
-    }[];
-    intentDistribution?: {
-        intent: string;
-        count: number;
-    }[];
-    topQueries?: {
-        message_content: string;
-        count: number;
-    }[];
-    cartOperations?: {
-        operation: string;
-        count: number;
-    }[];
-    navigationActions?: {
-        target: string;
-        count: number;
-    }[];
-
-    // Chatbot specific statistics
-    chatbotStats?: ChatbotStat[];
-
-    // Admin specific
-    topChatbots?: {
-        api_key: string;
-        name: string;
-        user_count: number;
-        message_count: number;
-    }[];
-    topPerformingChatbots?: {
-        api_key: string;
-        name: string;
-        total_users: number;
-        conversions: number;
-        conversion_rate: string;
-    }[];
-}
+export interface IntentItem   { intent:  string; count: number }
+export interface DailyItem    { date:    string; count: number; messages: number }
+export interface CartOpItem   { operation: string; count: number }
+export interface NavAction    { target: string; count: number }
 
 export interface ChatbotStat {
-    chatbotId: string;
-    apiKey: string;
-    name?: string;
+    name: string;
+    totalUsers: number;
+    totalConversations: number;
+    totalMessages: number;
+    conversions: number;
+    conversionRate: number;
+}
+
+export interface AnalyticsData {
     totalConversations: number;
     totalMessages: number;
     averageResponseTime: number;
-    conversions: number;
     conversionRate: number;
-    dailyStats?: any[];
-    topQueries?: any[];
-    intentDistribution?: any[];
-    cartOperations?: any[];
-    navigationActions?: any[];
-}
-
-// Chart data types
-export interface ChartDataPoint {
-    name: string;
-    value: number;
-}
-
-export interface LineChartDataPoint {
-    date: string;
-    count: number;
-    messages?: number;
-}
-
-export interface BarChartDataPoint {
-    name: string;
-    value: number;
-}
-
-export interface PieChartDataPoint {
-    name: string;
-    value: number;
+    conversions?: number;
+    recentActivity?: DailyItem[];
+    dailyStats?: DailyItem[];
+    intentDistribution?: IntentItem[];
+    topQueries?: { message_content: string; count: number }[];
+    cartOperations?: CartOpItem[];
+    navigationActions?: NavAction[];
+    chatbotStats?: ChatbotStat[];
+    topPerformingChatbots?: ChatbotStat[];
+    totalCartActions?: number;
+    chatbotName?: string;
 }

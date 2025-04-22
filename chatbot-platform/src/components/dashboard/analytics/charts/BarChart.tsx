@@ -1,4 +1,4 @@
-// src/components/charts/BarChart.tsx
+// src/components/dashboard/analytics/charts/BarChart.tsx
 'use client';
 
 import React from 'react';
@@ -13,8 +13,13 @@ import {
     ResponsiveContainer
 } from 'recharts';
 
+// Define a type for data items
+interface DataItem {
+    [key: string]: string | number | Date | null;
+}
+
 interface BarChartProps {
-    data: any[];
+    data: DataItem[];
     xDataKey: string;
     yDataKey: string;
     barSize?: number;

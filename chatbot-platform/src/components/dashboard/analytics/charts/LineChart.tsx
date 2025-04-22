@@ -1,4 +1,4 @@
-// src/components/charts/LineChart.tsx
+// src/components/dashboard/analytics/charts/LineChart.tsx
 'use client';
 
 import React from 'react';
@@ -13,8 +13,13 @@ import {
     ResponsiveContainer
 } from 'recharts';
 
+// Define a type for data items
+interface DataItem {
+    [key: string]: string | number | Date | null;
+}
+
 interface LineChartProps {
-    data: any[];
+    data: DataItem[];
     xDataKey: string;
     yDataKey: string;
     secondaryDataKey?: string;

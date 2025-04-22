@@ -1,4 +1,4 @@
-// src/components/charts/PieChart.tsx
+// src/components/dashboard/analytics/charts/PieChart.tsx
 'use client';
 
 import React from 'react';
@@ -11,14 +11,27 @@ import {
     ResponsiveContainer
 } from 'recharts';
 
+// Define a type for the data items
+interface DataItem {
+    [key: string]: string | number;
+}
+
 interface PieChartProps {
-    data: any[];
+    data: DataItem[];
     dataKey: string;
     nameKey: string;
     colors?: string[];
     innerRadius?: number;
     outerRadius?: number;
     showLegend?: boolean;
+}
+
+interface TooltipProps {
+    active?: boolean;
+    payload?: Array<{
+        name: string;
+        value: number;
+    }>;
 }
 
 const CustomPieChart: React.FC<PieChartProps> = ({
@@ -36,37 +49,34 @@ const CustomPieChart: React.FC<PieChartProps> = ({
 
     // Format names if they're system values or special cases
     const formattedData = data.map(item => {
-        let formattedName = item[nameKey];
+        let formattedName = item[nameKey] as string;
 
-        // Capitalize the first letter and format underscores and special values
-        if (typeof formattedName === 'string') {
-            // Replace underscores with spaces
-            formattedName = formattedName.replace(/_/g, ' ');
+        // Replace underscores with spaces
+        formattedName = formattedName.replace(/_/g, ' ');
 
-            // Special case for intent names
-            switch(formattedName) {
-                case 'cart add':
-                    formattedName = 'Add to Cart';
-                    break;
-                case 'product view':
-                    formattedName = 'View Product';
-                    break;
-                case 'navigate':
-                    formattedName = 'Navigation';
-                    break;
-                case 'question':
-                    formattedName = 'Question';
-                    break;
-                case 'other':
-                    formattedName = 'Other';
-                    break;
-                default:
-                    // Capitalize first letter of each word
-                    formattedName = formattedName
-                        .split(' ')
-                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                        .join(' ');
-            }
+        // Special case for intent names
+        switch(formattedName) {
+            case 'cart add':
+                formattedName = 'Add to Cart';
+                break;
+            case 'product view':
+                formattedName = 'View Product';
+                break;
+            case 'navigate':
+                formattedName = 'Navigation';
+                break;
+            case 'question':
+                formattedName = 'Question';
+                break;
+            case 'other':
+                formattedName = 'Other';
+                break;
+            default:
+                // Capitalize first letter of each word
+                formattedName = formattedName
+                    .split(' ')
+                    .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
         }
 
         return {
@@ -76,12 +86,12 @@ const CustomPieChart: React.FC<PieChartProps> = ({
     });
 
     // Custom tooltip formatter
-    const customTooltip = ({ active, payload }: any) => {
+    const customTooltip = ({ active, payload }: TooltipProps) => {
         if (active && payload && payload.length) {
             return (
                 <div className="bg-[#1f2937] border border-[#374151] p-3 rounded shadow">
                     <p className="font-medium">{payload[0].name}</p>
-                    <p className="text-[#d1d5db]">{`${payload[0].value} (${((payload[0].value / data.reduce((sum, item) => sum + item[dataKey], 0)) * 100).toFixed(1)}%)`}</p>
+                    <p className="text-[#d1d5db]">{`${payload[0].value} (${((payload[0].value / data.reduce((sum, item) => sum + (Number(item[dataKey]) || 0), 0)) * 100).toFixed(1)}%)`}</p>
                 </div>
             );
         }
@@ -105,7 +115,7 @@ const CustomPieChart: React.FC<PieChartProps> = ({
                     animationDuration={1500}
                     isAnimationActive={true}
                 >
-                    {formattedData.map((entry, index) => (
+                    {formattedData.map((_, index) => (
                         <Cell
                             key={`cell-${index}`}
                             fill={colors[index % colors.length]}
