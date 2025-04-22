@@ -1,4 +1,3 @@
-// src/app/admin/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -22,62 +21,72 @@ export default function AdminDashboard() {
     });
 
     useEffect(() => {
+        // Check if user is authenticated
         if (status === "unauthenticated") {
-            router.push("/auth/signin");
+            console.log("Admin dashboard - User not authenticated, redirecting to signin");
+            router.push("/admin/signin");
             return;
         }
 
-        if (status === "authenticated" && session?.user?.role !== "admin") {
-            router.push("/dashboard");
-            return;
-        }
-
-        // Fetch admin statistics from real database
-        const fetchStats = async () => {
-            try {
-                // Fetch real data from analytics endpoint
-                const response = await fetch('/api/admin/analytics', {
-                    headers: { 'Cache-Control': 'no-cache' }
-                });
-
-                if (!response.ok) {
-                    // Instead of throwing an error, handle it directly
-                    console.error('Failed to fetch analytics data:', response.status);
-                    setLoading(false);
-                    return; // Exit the function early
-                }
-
-                const analyticsData = await response.json();
-
-                // Fetch chatbots count
-                const chatbotsResponse = await fetch('/api/admin/chatbots');
-                const chatbotsData = await chatbotsResponse.json();
-
-                // Fetch users count
-                const usersResponse = await fetch('/api/admin/users/count');
-                const usersData = await usersResponse.json();
-
-                setStats({
-                    totalUsers: usersData.count || 0,
-                    activeSubscriptions: analyticsData.averageConversationsPerChatbot ?
-                        Math.round(analyticsData.averageConversationsPerChatbot) : 0,
-                    totalChatbots: chatbotsData.length || 0,
-                    totalConversations: analyticsData.totalConversations || 0,
-                    activeAlerts: analyticsData.totalCartActions ?
-                        (analyticsData.totalCartActions > 100 ? 1 : 0) : 0, // Set alert if high cart actions
-                });
-                setLoading(false);
-            } catch (error) {
-                console.error("Error fetching admin stats:", error);
-                setLoading(false);
+        // Check if user is an admin
+        if (status === "authenticated") {
+            if (!session?.user?.isAdmin) {
+                console.log("Admin dashboard - User not admin, redirecting to user dashboard");
+                router.push("/dashboard");
+                return;
             }
-        };
 
-        void fetchStats();
+            // Fetch admin statistics from real database
+            const fetchStats = async () => {
+                try {
+                    // Fetch real data from analytics endpoint
+                    const response = await fetch('/api/admin/analytics', {
+                        headers: { 'Cache-Control': 'no-cache' }
+                    });
+
+                    if (!response.ok) {
+                        console.error('Failed to fetch analytics data:', response.status);
+                        setLoading(false);
+                        return;
+                    }
+
+                    const analyticsData = await response.json();
+
+                    // Fetch chatbots count
+                    const chatbotsResponse = await fetch('/api/admin/chatbots');
+                    const chatbotsData = await chatbotsResponse.json();
+
+                    // Fetch users count
+                    const usersResponse = await fetch('/api/admin/users/count');
+                    const usersData = await usersResponse.json();
+
+                    setStats({
+                        totalUsers: usersData.count || 0,
+                        activeSubscriptions: analyticsData.averageConversationsPerChatbot ?
+                            Math.round(analyticsData.averageConversationsPerChatbot) : 0,
+                        totalChatbots: chatbotsData.length || 0,
+                        totalConversations: analyticsData.totalConversations || 0,
+                        activeAlerts: analyticsData.totalCartActions ?
+                            (analyticsData.totalCartActions > 100 ? 1 : 0) : 0,
+                    });
+                    setLoading(false);
+                } catch (error) {
+                    console.error("Error fetching admin stats:", error);
+                    setLoading(false);
+                }
+            };
+
+            void fetchStats();
+        }
     }, [session, status, router]);
 
-    if (loading) {
+    if (status === "loading" || loading) {
         return <LoadingSkeleton />;
+    }
+
+    // Additional safety check to ensure only admins see this page
+    if (!session?.user?.isAdmin) {
+        return null; // Render nothing while redirect happens
     }
 
     const adminCards = [
@@ -85,7 +94,7 @@ export default function AdminDashboard() {
             title: "User Management",
             description: "View and manage all platform users",
             icon: Users,
-            link: "/admin-dashboard/users",
+            link: "/admin/users",
             stat: stats.totalUsers,
             statLabel: "Total Users",
         },
@@ -93,7 +102,7 @@ export default function AdminDashboard() {
             title: "Subscription Management",
             description: "Track payments, plans, and renewals",
             icon: Database,
-            link: "/admin-dashboard/subscriptions",
+            link: "/admin/subscriptions",
             stat: stats.activeSubscriptions,
             statLabel: "Active Subscriptions",
         },
@@ -101,7 +110,7 @@ export default function AdminDashboard() {
             title: "Chatbot Monitoring",
             description: "Monitor all chatbots across the platform",
             icon: MessageSquare,
-            link: "/admin-dashboard/chatbots",
+            link: "/admin/chatbots",
             stat: stats.totalChatbots,
             statLabel: "Total Chatbots",
         },
@@ -109,7 +118,7 @@ export default function AdminDashboard() {
             title: "Conversations",
             description: "View all user-chatbot interactions",
             icon: MessageSquare,
-            link: "/admin-dashboard/conversations",
+            link: "/admin/conversations",
             stat: stats.totalConversations,
             statLabel: "Total Conversations",
         },
@@ -117,7 +126,7 @@ export default function AdminDashboard() {
             title: "Global Analytics",
             description: "View platform-wide metrics and usage data",
             icon: BarChart2,
-            link: "/admin-dashboard/analytics",
+            link: "/admin/analytics",
             stat: stats.totalConversations,
             statLabel: "Total Conversations",
         },
@@ -125,7 +134,7 @@ export default function AdminDashboard() {
             title: "Admin Settings",
             description: "Configure platform settings and defaults",
             icon: Settings,
-            link: "/admin-dashboard/settings",
+            link: "/admin/settings",
             stat: null,
             statLabel: null,
         },
@@ -133,7 +142,7 @@ export default function AdminDashboard() {
             title: "System Alerts",
             description: "Review system warnings and security logs",
             icon: Bell,
-            link: "/admin-dashboard/alerts",
+            link: "/admin/alerts",
             stat: stats.activeAlerts,
             statLabel: "Active Alerts",
         },

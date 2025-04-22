@@ -1,4 +1,4 @@
-// src/app/api/auth/invite-admin/route.ts
+// src/app/api/admin-auth/invite/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { createHash, randomBytes } from 'crypto';
 import { pool } from '@/lib/db';
@@ -55,27 +55,37 @@ export async function POST(req: NextRequest) {
             // Store the admin invitation in the database
             await client.query(
                 `INSERT INTO admin_invitations 
-         (name, email, token, expires, used, created_at, updated_at) 
-         VALUES ($1, $2, $3, $4, $5, NOW(), NOW())`,
+                 (name, email, token, expires, used, created_at, updated_at) 
+                 VALUES ($1, $2, $3, $4, $5, NOW(), NOW())`,
                 [name, email, setupToken, expiration, false]
             );
 
             // Generate the setup URL
             const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
-            const setupUrl = `${baseUrl}/auth/admin-setup?token=${setupToken}`;
+            const setupUrl = `${baseUrl}/admin/setup?token=${setupToken}`;
+            const dashboardUrl = `${baseUrl}/admin`; // Corrected admin dashboard URL
 
-            // Send email with the setup link
+            // Send email with the setup link and dashboard information
             await sendEmail({
                 to: email,
                 subject: 'Complete Your Admin Account Setup',
                 html: `
-          <h1>Admin Account Setup</h1>
-          <p>Hello ${name},</p>
-          <p>You have been invited to be an administrator for Lulai. Please click the link below to set up your password and complete your account registration:</p>
-          <p><a href="${setupUrl}">Complete Admin Setup</a></p>
-          <p>This link will expire in 24 hours.</p>
-          <p>If you did not request this invitation, please ignore this email.</p>
-        `,
+                    <h1>Admin Account Setup</h1>
+                    <p>Hello ${name},</p>
+                    <p>You have been invited to be an administrator for Lulai. Please click the link below to set up your password and complete your account registration:</p>
+                    <p><a href="${setupUrl}" style="display:inline-block; background-color:#4F46E5; color:white; padding:10px 20px; text-decoration:none; border-radius:5px; margin:15px 0;">Complete Account Setup</a></p>
+                    <p>This setup link will expire in 24 hours.</p>
+                    <h2>Next Steps</h2>
+                    <p>After setting up your password:</p>
+                    <ol>
+                        <li>You can access the admin dashboard at: <a href="${dashboardUrl}">${dashboardUrl}</a></li>
+                        <li>Use your email and the password you created to sign in</li>
+                        <li>Bookmark the dashboard link for easy access in the future</li>
+                    </ol>
+                    <p>If you did not request this invitation, please ignore this email.</p>
+                    <hr>
+                    <p style="color:#666; font-size:12px;">This is an automated email, please do not reply.</p>
+                `,
             });
 
             return NextResponse.json(

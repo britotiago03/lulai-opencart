@@ -4,7 +4,7 @@ import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { seedAdminIfNeeded } from "@/lib/seedAdmin";
-import React from "react"; // 👈 import here
+import React from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 

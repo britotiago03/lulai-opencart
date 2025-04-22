@@ -9,39 +9,56 @@ export async function seedAdminIfNeeded() {
 
     const client = await pool.connect();
     try {
+        // Check if any admin exists
         const existingAdmins = await client.query(
             `SELECT * FROM users WHERE role = 'admin' LIMIT 1`
         );
         if (existingAdmins.rows.length > 0) return;
 
+        // Check if there's a pending invitation
         const pending = await client.query(
             `SELECT * FROM admin_invitations WHERE email = $1 AND used = false AND expires > NOW()`,
             [ADMIN_EMAIL]
         );
         if (pending.rows.length > 0) return;
 
+        // Generate a token for the admin invitation
         const token = createHash('sha256').update(randomBytes(32)).digest('hex');
         const expiration = new Date();
         expiration.setHours(expiration.getHours() + 24);
 
+        // Store the invitation
         await client.query(
             `INSERT INTO admin_invitations (name, email, token, expires, used, created_at, updated_at)
              VALUES ($1, $2, $3, $4, $5, NOW(), NOW())`,
             [ADMIN_NAME, ADMIN_EMAIL, token, expiration, false]
         );
 
+        // Generate the setup URL using the admin setup path
         const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
-        const setupUrl = `${baseUrl}/auth/admin-setup?token=${token}`;
+        const setupUrl = `${baseUrl}/admin/setup?token=${token}`;
+        const dashboardUrl = `${baseUrl}/admin`; // Corrected admin dashboard URL
 
+        // Send the invitation email with improved formatting
         await sendEmail({
             to: ADMIN_EMAIL,
             subject: 'Complete Your Admin Account Setup',
             html: `
                 <h1>Admin Account Setup</h1>
                 <p>Hello ${ADMIN_NAME},</p>
-                <p>Click the link below to set your password:</p>
-                <a href="${setupUrl}">${setupUrl}</a>
-                <p>This link will expire in 24 hours.</p>
+                <p>You have been invited to be an administrator for Lulai. Please click the link below to set up your password and complete your account registration:</p>
+                <p><a href="${setupUrl}" style="display:inline-block; background-color:#4F46E5; color:white; padding:10px 20px; text-decoration:none; border-radius:5px; margin:15px 0;">Complete Account Setup</a></p>
+                <p>This setup link will expire in 24 hours.</p>
+                <h2>Next Steps</h2>
+                <p>After setting up your password:</p>
+                <ol>
+                    <li>You can access the admin dashboard at: <a href="${dashboardUrl}">${dashboardUrl}</a></li>
+                    <li>Use your email and the password you created to sign in</li>
+                    <li>Bookmark the dashboard link for easy access in the future</li>
+                </ol>
+                <p>If you did not request this invitation, please ignore this email.</p>
+                <hr>
+                <p style="color:#666; font-size:12px;">This is an automated email, please do not reply.</p>
             `
         });
 

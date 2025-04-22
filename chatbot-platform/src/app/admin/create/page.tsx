@@ -1,10 +1,10 @@
-// src/app/auth/create-admin/page.tsx
 "use client";
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import AdminSessionProvider from '@/components/admin/AdminSessionProvider';
 
-export default function CreateAdmin() {
+function CreateAdminContent() {
     const [name, setName] = useState('Admin User');
     const [email, setEmail] = useState('admin@lulai.com');
     const [token, setToken] = useState('create-admin-123456');
@@ -19,7 +19,8 @@ export default function CreateAdmin() {
         setMessage('');
 
         try {
-            const response = await fetch('/api/auth/invite-admin', {
+            // Update to use the new admin-auth/invite endpoint
+            const response = await fetch('/api/admin-auth/invite', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, email, token }),
@@ -40,7 +41,6 @@ export default function CreateAdmin() {
             } else {
                 setError('An unexpected error occurred');
             }
-            setLoading(false);
         } finally {
             setLoading(false);
         }
@@ -117,12 +117,20 @@ export default function CreateAdmin() {
                     </form>
 
                     <div className="mt-4 text-center">
-                        <Link href={`/auth/signin`} className="text-blue-500 hover:text-blue-400">
-                            Back to Sign In
+                        <Link href={`/admin/dashboard`} className="text-blue-500 hover:text-blue-400">
+                            Back to Admin Dashboard
                         </Link>
                     </div>
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function CreateAdminPage() {
+    return (
+        <AdminSessionProvider>
+            <CreateAdminContent />
+        </AdminSessionProvider>
     );
 }

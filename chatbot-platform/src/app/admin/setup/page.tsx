@@ -1,11 +1,10 @@
-// src/app/auth/admin-setup/page.tsx
 "use client";
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-export default function AdminSetup() {
+export default function AdminSetupPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -31,8 +30,13 @@ export default function AdminSetup() {
         // Validate token and get admin info
         const validateToken = async () => {
             try {
-                const response = await fetch(`/api/auth/validate-admin-token?token=${urlToken}`);
+                console.log("Validating token:", urlToken);
+
+                // Use the correct API path for token validation
+                const response = await fetch(`/api/admin-auth/validate-token?token=${urlToken}`);
                 const data = await response.json();
+
+                console.log("Token validation response:", data);
 
                 if (!response.ok) {
                     setError(data.message || 'Invalid token. This link may have expired.');
@@ -74,7 +78,10 @@ export default function AdminSetup() {
         setMessage('');
 
         try {
-            const response = await fetch('/api/auth/complete-admin-setup', {
+            console.log("Submitting admin setup with token:", token);
+
+            // Use the correct API path for completing setup
+            const response = await fetch('/api/admin-auth/complete-setup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -86,6 +93,7 @@ export default function AdminSetup() {
             });
 
             const data = await response.json();
+            console.log("Setup completion response:", data);
 
             if (!response.ok) {
                 setError(data.message || 'Failed to complete admin setup');
@@ -93,11 +101,11 @@ export default function AdminSetup() {
                 return;
             }
 
-            setMessage('Admin account created successfully! Redirecting to login...');
+            setMessage('Admin account created successfully! Redirecting to admin login...');
 
-            // Redirect to login after 2 seconds
+            // Redirect to admin login after 2 seconds
             setTimeout(() => {
-                router.push('/auth/signin');
+                router.push('/admin/signin');
             }, 2000);
 
         } catch (error) {
@@ -131,8 +139,8 @@ export default function AdminSetup() {
                             {error}
                         </div>
                         <div className="text-center mt-4">
-                            <Link href={`/auth/signin`} className="text-blue-500 hover:text-blue-400">
-                                Back to Sign In
+                            <Link href={`/admin/signin`} className="text-blue-500 hover:text-blue-400">
+                                Back to Admin Sign In
                             </Link>
                         </div>
                     </div>

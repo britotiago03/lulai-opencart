@@ -2,39 +2,73 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { AdminSidebar } from "@/components/admin-dashboard/AdminSidebar";
 import { MobileNav, useMobileNav } from "@/components/dashboard/MobileNav";
 import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
+import AdminSessionProvider from "@/components/admin/AdminSessionProvider";
 
-export default function AdminLayout({
-                                        children,
-                                    }: {
-    children: React.ReactNode;
-}) {
+// Content component that uses session
+function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     const { data: session, status } = useSession();
     const router = useRouter();
+    const pathname = usePathname();
     const [loading, setLoading] = useState(true);
     const { isOpen, isMobile, toggleAction } = useMobileNav();
 
+    // Define pages that don't require authentication
+    const publicAdminPages = ['/admin/setup', '/admin/signin'];
+
+    const isPublicPage = publicAdminPages.some(page =>
+        pathname === page || pathname.startsWith(`${page}?`));
+
     useEffect(() => {
+        console.log("Admin layout - Auth check - Path:", pathname);
+        console.log("Admin layout - Auth check - Status:", status);
+        console.log("Admin layout - Auth check - Is public:", isPublicPage);
+        console.log("Admin layout - Auth check - User:", session?.user);
+
+        // If this is a public admin page, don't check authentication
+        if (isPublicPage) {
+            console.log("Admin layout - Public page, skipping auth check");
+            setLoading(false);
+            return;
+        }
+
+        // For protected admin pages, check authentication
         if (status === "unauthenticated") {
-            router.push("/auth/signin");
+            console.log("Admin layout - Unauthenticated, redirecting to admin signin");
+            router.push("/admin/signin");
             return;
         }
 
         if (status === "authenticated") {
-            if (session?.user?.role !== "admin") {
+            // Check if the user is an admin
+            if (!session?.user?.isAdmin) {
+                console.log("Admin layout - Not admin, redirecting to user dashboard");
                 router.push("/dashboard");
                 return;
             }
+
+            console.log("Admin layout - Admin authenticated, proceeding");
             setLoading(false);
         }
-    }, [session, status, router]);
+    }, [session, status, router, pathname, isPublicPage]);
 
-    if (loading) {
+    // For public pages like setup and signin, just render the children directly without admin UI
+    if (isPublicPage) {
+        return <>{children}</>;
+    }
+
+    // Show loading state while checking authentication
+    if (status === "loading" || loading) {
         return <LoadingSkeleton />;
+    }
+
+    // Safety check - don't render admin UI for non-admins
+    if (status === "authenticated" && !session?.user?.isAdmin) {
+        return null; // Will redirect in useEffect
     }
 
     return (
@@ -71,5 +105,14 @@ export default function AdminLayout({
                 {children}
             </main>
         </div>
+    );
+}
+
+// Wrapper component with AdminSessionProvider
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+    return (
+        <AdminSessionProvider>
+            <AdminLayoutContent>{children}</AdminLayoutContent>
+        </AdminSessionProvider>
     );
 }

@@ -1,4 +1,4 @@
-// src/app/api/auth/validate-admin-token/route.ts
+// src/app/api/admin-auth/validate-token/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
 
@@ -19,9 +19,9 @@ export async function GET(req: NextRequest) {
             // Find the invitation by token
             const invitation = await client.query(
                 `SELECT * FROM admin_invitations 
-         WHERE token = $1 
-         AND used = false 
-         AND expires > NOW()`,
+                 WHERE token = $1 
+                 AND used = false 
+                 AND expires > NOW()`,
                 [token]
             );
 

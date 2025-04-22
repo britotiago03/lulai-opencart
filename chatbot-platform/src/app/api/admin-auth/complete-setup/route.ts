@@ -1,4 +1,4 @@
-// src/app/api/auth/complete-admin-setup/route.ts
+// src/app/api/admin-auth/complete-setup/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
 import bcrypt from 'bcryptjs';
@@ -28,10 +28,10 @@ export async function POST(req: NextRequest) {
             // Find the invitation by token
             const invitation = await client.query(
                 `SELECT * FROM admin_invitations 
-         WHERE token = $1 
-         AND email = $2
-         AND used = false 
-         AND expires > NOW()`,
+                 WHERE token = $1 
+                 AND email = $2
+                 AND used = false 
+                 AND expires > NOW()`,
                 [token, email]
             );
 
@@ -75,6 +75,12 @@ export async function POST(req: NextRequest) {
                 );
 
                 await client.query('COMMIT');
+
+                // Return success with redirect information
+                return NextResponse.json({
+                    message: 'Admin account created successfully',
+                    redirect: '/admin/signin'
+                });
             } catch (dbError) {
                 await client.query('ROLLBACK');
                 console.error("Transaction error:", dbError);
@@ -83,10 +89,6 @@ export async function POST(req: NextRequest) {
                     { status: 500 }
                 );
             }
-
-            return NextResponse.json({
-                message: 'Admin account created successfully',
-            });
         } finally {
             client.release();
         }
