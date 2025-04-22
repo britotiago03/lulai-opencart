@@ -1,4 +1,4 @@
-// src/app/admin-dashboard/conversations/page.tsx
+// src/app/admin/conversations/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";

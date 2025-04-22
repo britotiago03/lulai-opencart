@@ -1,4 +1,4 @@
-// src/app/admin-dashboard/chatbots/page.tsx
+// src/app/admin/chatbots/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";

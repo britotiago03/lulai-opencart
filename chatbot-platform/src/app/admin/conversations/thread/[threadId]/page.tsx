@@ -1,4 +1,4 @@
-// src/app/admin-dashboard/conversations/thread/[threadId]/page.tsx
+// src/app/admin/conversations/thread/[threadId]/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
