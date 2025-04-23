@@ -103,9 +103,9 @@ export default function AdminSetupPage() {
 
             setMessage('Admin account created successfully! Redirecting to admin login...');
 
-            // Redirect to admin login after 2 seconds
+            // Redirect to admin login after 2 seconds with from=setup parameter
             setTimeout(() => {
-                router.push('/admin/signin');
+                router.push('/admin/signin?from=setup');
             }, 2000);
 
         } catch (error) {
