@@ -6,56 +6,59 @@ import { getToken } from 'next-auth/jwt';
 export async function middleware(request: NextRequest) {
     const path = request.nextUrl.pathname;
 
+    // Debug logging
+    console.log(`Middleware running for path: ${path}`);
+
     // Only process admin paths
     if (!path.startsWith('/admin')) {
+        console.log('Not an admin path, skipping middleware');
         return NextResponse.next();
     }
 
-    // Get the setup token from the URL if it exists
+    // Get URL parameters for token validation
     const url = new URL(request.url);
     const setupToken = url.searchParams.get('token');
+    const fromSetup = url.searchParams.get('from') === 'setup';
 
-    // Handle the setup page - only accessible with a valid token parameter
-    if (path.startsWith('/admin/setup')) {
-        // Allow access if there's a token parameter (we'll validate it in the page)
-        if (setupToken) {
-            return NextResponse.next();
-        }
-        // If someone tries to access /admin/setup without a token, show 404
-        return NextResponse.redirect(new URL('/404', request.url));
+    console.log('URL params:', {
+        path,
+        hasSetupToken: !!setupToken,
+        fromSetup
+    });
+
+    // Special handling for /admin/setup with token parameter
+    if (path === '/admin/setup' && setupToken) {
+        console.log('Access granted: Setup page with token');
+        return NextResponse.next();
     }
 
-    // Handle the signin page - only accessible for returning admins with valid session
-    // or if it's a callback from the setup process
-    if (path.startsWith('/admin/signin')) {
-        const token = await getToken({
-            req: request,
-            secret: process.env.NEXTAUTH_SECRET,
-        });
-
-        const fromSetup = url.searchParams.get('from') === 'setup';
-
-        // Allow access if user is an admin, or coming from setup
-        if ((token && token.role === 'admin') || fromSetup) {
-            return NextResponse.next();
-        }
-        // Otherwise show 404
-        return NextResponse.redirect(new URL('/404', request.url));
+    // Allow access to signin if coming from setup
+    if (path === '/admin/signin' && fromSetup) {
+        console.log('Access granted: Signin page from setup');
+        return NextResponse.next();
     }
 
-    // For all other admin paths, require admin authentication
+    // For all other admin routes, check for admin authentication
     const token = await getToken({
         req: request,
         secret: process.env.NEXTAUTH_SECRET,
     });
 
-    // If no token or the user is not an admin, show 404
-    if (!token || token.role !== 'admin') {
-        return NextResponse.redirect(new URL('/404', request.url));
+    console.log('Authentication token:', {
+        hasToken: !!token,
+        tokenRole: token?.role || 'none',
+        isAdmin: token?.role === 'admin'
+    });
+
+    // If authenticated as admin, allow access
+    if (token && token.role === 'admin') {
+        console.log('Access granted: Authenticated admin user');
+        return NextResponse.next();
     }
 
-    // Allow access if the user is authenticated and is an admin
-    return NextResponse.next();
+    // Otherwise, show 404 to hide the existence of the admin area
+    console.log('Access denied: Redirecting to 404');
+    return NextResponse.redirect(new URL('/404', request.url));
 }
 
 // Configure the middleware to run on specific paths

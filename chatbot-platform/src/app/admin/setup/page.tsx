@@ -3,12 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { useSession } from 'next-auth/react';
 
 export default function AdminSetupPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { status } = useSession();
 
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -19,13 +17,6 @@ export default function AdminSetupPage() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [validatingToken, setValidatingToken] = useState(true);
-
-    // If user is already authenticated, redirect to admin dashboard
-    useEffect(() => {
-        if (status === "authenticated") {
-            router.push('/admin/dashboard');
-        }
-    }, [status, router]);
 
     useEffect(() => {
         // Get token from URL
@@ -66,7 +57,7 @@ export default function AdminSetupPage() {
         };
 
         void validateToken();
-    }, [searchParams, router]);
+    }, [searchParams]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -112,9 +103,9 @@ export default function AdminSetupPage() {
 
             setMessage('Admin account created successfully! Redirecting to admin login...');
 
-            // Redirect to admin login after 2 seconds with a parameter indicating it's from setup
+            // Redirect to admin login after 2 seconds
             setTimeout(() => {
-                router.push('/admin/signin?from=setup');
+                router.push('/admin/signin');
             }, 2000);
 
         } catch (error) {
