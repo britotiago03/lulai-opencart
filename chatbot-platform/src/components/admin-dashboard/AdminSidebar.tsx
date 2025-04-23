@@ -10,12 +10,9 @@ import {
     Bell,
     Settings,
     Layout,
-    Database,
-    User,
     LogOut,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
-import Image from "next/image";
 
 export function AdminSidebar({ onClose }: { onClose?: () => void }) {
     const pathname = usePathname();
@@ -41,14 +38,7 @@ export function AdminSidebar({ onClose }: { onClose?: () => void }) {
     return (
         <div className="flex flex-col h-full bg-[#0f1729] text-white border-r border-gray-800">
             <div className="p-4 border-b border-gray-800 flex items-center justify-between">
-                <Link href="/admin" className="flex items-center space-x-2">
-                    <Image
-                        src="/images/logo.png"
-                        alt="LulAI Logo"
-                        width={36}
-                        height={36}
-                        className="w-9 h-9"
-                    />
+                <Link href={`/admin`} className="flex items-center space-x-2">
                     <span className="font-bold text-xl">LulAI Admin</span>
                 </Link>
             </div>
