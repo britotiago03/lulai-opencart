@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { RefreshCw } from "lucide-react";
 import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
 import { TimeRangeSelector } from "@/components/admin-dashboard/analytics/TimeRangeSelector";
@@ -10,6 +8,7 @@ import { KeyMetricsGrid } from "@/components/admin-dashboard/analytics/KeyMetric
 import { ChartSection } from "@/components/admin-dashboard/analytics/ChartSection";
 import { ChatbotTable } from "@/components/admin-dashboard/analytics/ChatbotTable";
 import { ErrorCard } from "@/components/admin-dashboard/analytics/ErrorCard";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 // Admin-specific chart wrappers with proper props
 import AdminLineChart from "@/components/admin-dashboard/analytics/charts/AdminLineChart";
@@ -46,8 +45,8 @@ interface AdminAnalyticsData {
 type TopPerformingBot = AdminAnalyticsData["topPerformingChatbots"][number];
 
 export default function AdminAnalyticsPage() {
-    const { data: session, status } = useSession();
-    const router = useRouter();
+    // Use admin auth hook instead of regular session
+    const { isLoading, isAdmin } = useAdminAuth();
 
     const [loading, setLoading] = useState(true);
     const [analyticsData, setAnalyticsData] = useState<AdminAnalyticsData | null>(null);
@@ -89,24 +88,26 @@ export default function AdminAnalyticsPage() {
     }, [timeRange]);
 
     useEffect(() => {
-        if (status === "unauthenticated") {
-            router.push("/auth/signin");
-            return;
+        // Only fetch analytics after confirming admin status
+        if (!isLoading && isAdmin) {
+            void fetchAnalyticsData();
         }
+    }, [isLoading, isAdmin, fetchAnalyticsData]);
 
-        if (status === "authenticated" && session?.user?.role !== "admin") {
-            router.push("/dashboard");
-            return;
-        }
+    // Show loading while admin auth is being checked
+    if (isLoading || loading) {
+        return <LoadingSkeleton />;
+    }
 
-        void fetchAnalyticsData();
-    }, [status, session, router, fetchAnalyticsData]);
+    // Safety check - don't render for non-admins
+    if (!isAdmin) {
+        return null; // The hook will handle redirection
+    }
 
     const refreshData = () => {
         void fetchAnalyticsData();
     };
 
-    if (loading) return <LoadingSkeleton />;
     if (error || !analyticsData) return <ErrorCard error={error} />;
 
     return (

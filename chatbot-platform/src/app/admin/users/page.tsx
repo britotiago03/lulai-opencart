@@ -2,8 +2,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
 import { UserData } from "@/types/user";
@@ -11,10 +9,11 @@ import UserTable from "@/components/admin-dashboard/users/UserTable";
 import UserControls from "@/components/admin-dashboard/users/UserControls";
 import EmptyUserState from "@/components/admin-dashboard/users/EmptyUserState";
 import ErrorState from "@/components/admin-dashboard/users/ErrorState";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 export default function UsersPage() {
-    const { data: session, status } = useSession();
-    const router = useRouter();
+    // Use admin auth hook instead of regular session
+    const { isLoading, isAdmin } = useAdminAuth();
     const [loading, setLoading] = useState(true);
     const [users, setUsers] = useState<UserData[]>([]);
     const [search, setSearch] = useState("");
@@ -22,53 +21,52 @@ export default function UsersPage() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (status === "unauthenticated") {
-            router.push("/auth/signin");
-            return;
-        }
+        // Only fetch users after confirming admin status
+        if (!isLoading && isAdmin) {
+            const fetchUsers = async () => {
+                try {
+                    setLoading(true);
+                    const response = await fetch('/api/admin/users');
 
-        if (status === "authenticated" && session?.user?.role !== "admin") {
-            router.push("/dashboard");
-            return;
-        }
+                    if (!response.ok) {
+                        setError('Failed to fetch users');
+                        return;
+                    }
 
-        const fetchUsers = async () => {
-            try {
-                setLoading(true);
-                const response = await fetch('/api/admin/users');
-
-                if (!response.ok) {
-                    setError('Failed to fetch users');
-                    return;
+                    const data = await response.json();
+                    setUsers(data);
+                } catch (err) {
+                    console.error("Error fetching users:", err);
+                    setError("Failed to load users. Please try again.");
+                } finally {
+                    setLoading(false);
                 }
+            };
 
-                const data = await response.json();
-                setUsers(data);
-            } catch (err) {
-                console.error("Error fetching users:", err);
-                setError("Failed to load users. Please try again.");
-            } finally {
-                setLoading(false);
-            }
-        };
+            void fetchUsers();
+        }
+    }, [isLoading, isAdmin]);
 
-        void fetchUsers();
-    }, [session, status, router]);
+    // Show loading while admin auth is being checked
+    if (isLoading || loading) {
+        return <LoadingSkeleton />;
+    }
+
+    // Safety check - don't render for non-admins
+    if (!isAdmin) {
+        return null; // The hook will handle redirection
+    }
 
     // Filter users based on search and role filter
     const filteredUsers = users.filter(user => {
         const matchesSearch = search === "" ||
-            user.name.toLowerCase().includes(search.toLowerCase()) ||
+            user.name?.toLowerCase().includes(search.toLowerCase()) ||
             user.email.toLowerCase().includes(search.toLowerCase());
 
         const matchesFilter = filter === "all" || user.role === filter;
 
         return matchesSearch && matchesFilter;
     });
-
-    if (loading) {
-        return <LoadingSkeleton />;
-    }
 
     return (
         <div className="max-w-7xl mx-auto p-6">

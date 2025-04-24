@@ -2,8 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
@@ -12,90 +11,90 @@ import EmptyConversation from "@/components/admin-dashboard/conversations/EmptyC
 import MessageList from "@/components/admin-dashboard/conversations/MessageList";
 import ConversationSummary from "@/components/admin-dashboard/conversations/ConversationSummary";
 import { Message, ChatbotInfo } from "@/types/conversation";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 export default function AdminConversationThreadPage() {
     const { threadId } = useParams();
-    const router = useRouter();
-    const { data: session, status } = useSession();
+    // Use admin auth hook instead of regular session
+    const { isLoading, isAdmin } = useAdminAuth();
     const [loading, setLoading] = useState(true);
     const [messages, setMessages] = useState<Message[]>([]);
     const [chatbotInfo, setChatbotInfo] = useState<ChatbotInfo | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (status === "unauthenticated") {
-            router.push("/auth/signin");
-            return;
-        }
-
-        if (status === "authenticated" && session?.user?.role !== "admin") {
-            router.push("/dashboard");
-            return;
-        }
-
-        const fetchConversationThread = async () => {
-            try {
-                setLoading(true);
-
-                if (!threadId) {
-                    setError("Thread ID is required");
-                    return;
-                }
-
-                // Split the threadId to get user_id and api_key
-                const [userId, apiKey] = (threadId as string).split('-');
-
-                if (!userId || !apiKey) {
-                    setError("Invalid thread ID format");
-                    return;
-                }
-
-                // Fetch all messages for this user and chatbot
-                const response = await fetch(`/api/conversations?userId=${userId}&apiKey=${apiKey}`);
-
-                if (!response.ok) {
-                    setError("Failed to fetch conversation thread");
-                    return;
-                }
-
-                const data = await response.json();
-
-                // Sort messages by timestamp
-                const sortedMessages = Array.isArray(data)
-                    ? data.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
-                    : [];
-
-                setMessages(sortedMessages);
-
-                // Fetch chatbot information
+        // Only fetch conversation thread after confirming admin status
+        if (!isLoading && isAdmin) {
+            const fetchConversationThread = async () => {
                 try {
-                    const chatbotResponse = await fetch(`/api/chatbots?apiKey=${apiKey}`);
-                    if (chatbotResponse.ok) {
-                        const chatbotData = await chatbotResponse.json();
-                        if (chatbotData && chatbotData.length > 0) {
-                            setChatbotInfo(chatbotData[0]);
-                        }
+                    setLoading(true);
+
+                    if (!threadId) {
+                        setError("Thread ID is required");
+                        return;
                     }
-                } catch (chatbotError) {
-                    console.error("Error fetching chatbot info:", chatbotError);
+
+                    // Split the threadId to get user_id and api_key
+                    const [userId, apiKey] = (threadId as string).split('-');
+
+                    if (!userId || !apiKey) {
+                        setError("Invalid thread ID format");
+                        return;
+                    }
+
+                    // Fetch all messages for this user and chatbot
+                    const response = await fetch(`/api/conversations?userId=${userId}&apiKey=${apiKey}`);
+
+                    if (!response.ok) {
+                        setError("Failed to fetch conversation thread");
+                        return;
+                    }
+
+                    const data = await response.json();
+
+                    // Sort messages by timestamp
+                    const sortedMessages = Array.isArray(data)
+                        ? data.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+                        : [];
+
+                    setMessages(sortedMessages);
+
+                    // Fetch chatbot information
+                    try {
+                        const chatbotResponse = await fetch(`/api/chatbots?apiKey=${apiKey}`);
+                        if (chatbotResponse.ok) {
+                            const chatbotData = await chatbotResponse.json();
+                            if (chatbotData && chatbotData.length > 0) {
+                                setChatbotInfo(chatbotData[0]);
+                            }
+                        }
+                    } catch (chatbotError) {
+                        console.error("Error fetching chatbot info:", chatbotError);
+                    }
+                } catch (err) {
+                    console.error("Error fetching conversation thread:", err);
+                    setError("Failed to load conversation thread. Please try again.");
+                } finally {
+                    setLoading(false);
                 }
-            } catch (err) {
-                console.error("Error fetching conversation thread:", err);
-                setError("Failed to load conversation thread. Please try again.");
-            } finally {
+            };
+
+            fetchConversationThread().catch(err => {
+                console.error("Unhandled error in fetchConversationThread:", err);
+                setError("An unexpected error occurred. Please try again.");
                 setLoading(false);
-            }
-        };
+            });
+        }
+    }, [threadId, isLoading, isAdmin]);
 
-        fetchConversationThread().catch(err => {
-            console.error("Unhandled error in fetchConversationThread:", err);
-            setError("An unexpected error occurred. Please try again.");
-            setLoading(false);
-        });
-    }, [threadId, session, status, router]);
-
-    if (loading) {
+    // Show loading while admin auth is being checked
+    if (isLoading || loading) {
         return <LoadingSkeleton />;
+    }
+
+    // Safety check - don't render for non-admins
+    if (!isAdmin) {
+        return null; // The hook will handle redirection
     }
 
     if (error) {
