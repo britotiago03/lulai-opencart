@@ -18,17 +18,25 @@ export async function middleware(request: NextRequest) {
     // Get URL parameters for token validation
     const url = new URL(request.url);
     const setupToken = url.searchParams.get('token');
+    const signinToken = url.searchParams.get('signinToken');
     const fromSetup = url.searchParams.get('from') === 'setup';
 
     console.log('URL params:', {
         path,
         hasSetupToken: !!setupToken,
+        hasSigninToken: !!signinToken,
         fromSetup
     });
 
     // Special handling for /admin/setup with token parameter
     if (path === '/admin/setup' && setupToken) {
         console.log('Access granted: Setup page with token');
+        return NextResponse.next();
+    }
+
+    // Special handling for /admin/signin with signinToken
+    if (path === '/admin/signin' && signinToken) {
+        console.log('Access granted: Signin page with token');
         return NextResponse.next();
     }
 
@@ -42,7 +50,7 @@ export async function middleware(request: NextRequest) {
     const token = await getToken({
         req: request,
         secret: process.env.NEXTAUTH_SECRET,
-        cookieName: "admin-session-token"
+        cookieName: "admin-session-token"  // Important to use the admin cookie name
     });
 
     console.log('Authentication token:', {
@@ -54,6 +62,18 @@ export async function middleware(request: NextRequest) {
     // If authenticated as admin, allow access
     if (token && token.role === 'admin') {
         console.log('Access granted: Authenticated admin user');
+        return NextResponse.next();
+    }
+
+    // Special case: Callback URLs from NextAuth
+    if (path === '/admin/signin' && url.searchParams.has('callbackUrl')) {
+        console.log('Access granted: Signin callback');
+        return NextResponse.next();
+    }
+
+    // Allow basic access to the /api/admin-auth endpoints for auth flows
+    if (path.startsWith('/api/admin-auth/')) {
+        console.log('Access granted: Admin auth API');
         return NextResponse.next();
     }
 

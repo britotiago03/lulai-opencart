@@ -73,6 +73,16 @@ CREATE TABLE IF NOT EXISTS admin_invitations (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Create admin_signin_tokens table
+CREATE TABLE IF NOT EXISTS admin_signin_tokens (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) NOT NULL,
+    token VARCHAR(255) NOT NULL UNIQUE,
+    expires TIMESTAMP NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    used_at TIMESTAMP
+);
+
 -- Add indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_conversations_api_key ON conversations(api_key);
 CREATE INDEX IF NOT EXISTS idx_conversations_user_id ON conversations(user_id);
@@ -80,3 +90,5 @@ CREATE INDEX IF NOT EXISTS idx_chatbots_user_id ON chatbots(user_id);
 CREATE INDEX IF NOT EXISTS idx_chatbots_api_key ON chatbots(api_key);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_admin_invitations_token ON admin_invitations(token);
+CREATE INDEX IF NOT EXISTS idx_admin_signin_tokens_token ON admin_signin_tokens(token);
+CREATE INDEX IF NOT EXISTS idx_admin_signin_tokens_email ON admin_signin_tokens(email);

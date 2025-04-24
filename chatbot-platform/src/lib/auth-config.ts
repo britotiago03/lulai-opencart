@@ -19,6 +19,8 @@ async function validateUserCredentials(email: string, password: string, userType
     try {
         const client = await pool.connect();
         try {
+            console.log(`Validating ${userType} credentials for ${email}`);
+
             const result = await client.query(
                 "SELECT * FROM users WHERE email = $1 AND role = $2",
                 [email, userType]
@@ -27,6 +29,7 @@ async function validateUserCredentials(email: string, password: string, userType
             const user = result.rows[0];
 
             if (!user) {
+                console.log(`No ${userType} found with email ${email}`);
                 return null;
             }
 
@@ -36,9 +39,11 @@ async function validateUserCredentials(email: string, password: string, userType
             );
 
             if (!passwordMatch) {
+                console.log(`Password mismatch for ${email}`);
                 return null;
             }
 
+            console.log(`Successfully authenticated ${userType}: ${email}`);
             return {
                 id: user.id,
                 name: user.name,

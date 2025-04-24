@@ -48,22 +48,48 @@ export async function POST(req: NextRequest) {
             // Generate a unique setup token
             const setupToken = generateSecureToken();
 
+            // Generate a signin token
+            const signinToken = generateSecureToken();
+
             // Set expiration for 24 hours from now
             const expiration = new Date();
             expiration.setHours(expiration.getHours() + 24);
 
-            // Store the admin invitation in the database
-            await client.query(
-                `INSERT INTO admin_invitations 
-                 (name, email, token, expires, used, created_at, updated_at) 
-                 VALUES ($1, $2, $3, $4, $5, NOW(), NOW())`,
-                [name, email, setupToken, expiration, false]
-            );
+            // Start a transaction
+            await client.query('BEGIN');
+
+            try {
+                // Store the admin invitation in the database
+                await client.query(
+                    `INSERT INTO admin_invitations 
+                     (name, email, token, expires, used, created_at, updated_at) 
+                     VALUES ($1, $2, $3, $4, $5, NOW(), NOW())`,
+                    [name, email, setupToken, expiration, false]
+                );
+
+                // Store the signin token
+                await client.query(
+                    `INSERT INTO admin_signin_tokens 
+                     (email, token, expires, created_at) 
+                     VALUES ($1, $2, $3, NOW())`,
+                    [email, signinToken, expiration]
+                );
+
+                await client.query('COMMIT');
+            } catch (dbError) {
+                await client.query('ROLLBACK');
+                console.error('Database error during invitation creation:', dbError);
+                return NextResponse.json(
+                    { message: 'Database error occurred during invitation creation' },
+                    { status: 500 }
+                );
+            }
 
             // Generate the setup URL
             const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
             const setupUrl = `${baseUrl}/admin/setup?token=${setupToken}`;
-            const dashboardUrl = `${baseUrl}/admin`; // Corrected admin dashboard URL
+            const dashboardUrl = `${baseUrl}/admin`;
+            const signinUrl = `${baseUrl}/admin/signin?signinToken=${signinToken}`;
 
             // Send email with the setup link and dashboard information
             await sendEmail({
@@ -80,7 +106,8 @@ export async function POST(req: NextRequest) {
                     <ol>
                         <li>You can access the admin dashboard at: <a href="${dashboardUrl}">${dashboardUrl}</a></li>
                         <li>Use your email and the password you created to sign in</li>
-                        <li>Bookmark the dashboard link for easy access in the future</li>
+                        <li>If you are signed out, you can use this secure admin signin link: <a href="${signinUrl}">Admin Sign In</a></li>
+                        <li>Bookmark this signin link for easy access in the future</li>
                     </ol>
                     <p>If you did not request this invitation, please ignore this email.</p>
                     <hr>
