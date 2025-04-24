@@ -22,11 +22,16 @@ function AdminSignInContent() {
         setError("");
 
         try {
+            console.log("Admin login attempt with:", email);
+
             const result = await signIn("admin-credentials", {
                 redirect: false,
                 email,
                 password,
+                callbackUrl: "/admin" // Explicitly set callback URL
             });
+
+            console.log("Admin login result:", result);
 
             if (result?.error) {
                 setError("Invalid admin credentials");
@@ -34,9 +39,13 @@ function AdminSignInContent() {
                 return;
             }
 
-            router.push("/admin");
-            router.refresh();
-        } catch {
+            // Add a slight delay to ensure session is established
+            console.log("Login successful, redirecting after delay...");
+            setTimeout(() => {
+                router.push("/admin");
+            }, 1000);
+        } catch (error) {
+            console.error("Admin login error:", error);
             setError("An error occurred during sign in");
             setIsLoading(false);
         }
