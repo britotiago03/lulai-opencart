@@ -1,16 +1,16 @@
 // /app/api/chatbots/[id]/regenerate-api-key/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../../../auth/[...nextauth]/route";
+import { userAuthOptions } from "@/lib/auth-config";
 import { pool } from "@/lib/db";
 import crypto from "crypto";
 
 export async function POST(
-    req: NextRequest,
+    _req: NextRequest,
     { params }: { params: { id: string } }
 ) {
     try {
-        const session = await getServerSession(authOptions);
+        const session = await getServerSession(userAuthOptions);
 
         if (!session) {
             return NextResponse.json(
@@ -24,7 +24,7 @@ export async function POST(
 
         try {
             // Verify ownership
-            let query = "SELECT id, api_key FROM chatbots WHERE id = $1";
+            let query = "SELECT id FROM chatbots WHERE id = $1";
             const queryParams = [chatbotId];
 
             if (session.user.role !== "admin") {
@@ -40,8 +40,6 @@ export async function POST(
                     { status: 404 }
                 );
             }
-
-            const oldApiKey = result.rows[0].api_key;
 
             // Generate a new API key
             const newApiKey = crypto.randomBytes(16).toString("hex");

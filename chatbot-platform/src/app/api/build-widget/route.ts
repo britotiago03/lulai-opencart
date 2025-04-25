@@ -5,7 +5,7 @@ import path from 'path';
 import crypto from 'crypto';
 import JavaScriptObfuscator from 'javascript-obfuscator';
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../auth/[...nextauth]/route";
+import { userAuthOptions } from "@/lib/auth-config";
 
 interface WidgetConfig {
     widgetConfig: {
@@ -22,7 +22,7 @@ interface WidgetConfig {
 export async function POST(request: NextRequest) {
 
     try {
-        const session = await getServerSession(authOptions);
+        const session = await getServerSession(userAuthOptions);
 
         if (!session) {
             return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -50,7 +50,8 @@ export async function POST(request: NextRequest) {
         try {
             await fs.access(templatePath);
             console.log('Template file found:', templatePath);
-        } catch (accessError) {
+        } catch {
+            // Error parameter intentionally omitted
             console.error('Template file not found:', templatePath);
             return NextResponse.json({
                 message: 'Widget template file is missing',

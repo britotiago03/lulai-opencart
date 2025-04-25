@@ -1,13 +1,13 @@
 // src/app/api/conversations/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../auth/[...nextauth]/route";
+import { userAuthOptions } from "@/lib/auth-config";
 import { pool } from "@/lib/db";
 
 // GET: Retrieve conversations for a specific chatbot or user
 export async function GET(req: NextRequest) {
     try {
-        const session = await getServerSession(authOptions);
+        const session = await getServerSession(userAuthOptions);
 
         if (!session) {
             return NextResponse.json(

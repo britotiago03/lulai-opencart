@@ -1,15 +1,15 @@
 // src/app/api/chatbots/[id]/widget/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../../../auth/[...nextauth]/route";
+import { userAuthOptions } from "@/lib/auth-config";
 import { pool } from "@/lib/db";
 
 export async function GET(
-    req: NextRequest,
+    _req: NextRequest,
     { params }: { params: { id: string } }
 ) {
     try {
-        const session = await getServerSession(authOptions);
+        const session = await getServerSession(userAuthOptions);
 
         if (!session) {
             return NextResponse.json(
@@ -68,7 +68,7 @@ export async function PUT(
     { params }: { params: { id: string } }
 ) {
     try {
-        const session = await getServerSession(authOptions);
+        const session = await getServerSession(userAuthOptions);
 
         if (!session) {
             return NextResponse.json(
