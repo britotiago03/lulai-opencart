@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { pool } from '@/lib/db';
+import { v4 as uuidv4 } from 'uuid';
 
 export async function POST(req: Request) {
     try {
@@ -38,10 +39,13 @@ export async function POST(req: Request) {
         // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Create new user
+        // Generate a unique ID for the email signup user
+        const userId = `email_${uuidv4()}`;
+
+        // Create new user with generated ID
         await pool.query(
-            'INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4)',
-            [name, email, hashedPassword, 'client']
+            'INSERT INTO users (id, name, email, password, role) VALUES ($1, $2, $3, $4, $5)',
+            [userId, name, email, hashedPassword, 'client']
         );
 
         return NextResponse.json(

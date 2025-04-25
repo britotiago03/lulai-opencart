@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
 import bcrypt from 'bcryptjs';
+import { v4 as uuidv4 } from 'uuid'; // You may need to install this package if not available
 
 export async function POST(req: NextRequest) {
     try {
@@ -58,14 +59,17 @@ export async function POST(req: NextRequest) {
             // Hash the password
             const hashedPassword = await bcrypt.hash(password, 10);
 
+            // Generate a unique ID for the admin user
+            const adminId = `admin_${uuidv4()}`;
+
             // Start a transaction
             await client.query('BEGIN');
 
             try {
-                // Create the admin user
+                // Create the admin user with a generated ID
                 await client.query(
-                    'INSERT INTO users (name, email, password, role, created_at) VALUES ($1, $2, $3, $4, NOW())',
-                    [name, email, hashedPassword, 'admin']
+                    'INSERT INTO users (id, name, email, password, role, created_at) VALUES ($1, $2, $3, $4, $5, NOW())',
+                    [adminId, name, email, hashedPassword, 'admin']
                 );
 
                 // Mark the invitation as used

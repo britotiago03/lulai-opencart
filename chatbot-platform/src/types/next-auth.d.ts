@@ -8,6 +8,7 @@ declare module "next-auth" {
         email: string;
         role: string;
         isAdmin?: boolean;
+        image?: string | null; // Added for Google profile images
     }
 
     interface Session {
