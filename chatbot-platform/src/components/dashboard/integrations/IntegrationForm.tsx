@@ -4,7 +4,7 @@ import FormStepper from "./FormStepper";
 import PlatformSelection from "./PlatformSelection";
 import StoreDetailsForm from "./StoreDetailsForm";
 import CustomPromptForm from "./CustomPromptForm";
-import WidgetCustomization from "./WidgetCustomization";
+import WidgetCustomization from "./widget/WidgetCustomization";
 import BuildIntegration from "./BuildIntegration";
 import StepNavigation from "./StepNavigation";
 
