@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, MessageSquare, BarChart2, Settings, Bell, Database } from "lucide-react";
+import { Users, MessageSquare, BarChart2, Settings, Bell, CreditCard } from "lucide-react";
 import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 
@@ -23,16 +23,41 @@ export default function AdminDashboard() {
         if (!isLoading && isAdmin) {
             const fetchStats = async () => {
                 try {
-                    // Fetch real data or use dummy data for now
+                    // Fetch data from existing API endpoints
+                    const [usersCountRes, chatbotsRes, analyticsRes] = await Promise.all([
+                        fetch('/api/admin/users/count'),
+                        fetch('/api/admin/chatbots'),
+                        fetch('/api/admin/analytics')
+                    ]);
+
+                    const [usersCount, chatbots, analytics] = await Promise.all([
+                        usersCountRes.json(),
+                        chatbotsRes.json(),
+                        analyticsRes.json()
+                    ]);
+
+                    // Define interface for chatbot objects
+                    interface Chatbot {
+                        id: string | number;
+                        name: string;
+                        status: string;
+                        userId: string | number;
+                        userName: string;
+                        userEmail: string;
+                        // Other properties may exist, but we only need status for filtering
+                    }
+
+                    // Extract relevant stats from the API responses and properly type the chatbots
                     setStats({
-                        totalUsers: 10,
-                        activeSubscriptions: 5,
-                        totalChatbots: 12,
-                        totalConversations: 142,
-                        activeAlerts: 0,
+                        totalUsers: usersCount.count,
+                        activeSubscriptions: (chatbots as Chatbot[]).filter(bot => bot.status === 'active').length,
+                        totalChatbots: chatbots.length,
+                        totalConversations: analytics.totalConversations,
+                        activeAlerts: 0, // Currently no alert system in the provided APIs
                     });
                 } catch (error) {
                     console.error("Error fetching admin stats:", error);
+                    // Optionally show error state to the user
                 } finally {
                     setFetchingStats(false);
                 }
@@ -63,15 +88,15 @@ export default function AdminDashboard() {
         },
         {
             title: "Subscription Management",
-            description: "Track payments, plans, and renewals",
-            icon: Database,
+            description: "Track payments, plans, and billing",
+            icon: CreditCard,
             link: "/admin/subscriptions",
             stat: stats.activeSubscriptions,
             statLabel: "Active Subscriptions",
         },
         {
             title: "Chatbot Monitoring",
-            description: "Monitor all chatbots across the platform",
+            description: "Monitor all active chatbots across the platform",
             icon: MessageSquare,
             link: "/admin/chatbots",
             stat: stats.totalChatbots,
@@ -91,7 +116,7 @@ export default function AdminDashboard() {
             icon: BarChart2,
             link: "/admin/analytics",
             stat: stats.totalConversations,
-            statLabel: "Total Conversations",
+            statLabel: "All Interactions",
         },
         {
             title: "Admin Settings",

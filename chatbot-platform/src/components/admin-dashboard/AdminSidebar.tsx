@@ -1,4 +1,4 @@
-// src/components/admin.dashboard/AdminSidebar.tsx
+// src/components/admin-dashboard/AdminSidebar.tsx
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -11,6 +11,7 @@ import {
     Settings,
     Layout,
     LogOut,
+    CreditCard,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
@@ -18,8 +19,9 @@ export function AdminSidebar({ onClose }: { onClose?: () => void }) {
     const pathname = usePathname();
 
     const links = [
-        { name: "Dashboard", href: "/admin", icon: Layout },
+        { name: "Dashboard", href: "/admin", icon: Layout, exactMatch: true },
         { name: "User Management", href: "/admin/users", icon: Users },
+        { name: "Subscriptions", href: "/admin/subscriptions", icon: CreditCard },
         { name: "Chatbots", href: "/admin/chatbots", icon: MessageSquare },
         { name: "Conversations", href: "/admin/conversations", icon: MessageCircle },
         { name: "Analytics", href: "/admin/analytics", icon: BarChart2 },
@@ -27,7 +29,10 @@ export function AdminSidebar({ onClose }: { onClose?: () => void }) {
         { name: "Settings", href: "/admin/settings", icon: Settings },
     ];
 
-    const isActive = (path: string) => {
+    const isActive = (path: string, exactMatch = false) => {
+        if (exactMatch) {
+            return pathname === path;
+        }
         return pathname === path || pathname.startsWith(`${path}/`);
     };
 
@@ -54,7 +59,7 @@ export function AdminSidebar({ onClose }: { onClose?: () => void }) {
                                     href={link.href}
                                     onClick={onClose}
                                     className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                                        isActive(link.href)
+                                        isActive(link.href, link.exactMatch)
                                             ? "bg-[#1D2739] text-white"
                                             : "text-gray-300 hover:bg-[#1D2739] hover:text-white"
                                     }`}
