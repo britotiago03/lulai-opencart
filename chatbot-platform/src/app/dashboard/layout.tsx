@@ -15,9 +15,32 @@ export default function DashboardLayout({
     const { data: session, status } = useSession();
     const router = useRouter();
     const [loading, setLoading] = useState(true);
+    const [subscriptionChecked, setSubscriptionChecked] = useState(false);
     const { isOpen, isMobile, toggleAction } = useMobileNav();
 
+    // Check for subscription status
     useEffect(() => {
+        async function checkSubscription() {
+            try {
+                const response = await fetch('/api/subscriptions/check');
+                const data = await response.json();
+
+                if (!data.hasActiveSubscription) {
+                    // Redirect to subscriptions page if no active subscription
+                    router.push('/subscriptions');
+                    return;
+                }
+
+                setSubscriptionChecked(true);
+                setLoading(false);
+            } catch (error) {
+                console.error('Error checking subscription:', error);
+                // On error, still allow access to dashboard
+                setSubscriptionChecked(true);
+                setLoading(false);
+            }
+        }
+
         if (status === "unauthenticated") {
             router.push("/auth/signin");
             return;
@@ -28,9 +51,13 @@ export default function DashboardLayout({
                 router.push("/admin");
                 return;
             }
-            setLoading(false);
+
+            // Check for subscription
+            if (!subscriptionChecked) {
+                void checkSubscription();
+            }
         }
-    }, [session, status, router]);
+    }, [session, status, router, subscriptionChecked]);
 
     if (loading) {
         return <LoadingSkeleton />;

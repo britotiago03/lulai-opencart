@@ -1,20 +1,20 @@
-// src/types/subscription.ts
+// Basic subscription data
 export interface Subscription {
-    id: string;
-    user_id: string;
-    plan_id: string;
-    status: string;
-    current_period_start: string;
-    current_period_end: string;
-    cancel_at_period_end: boolean;
-    created_at: string;
-    updated_at: string;
+    plan_type: 'free' | 'basic' | 'pro';
+    price: number;
+    status?: string;
 }
 
+// Full subscription data as retrieved from the database
 export interface RetrievedSubscription {
     id: string;
-    plan_type: string;
+    user_id: string;
+    plan_type: 'free' | 'basic' | 'pro';
     price: number;
-    renewal_date: string;
     status: string;
+    payment_method: string;
+    payment_id: string;
+    created_at: string;
+    start_date: string;
+    end_date: string;
 }

@@ -33,9 +33,10 @@ export default function SignIn() {
                 return;
             }
 
-            router.push('/dashboard');
-            router.refresh();
+            // Redirect to subscription check, which will handle further redirection
+            router.push('/auth/check-subscription');
         } catch {
+            // No parameter in catch block
             setError('An error occurred during sign in');
             setIsLoading(false);
         }
@@ -44,8 +45,10 @@ export default function SignIn() {
     const handleGoogleSignIn = async () => {
         setGoogleLoading(true);
         try {
-            await signIn('google', { callbackUrl: '/dashboard' });
-        } catch (err) {
+            // For Google sign-in, we'll handle subscription check in the callback
+            await signIn('google', { callbackUrl: '/auth/check-subscription' });
+        } catch {
+            // No parameter in catch block
             setError('An error occurred with Google sign in');
             setGoogleLoading(false);
         }

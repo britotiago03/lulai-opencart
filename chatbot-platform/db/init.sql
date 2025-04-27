@@ -83,6 +83,21 @@ CREATE TABLE IF NOT EXISTS admin_signin_tokens (
     used_at TIMESTAMP
 );
 
+-- Create subscriptions table if not exists
+CREATE TABLE IF NOT EXISTS subscriptions (
+    id SERIAL PRIMARY KEY,
+    user_id TEXT REFERENCES users(id),
+    plan_type VARCHAR(50) NOT NULL, -- 'free', 'basic', 'pro'
+    price DECIMAL(10, 2) NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'active', -- 'active', 'cancelled', 'expired'
+    payment_method VARCHAR(50), -- 'stripe', 'paypal'
+    payment_id VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    end_date TIMESTAMP,
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Add indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_conversations_api_key ON conversations(api_key);
 CREATE INDEX IF NOT EXISTS idx_conversations_user_id ON conversations(user_id);
@@ -92,3 +107,5 @@ CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_admin_invitations_token ON admin_invitations(token);
 CREATE INDEX IF NOT EXISTS idx_admin_signin_tokens_token ON admin_signin_tokens(token);
 CREATE INDEX IF NOT EXISTS idx_admin_signin_tokens_email ON admin_signin_tokens(email);
+CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
+CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON subscriptions(status);

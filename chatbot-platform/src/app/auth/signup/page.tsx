@@ -34,10 +34,11 @@ export default function SignUp() {
                 return;
             }
 
-            // Automatically redirect to sign in after successful registration
+            // After successful registration, redirect to sign in with a flag
+            // The user will then be redirected to subscriptions after signin
             router.push('/auth/signin?registered=true');
         } catch {
-            // Simple error handling - avoid the throw/catch issue
+            // Simple error handling without declaring any parameter
             setError('An error occurred during registration');
             setIsLoading(false);
         }
@@ -46,8 +47,10 @@ export default function SignUp() {
     const handleGoogleSignUp = async () => {
         setGoogleLoading(true);
         try {
-            await signIn('google', { callbackUrl: '/dashboard' });
-        } catch (err) {
+            // Direct Google signup to subscription route
+            await signIn('google', { callbackUrl: '/auth/check-subscription' });
+        } catch {
+            // No parameter in catch block
             setError('An error occurred with Google sign up');
             setGoogleLoading(false);
         }
