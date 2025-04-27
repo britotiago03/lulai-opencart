@@ -1,31 +1,25 @@
-// src/types/next-auth.d.ts
-import NextAuth, { DefaultSession } from "next-auth";
-import { JWT } from "next-auth/jwt";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import NextAuth from "next-auth";
 
 declare module "next-auth" {
-    /**
-     * Extend the built-in session types
-     */
-    interface Session {
-        user: {
-            id: string;
-            role: string;
-        } & DefaultSession["user"];
-    }
-
-    /**
-     * Extend the built-in user types
-     */
     interface User {
         id: string;
+        name: string;
+        email: string;
         role: string;
+        isAdmin?: boolean;
+        image?: string | null; // Added for Google profile images
+    }
+
+    interface Session {
+        user: User;
     }
 }
 
 declare module "next-auth/jwt" {
-    /** Extend the built-in JWT types */
     interface JWT {
         id: string;
         role: string;
+        isAdmin?: boolean;
     }
 }

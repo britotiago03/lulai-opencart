@@ -1,57 +1,61 @@
 // src/app/admin/layout.tsx
 "use client";
 
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { usePathname } from "next/navigation";
+import React from "react";
+import { AdminSidebar } from "@/components/admin-dashboard/AdminSidebar";
 import { MobileNav, useMobileNav } from "@/components/dashboard/MobileNav";
 import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
+import AdminSessionProvider from "@/components/admin/AdminSessionProvider";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
-export default function AdminLayout({
-                                        children,
-                                    }: {
-    children: React.ReactNode;
-}) {
-    const { data: session, status } = useSession();
-    const router = useRouter();
-    const [loading, setLoading] = useState(true);
-    const { isOpen, isMobile, toggle } = useMobileNav();
+// Content component that uses our custom auth hook
+function AdminLayoutContent({ children }: { children: React.ReactNode }) {
+    const pathname = usePathname();
+    const { isOpen, isMobile, toggleAction } = useMobileNav();
 
-    useEffect(() => {
-        if (status === "unauthenticated") {
-            router.push("/auth/signin");
-            return;
-        }
+    // Define pages that don't require authentication
+    const publicAdminPages = ['/admin/setup', '/admin/signin'];
+    const isPublicPage = publicAdminPages.some(page =>
+        pathname === page || pathname.startsWith(`${page}?`));
 
-        if (status === "authenticated") {
-            if (session?.user?.role !== "admin") {
-                router.push("/dashboard");
-                return;
-            }
-            setLoading(false);
-        }
-    }, [session, status, router]);
+    // Only check admin auth for protected pages
+    const { isLoading, isAdmin } = useAdminAuth({
+        requiredAdmin: !isPublicPage,
+        redirectTo: '/admin/signin'
+    });
 
-    if (loading) {
+    // For public pages, render directly without admin shell
+    if (isPublicPage) {
+        return <>{children}</>;
+    }
+
+    // Show loading while checking auth
+    if (isLoading) {
         return <LoadingSkeleton />;
     }
 
+    // If required admin check failed, don't render anything (redirect will happen in hook)
+    if (!isPublicPage && !isAdmin) {
+        return null;
+    }
+
+    // Admin is authenticated, render admin UI
     return (
         <div className="flex h-screen overflow-hidden bg-[#0f1729]">
             {/* Mobile Nav Toggle */}
-            {isMobile && <MobileNav isOpen={isOpen} toggle={toggle} />}
+            {isMobile && <MobileNav isOpen={isOpen} toggleAction={toggleAction} />}
 
             {/* Mobile Sidebar Overlay */}
             {isOpen && isMobile && (
                 <div
                     className="fixed inset-0 bg-black/50 z-40"
-                    onClick={toggle}
+                    onClick={toggleAction}
                     aria-hidden="true"
                 />
             )}
 
-            {/* Sidebar - either fixed or hidden on mobile */}
+            {/* Sidebar */}
             <div
                 className={`${
                     isMobile
@@ -61,15 +65,23 @@ export default function AdminLayout({
                         : "sticky top-0 h-screen w-64 flex-shrink-0"
                 }`}
             >
-                <AdminSidebar onClose={toggle} />
+                <AdminSidebar onClose={toggleAction} />
             </div>
 
             {/* Main Content */}
             <main className="flex-1 overflow-auto bg-[#0f1729] text-white">
-                {/* This padding is only needed on mobile when the navbar toggle is shown */}
                 {isMobile && <div className="h-14"></div>}
                 {children}
             </main>
         </div>
+    );
+}
+
+// Wrapper with provider
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+    return (
+        <AdminSessionProvider>
+            <AdminLayoutContent>{children}</AdminLayoutContent>
+        </AdminSessionProvider>
     );
 }

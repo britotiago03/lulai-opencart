@@ -1,14 +1,14 @@
 services:
   postgres:
     image: postgres:latest
-    container_name: chatbot
+    container_name: lulai-chatbot-db
     restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: chatbot  # Docker creates this automatically
     ports:
-      - "5432:5432"
+      - "5433:5432"  # Changed external port to 5433 to avoid conflicts
     volumes:
       - postgres_data:/var/lib/postgresql/data  # Persists data
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql  # Runs only if DB is empty
@@ -18,12 +18,12 @@ services:
     container_name: nextjs_app1
     restart: always
     ports:
-      - "3000:3000"
+      - "3001:3000"
     depends_on:
       - postgres
     environment:
-      #DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/ecommerce_db1"
       DATABASE_URL: "postgresql://postgres:postgres@lulai-chatbot-db:5432/chatbot"
+      NEXTAUTH_SECRET: "6fbbJ2rDi+mCPnBefneSAdy0VZgxAHFw/81l/TlQMhs="
 
 volumes:
   postgres_data:

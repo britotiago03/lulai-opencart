@@ -1,18 +1,14 @@
-// src/app/admin/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { Users, MessageSquare, BarChart2, Settings, Bell, Database } from "lucide-react";
+import { Users, MessageSquare, BarChart2, Settings, Bell, CreditCard } from "lucide-react";
 import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 export default function AdminDashboard() {
-    const { data: session, status } = useSession();
-    const router = useRouter();
-    const [loading, setLoading] = useState(true);
+    const { isLoading, isAdmin } = useAdminAuth();
     const [stats, setStats] = useState({
         totalUsers: 0,
         activeSubscriptions: 0,
@@ -20,61 +16,65 @@ export default function AdminDashboard() {
         totalConversations: 0,
         activeAlerts: 0,
     });
+    const [fetchingStats, setFetchingStats] = useState(true);
 
     useEffect(() => {
-        if (status === "unauthenticated") {
-            router.push("/auth/signin");
-            return;
-        }
+        // Only fetch stats after we've confirmed admin status
+        if (!isLoading && isAdmin) {
+            const fetchStats = async () => {
+                try {
+                    // Fetch data from existing API endpoints
+                    const [usersCountRes, chatbotsRes, analyticsRes] = await Promise.all([
+                        fetch('/api/admin/users/count'),
+                        fetch('/api/admin/chatbots'),
+                        fetch('/api/admin/analytics')
+                    ]);
 
-        if (status === "authenticated" && session?.user?.role !== "admin") {
-            router.push("/dashboard");
-            return;
-        }
+                    const [usersCount, chatbots, analytics] = await Promise.all([
+                        usersCountRes.json(),
+                        chatbotsRes.json(),
+                        analyticsRes.json()
+                    ]);
 
-        // Fetch admin statistics from real database
-        const fetchStats = async () => {
-            try {
-                // Fetch real data from analytics endpoint
-                const response = await fetch('/api/analytics', {
-                    headers: { 'Cache-Control': 'no-cache' }
-                });
+                    // Define interface for chatbot objects
+                    interface Chatbot {
+                        id: string | number;
+                        name: string;
+                        status: string;
+                        userId: string | number;
+                        userName: string;
+                        userEmail: string;
+                        // Other properties may exist, but we only need status for filtering
+                    }
 
-                if (!response.ok) {
-                    throw new Error('Failed to fetch analytics data');
+                    // Extract relevant stats from the API responses and properly type the chatbots
+                    setStats({
+                        totalUsers: usersCount.count,
+                        activeSubscriptions: (chatbots as Chatbot[]).filter(bot => bot.status === 'active').length,
+                        totalChatbots: chatbots.length,
+                        totalConversations: analytics.totalConversations,
+                        activeAlerts: 0, // Currently no alert system in the provided APIs
+                    });
+                } catch (error) {
+                    console.error("Error fetching admin stats:", error);
+                    // Optionally show error state to the user
+                } finally {
+                    setFetchingStats(false);
                 }
+            };
 
-                const analyticsData = await response.json();
+            void fetchStats();
+        }
+    }, [isLoading, isAdmin]);
 
-                // Fetch chatbots count
-                const chatbotsResponse = await fetch('/api/chatbots');
-                const chatbotsData = await chatbotsResponse.json();
-
-                // Fetch users count
-                const usersResponse = await fetch('/api/admin/users/count');
-                const usersData = await usersResponse.json();
-
-                setStats({
-                    totalUsers: usersData.count || 0,
-                    activeSubscriptions: analyticsData.averageConversationsPerChatbot ?
-                        Math.round(analyticsData.averageConversationsPerChatbot) : 0,
-                    totalChatbots: chatbotsData.length || 0,
-                    totalConversations: analyticsData.totalConversations || 0,
-                    activeAlerts: analyticsData.totalCartActions ?
-                        (analyticsData.totalCartActions > 100 ? 1 : 0) : 0, // Set alert if high cart actions
-                });
-                setLoading(false);
-            } catch (error) {
-                console.error("Error fetching admin stats:", error);
-                setLoading(false);
-            }
-        };
-
-        fetchStats();
-    }, [session, status, router]);
-
-    if (loading) {
+    // Show loading while checking auth or fetching stats
+    if (isLoading || fetchingStats) {
         return <LoadingSkeleton />;
+    }
+
+    // Safety check - don't render for non-admins
+    if (!isAdmin) {
+        return null;
     }
 
     const adminCards = [
@@ -88,15 +88,15 @@ export default function AdminDashboard() {
         },
         {
             title: "Subscription Management",
-            description: "Track payments, plans, and renewals",
-            icon: Database,
+            description: "Track payments, plans, and billing",
+            icon: CreditCard,
             link: "/admin/subscriptions",
             stat: stats.activeSubscriptions,
             statLabel: "Active Subscriptions",
         },
         {
             title: "Chatbot Monitoring",
-            description: "Monitor all chatbots across the platform",
+            description: "Monitor all active chatbots across the platform",
             icon: MessageSquare,
             link: "/admin/chatbots",
             stat: stats.totalChatbots,
@@ -105,7 +105,7 @@ export default function AdminDashboard() {
         {
             title: "Conversations",
             description: "View all user-chatbot interactions",
-            icon: MessageSquare, // Use MessageCircle if available
+            icon: MessageSquare,
             link: "/admin/conversations",
             stat: stats.totalConversations,
             statLabel: "Total Conversations",
@@ -116,7 +116,7 @@ export default function AdminDashboard() {
             icon: BarChart2,
             link: "/admin/analytics",
             stat: stats.totalConversations,
-            statLabel: "Total Conversations",
+            statLabel: "All Interactions",
         },
         {
             title: "Admin Settings",

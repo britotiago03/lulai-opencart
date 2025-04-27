@@ -3,51 +3,55 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { MessageSquare, Calendar, Search, ChevronRight } from "lucide-react";
 import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
+import { Conversation } from "@/types/conversation";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 export default function AdminConversationsPage() {
-    const { data: session, status } = useSession();
-    const router = useRouter();
+    // Use admin auth hook instead of regular session
+    const { isLoading, isAdmin } = useAdminAuth();
     const [loading, setLoading] = useState(true);
-    const [conversations, setConversations] = useState([]);
+    const [conversations, setConversations] = useState<Conversation[]>([]);
     const [search, setSearch] = useState("");
-    const [error, setError] = useState(null);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (status === "unauthenticated") {
-            router.push("/auth/signin");
-            return;
-        }
+        // Only fetch conversations after confirming admin status
+        if (!isLoading && isAdmin) {
+            const fetchConversations = async () => {
+                try {
+                    setLoading(true);
+                    const response = await fetch("/api/admin/conversations");
+                    if (!response.ok) {
+                        setError("Failed to fetch conversations");
+                        return;
+                    }
 
-        if (status === "authenticated" && session?.user?.role !== "admin") {
-            router.push("/dashboard");
-            return;
-        }
-
-        const fetchConversations = async () => {
-            try {
-                setLoading(true);
-                const response = await fetch("/api/admin/conversations");
-                if (!response.ok) {
-                    throw new Error("Failed to fetch conversations");
+                    const data = await response.json();
+                    setConversations(data);
+                } catch (err) {
+                    console.error("Error fetching conversations:", err);
+                    setError("Failed to load conversations. Please try again.");
+                } finally {
+                    setLoading(false);
                 }
+            };
 
-                const data = await response.json();
-                setConversations(data);
-            } catch (err) {
-                console.error("Error fetching conversations:", err);
-                setError("Failed to load conversations. Please try again.");
-            } finally {
-                setLoading(false);
-            }
-        };
+            void fetchConversations();
+        }
+    }, [isLoading, isAdmin]);
 
-        fetchConversations();
-    }, [session, status, router]);
+    // Show loading while admin auth is being checked
+    if (isLoading || loading) {
+        return <LoadingSkeleton />;
+    }
+
+    // Safety check - don't render for non-admins
+    if (!isAdmin) {
+        return null; // The hook will handle redirection
+    }
 
     // Filter conversations based on search
     const filteredConversations = search
@@ -59,18 +63,14 @@ export default function AdminConversationsPage() {
         : conversations;
 
     // Group conversations by date
-    const groupedConversations = filteredConversations.reduce((groups, convo) => {
+    const groupedConversations: Record<string, Conversation[]> = filteredConversations.reduce((groups, convo) => {
         const date = new Date(convo.created_at).toLocaleDateString();
         if (!groups[date]) {
             groups[date] = [];
         }
         groups[date].push(convo);
         return groups;
-    }, {});
-
-    if (loading) {
-        return <LoadingSkeleton />;
-    }
+    }, {} as Record<string, Conversation[]>);
 
     return (
         <div className="max-w-7xl mx-auto p-6">
@@ -121,7 +121,7 @@ export default function AdminConversationsPage() {
                             </div>
 
                             <div className="space-y-4">
-                                {convos.map((convo) => (
+                                {convos.map((convo: Conversation) => (
                                     <Link key={convo.id} href={`/admin/conversations/thread/${convo.user_id}-${convo.api_key}`}>
                                         <Card className="bg-[#1b2539] border-0 hover:bg-[#232b3c] transition-colors cursor-pointer">
                                             <CardContent className="p-4">

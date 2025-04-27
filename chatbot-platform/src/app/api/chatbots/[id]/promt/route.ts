@@ -1,15 +1,15 @@
 // src/app/api/chatbots/[id]/prompt/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../../../auth/[...nextauth]/route";
+import { userAuthOptions } from "@/lib/auth-config";
 import { pool } from "@/lib/db";
 
 export async function GET(
-    req: NextRequest,
+    _req: NextRequest,
     { params }: { params: { id: string } }
 ) {
     try {
-        const session = await getServerSession(authOptions);
+        const session = await getServerSession(userAuthOptions);
 
         if (!session) {
             return NextResponse.json(
@@ -70,7 +70,7 @@ export async function PUT(
     { params }: { params: { id: string } }
 ) {
     try {
-        const session = await getServerSession(authOptions);
+        const session = await getServerSession(userAuthOptions);
 
         if (!session) {
             return NextResponse.json(
@@ -95,17 +95,17 @@ export async function PUT(
         const client = await pool.connect();
 
         try {
-            // Verify ownership and get the API key
-            let query = "SELECT id, api_key FROM chatbots WHERE id = $1";
-            const params = [chatbotId];
+            // Verify ownership
+            let query = "SELECT id FROM chatbots WHERE id = $1";
+            const queryParams = [chatbotId];
 
             // Add ownership check for non-admins
             if (session.user.role !== 'admin') {
                 query += " AND user_id = $2";
-                params.push(session.user.id);
+                queryParams.push(session.user.id);
             }
 
-            const result = await client.query(query, params);
+            const result = await client.query(query, queryParams);
 
             if (result.rows.length === 0) {
                 return NextResponse.json(
@@ -113,8 +113,6 @@ export async function PUT(
                     { status: 404 }
                 );
             }
-
-            const apiKey = result.rows[0].api_key;
 
             // Update the custom prompt in the chatbots table
             await client.query(

@@ -2,9 +2,8 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Users, BarChart2, MessageSquare, Layers, Settings, User, LogOut } from "lucide-react";
+import { Home, Users, BarChart2, MessageSquare, Layers, Settings, LogOut, CreditCard } from "lucide-react";
 import { signOut } from "next-auth/react";
-import Image from "next/image";
 
 export function Sidebar({ onClose }: { onClose?: () => void }) {
     const pathname = usePathname();
@@ -18,11 +17,18 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
     ];
 
     const personalLinks = [
+        { name: "Subscription", href: "/dashboard/subscriptions", icon: CreditCard },
         { name: "Settings", href: "/dashboard/profile", icon: Settings },
     ];
 
     const isActive = (path: string) => {
-        return pathname === path || pathname.startsWith(`${path}/`);
+        // Special case for the dashboard home
+        if (path === "/dashboard") {
+            return pathname === "/dashboard";
+        }
+
+        // For other routes, check if the pathname starts with the path
+        return pathname.startsWith(`${path}/`) || pathname === path;
     };
 
     const handleSignOut = async () => {
@@ -32,14 +38,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
     return (
         <div className="flex flex-col h-full bg-[#0f1729] text-white border-r border-gray-800">
             <div className="p-4 border-b border-gray-800 flex items-center justify-between">
-                <Link href="/dashboard" className="flex items-center space-x-2">
-                    <Image
-                        src="/images/logo.png"
-                        alt="LulAI Logo"
-                        width={36}
-                        height={36}
-                        className="w-9 h-9"
-                    />
+                <Link href={`/dashboard`} className="flex items-center space-x-2">
                     <span className="font-bold text-xl">LulAI</span>
                 </Link>
             </div>

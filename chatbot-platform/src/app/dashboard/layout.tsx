@@ -1,9 +1,8 @@
-// src/app/dashboard/layout.tsx
 "use client";
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { MobileNav, useMobileNav } from "@/components/dashboard/MobileNav";
 import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
@@ -16,9 +15,32 @@ export default function DashboardLayout({
     const { data: session, status } = useSession();
     const router = useRouter();
     const [loading, setLoading] = useState(true);
-    const { isOpen, isMobile, toggle } = useMobileNav();
+    const [subscriptionChecked, setSubscriptionChecked] = useState(false);
+    const { isOpen, isMobile, toggleAction } = useMobileNav();
 
+    // Check for subscription status
     useEffect(() => {
+        async function checkSubscription() {
+            try {
+                const response = await fetch('/api/subscriptions/check');
+                const data = await response.json();
+
+                if (!data.hasActiveSubscription) {
+                    // Redirect to subscriptions page if no active subscription
+                    router.push('/subscriptions');
+                    return;
+                }
+
+                setSubscriptionChecked(true);
+                setLoading(false);
+            } catch (error) {
+                console.error('Error checking subscription:', error);
+                // On error, still allow access to dashboard
+                setSubscriptionChecked(true);
+                setLoading(false);
+            }
+        }
+
         if (status === "unauthenticated") {
             router.push("/auth/signin");
             return;
@@ -29,9 +51,13 @@ export default function DashboardLayout({
                 router.push("/admin");
                 return;
             }
-            setLoading(false);
+
+            // Check for subscription
+            if (!subscriptionChecked) {
+                void checkSubscription();
+            }
         }
-    }, [session, status, router]);
+    }, [session, status, router, subscriptionChecked]);
 
     if (loading) {
         return <LoadingSkeleton />;
@@ -40,13 +66,13 @@ export default function DashboardLayout({
     return (
         <div className="flex h-screen overflow-hidden bg-[#0f1729]">
             {/* Mobile Nav Toggle */}
-            {isMobile && <MobileNav isOpen={isOpen} toggle={toggle} />}
+            {isMobile && <MobileNav isOpen={isOpen} toggleAction={toggleAction} />}
 
             {/* Mobile Sidebar Overlay */}
             {isOpen && isMobile && (
                 <div
                     className="fixed inset-0 bg-black/50 z-40"
-                    onClick={toggle}
+                    onClick={toggleAction}
                     aria-hidden="true"
                 />
             )}
@@ -61,7 +87,7 @@ export default function DashboardLayout({
                         : "sticky top-0 h-screen w-64 flex-shrink-0"
                 }`}
             >
-                <Sidebar onClose={toggle} />
+                <Sidebar onClose={toggleAction} />
             </div>
 
             {/* Main Content */}
