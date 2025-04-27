@@ -1,19 +1,21 @@
 // src/lib/auth/google.ts
 import { pool } from "@/lib/db";
 import { UserTypes } from "./types";
+import { Profile } from "next-auth";
 
 /**
  * Handles Google sign-in authentication flow
- * @param profile Google profile data
+ * @param profile Google profile data from NextAuth
  * @returns Boolean indicating successful authentication
  */
-export async function handleGoogleSignIn(profile: any): Promise<boolean> {
-    const { name, email, sub } = profile;
-
-    if (!email) {
-        console.error("No email provided from Google");
+export async function handleGoogleSignIn(profile: Profile): Promise<boolean> {
+    // Early return if we don't have the required profile fields
+    if (!profile || !profile.email || !profile.sub) {
+        console.error("Missing required profile data from Google");
         return false;
     }
+
+    const { name, email, sub } = profile;
 
     try {
         const client = await pool.connect();
@@ -40,7 +42,7 @@ export async function handleGoogleSignIn(profile: any): Promise<boolean> {
                 // Create new user with Google auth, using Google ID as user ID (as TEXT)
                 await client.query(
                     "INSERT INTO users (id, name, email, password, role) VALUES ($1, $2, $3, $4, $5)",
-                    [googleId.toString(), name, email, "GOOGLE_AUTH", UserTypes.CLIENT]
+                    [googleId.toString(), name || email.split('@')[0], email, "GOOGLE_AUTH", UserTypes.CLIENT]
                 );
                 console.log(`New user created via Google auth: ${email} with ID: ${googleId}`);
                 return true;
