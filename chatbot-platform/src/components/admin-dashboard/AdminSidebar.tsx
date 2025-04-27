@@ -13,10 +13,22 @@ import {
     LogOut,
     CreditCard,
 } from "lucide-react";
-import { signOut } from "next-auth/react";
+import { useAdminLogout } from "@/hooks/useAdminLogout";
 
 export function AdminSidebar({ onClose }: { onClose?: () => void }) {
     const pathname = usePathname();
+    const { logout } = useAdminLogout();
+
+    const handleSignOut = async () => {
+        // Show a loading indicator or message if desired
+        try {
+            await logout();
+        } catch (error) {
+            console.error("Logout failed:", error);
+            // Force a hard reload to homepage as last resort
+            window.location.href = "/";
+        }
+    };
 
     const links = [
         { name: "Dashboard", href: "/admin", icon: Layout, exactMatch: true },
@@ -34,10 +46,6 @@ export function AdminSidebar({ onClose }: { onClose?: () => void }) {
             return pathname === path;
         }
         return pathname === path || pathname.startsWith(`${path}/`);
-    };
-
-    const handleSignOut = async () => {
-        await signOut({ redirect: true, callbackUrl: "/" });
     };
 
     return (

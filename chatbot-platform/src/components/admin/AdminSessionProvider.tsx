@@ -9,7 +9,11 @@ export default function AdminSessionProvider({
     children: React.ReactNode;
 }) {
     return (
-        <SessionProvider basePath="/api/admin-auth">
+        <SessionProvider
+            basePath="/api/admin-auth"
+            refetchInterval={5 * 60}
+            refetchOnWindowFocus={true}
+        >
             {children}
         </SessionProvider>
     );
