@@ -9,8 +9,14 @@ const generateToken = () => {
 };
 
 export async function seedAdminIfNeeded() {
-    const ADMIN_NAME = 'Admin User';
-    const ADMIN_EMAIL = 'britotiago101@gmail.com';
+    // Use environment variables with fallbacks
+    const ADMIN_NAME = process.env.ADMIN_NAME || 'Admin User';
+    const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'britotiago101@gmail.com';
+
+    // Ensure required environment variables are set
+    if (!process.env.ADMIN_EMAIL) {
+        console.warn('⚠️ ADMIN_EMAIL environment variable not set, using default value');
+    }
 
     const client = await pool.connect();
     try {
