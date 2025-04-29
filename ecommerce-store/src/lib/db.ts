@@ -2,14 +2,15 @@ import { Pool, PoolClient } from "pg";
 import { CustomerInfo } from "@/types/order";
 
 // Create a PostgreSQL connection pool with environment variables
-export const pool = new Pool({
-    user: process.env.DB_USER || "postgres",
-    host: process.env.DB_HOST ||"ecommerce_postgres", //local: "postgres", deploy: "ecommerce_postgres"// Updated default
-    database: process.env.DB_NAME || "ecommerce_db",
-    password: process.env.DB_PASSWORD || "postgres",
-    port: Number(process.env.DB_PORT) || 5432,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-});
+const createPool = () => {
+    return new Pool({
+        connectionString: process.env.DATABASE_URL,
+        ssl: process.env.NODE_ENV === 'production' ?
+            { rejectUnauthorized: false } : false
+    });
+};
+
+const pool = createPool();
 
 // Interface for cart items sent from client
 export interface CartItem {
