@@ -29,7 +29,10 @@ export const dynamic = 'force-static';
 // ✅ Ensure the admin system initializes only once
 let initialized = false;
 if (typeof window === "undefined" && !initialized) {
-    initializeAdminSystem();
+    // Use promise to initialize the admin system
+    initializeAdminSystem().catch(error => {
+        console.error("Error initializing admin system:", error);
+    });
     initialized = true;
 }
 
