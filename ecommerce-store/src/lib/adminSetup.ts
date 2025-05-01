@@ -91,23 +91,33 @@ export async function setupInitialAdmin(): Promise<boolean> {
             return false;
         }
 
-        // Get admin email from settings
-        const emailResult = await client.query(
-            "SELECT setting_value FROM admin_settings WHERE setting_key = 'admin_email'"
-        );
+        // Get admin email from environment variable, fallback to settings
+        const adminEmail = process.env.ADMIN_EMAIL;
+        let emailFromSettings = false;
 
-        if (emailResult.rows.length === 0) {
-            await client.query('ROLLBACK');
-            console.error("Admin email setting not found");
-            return false;
+        if (!adminEmail) {
+            // If no environment variable, try to get from settings
+            const emailResult = await client.query(
+                "SELECT setting_value FROM admin_settings WHERE setting_key = 'admin_email'"
+            );
+
+            if (emailResult.rows.length === 0) {
+                await client.query('ROLLBACK');
+                console.error("Admin email not found in environment variables or settings");
+                return false;
+            }
+
+            emailFromSettings = true;
         }
 
-        const adminEmail = emailResult.rows[0].setting_value;
+        // Use the email from environment variable or from settings
+        const actualAdminEmail = adminEmail || (emailFromSettings ?
+            (await client.query("SELECT setting_value FROM admin_settings WHERE setting_key = 'admin_email'")).rows[0].setting_value : '');
 
         // Check if admin user already exists
         const userResult = await client.query(
             "SELECT id FROM admin_users WHERE email = $1",
-            [adminEmail]
+            [actualAdminEmail]
         );
 
         let adminId: number;
@@ -119,7 +129,7 @@ export async function setupInitialAdmin(): Promise<boolean> {
                 (name, email, is_super_admin, is_active)
                 VALUES ($1, $2, $3, $4)
                 RETURNING id`,
-                ["Admin", adminEmail, true, true]
+                ["Admin", actualAdminEmail, true, true]
             );
 
             adminId = insertResult.rows[0].id;
@@ -135,7 +145,7 @@ export async function setupInitialAdmin(): Promise<boolean> {
 
         // Send email with setup instructions
         await sendAdminSetupEmail(
-            adminEmail,
+            actualAdminEmail,
             "Admin",
             setupToken,
             accessToken.path,
@@ -148,9 +158,17 @@ export async function setupInitialAdmin(): Promise<boolean> {
             ['in_progress']
         );
 
+        // If using environment variable, update the admin_email setting
+        if (!emailFromSettings && adminEmail) {
+            await client.query(
+                "UPDATE admin_settings SET setting_value = $1 WHERE setting_key = 'admin_email'",
+                [adminEmail]
+            );
+        }
+
         await client.query('COMMIT');
 
-        console.log("Admin setup initiated, email sent to:", adminEmail);
+        console.log("Admin setup initiated, email sent to:", actualAdminEmail);
         return true;
     } catch (error) {
         await client.query('ROLLBACK');

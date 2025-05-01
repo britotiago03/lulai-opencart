@@ -5,7 +5,8 @@ import Providers from "@/components/layout/Providers";
 import Navbar from "@/components/layout/Navbar";
 import AIShoppingAssistant from "@/components/assistant/AIShoppingAssistant";
 import "./globals.css";
-import ChatWidget from "@/components/widget"; // Import the ChatWidget component
+import { initializeAdminSystem } from "@/lib/admin-init";
+//import ChatWidget from "@/components/widget"; // Import the ChatWidget component
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -25,6 +26,16 @@ export const metadata: Metadata = {
 // Enable static generation of the layout shell
 export const dynamic = 'force-static';
 
+// ✅ Ensure the admin system initializes only once
+let initialized = false;
+if (typeof window === "undefined" && !initialized) {
+    // Use promise to initialize the admin system
+    initializeAdminSystem().catch(error => {
+        console.error("Error initializing admin system:", error);
+    });
+    initialized = true;
+}
+
 export default function RootLayout({
                                        children,
                                    }: {
@@ -35,7 +46,6 @@ export default function RootLayout({
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Providers>
             <Navbar />
-            <ChatWidget/>
             <main>
                 {children}
             </main>

@@ -5,7 +5,7 @@ import AdminLoginPage from "@/components/admin/AdminLoginPage";
 
 export default async function AdminRoute({ params }: { params: { adminRoute: string[] } }) {
     // ✅ Ensure params.adminRoute is properly awaited
-    const adminRouteParts = params?.adminRoute ?? [];
+    const adminRouteParts = await params?.adminRoute ?? [];
 
     if (adminRouteParts.length === 0) {
         console.error("Invalid or missing adminRouteParts:", adminRouteParts);
