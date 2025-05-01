@@ -1,28 +1,12 @@
 services:
-  postgres:
-    image: postgres:15.0
-    container_name: postgres_db
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: ecommerce_db  # Docker creates this automatically
-    ports:
-      - "5434:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data  # Persists data
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql  # Runs only if DB is empty
-
   nextjs:
     build: .
-    container_name: nextjs_app
+    container_name: lulai-ecommerce-store
     restart: always
     ports:
       - "3000:3000"
-    depends_on:
-      - postgres
     environment:
-      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/ecommerce_db"
+      DATABASE_URL: "postgresql://postgres:postgres@lulai-db:5432/lulai?options=--search_path%3Decommerce_schema"
       EMAIL_HOST: "smtp.gmail.com"
       EMAIL_PORT: "587"
       EMAIL_SECURE: "false"
@@ -42,8 +26,10 @@ services:
       TTS_API_URL: "https://api.elevenlabs.io/v1/text-to-speech"
       TTS_VOICE_ID: "ErXwobaYiN019PkySvjV"
       ADMIN_EMAIL: "britotiago101@gmail.com"
+    networks:
+      - database_network
 
-
-
-volumes:
-  postgres_data:
+networks:
+  database_network:
+    external: true
+    name: lulai_db_network
