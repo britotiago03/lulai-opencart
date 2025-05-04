@@ -3,10 +3,10 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Providers from "@/components/layout/Providers";
 import Navbar from "@/components/layout/Navbar";
-import AIShoppingAssistant from "@/components/assistant/AIShoppingAssistant";
+//import AIShoppingAssistant from "@/components/assistant/AIShoppingAssistant";
 import "./globals.css";
 import { initializeAdminSystem } from "@/lib/admin-init";
-//import ChatWidget from "@/components/widget"; // Import the ChatWidget component
+// AIShoppingAssistant code: <AIShoppingAssistant />
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -49,7 +49,6 @@ export default function RootLayout({
             <main>
                 {children}
             </main>
-            <AIShoppingAssistant />
         </Providers>
         </body>
         </html>

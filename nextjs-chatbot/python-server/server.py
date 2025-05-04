@@ -1,21 +1,16 @@
-# lulai-opencart/lulai-chatbot/nextjs-chatbot/python-server/server.py
 from fastapi import FastAPI, UploadFile, File, HTTPException, Request
 from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import io
 import logging
 import os
-from dotenv import load_dotenv
 from openai import OpenAI
 
 # Import ElevenLabs SDK
 from elevenlabs import VoiceSettings
 from elevenlabs.client import ElevenLabs
 
-# Load environment variables
-dotenv_path = os.path.join(os.path.dirname(__file__), "..", ".env.local")
-load_dotenv(dotenv_path=dotenv_path)
-
+# Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -30,9 +25,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize API clients
-openai_api_key = os.getenv("OPENAI_API_KEY")
-elevenlabs_api_key = os.getenv("ELEVENLABS_API_KEY")
+# Get environment variables directly
+openai_api_key = os.environ.get("OPENAI_API_KEY")
+elevenlabs_api_key = os.environ.get("ELEVENLABS_API_KEY")
+tts_voice_id = os.environ.get("TTS_VOICE_ID", "pNInz6obpgDQGcFmaJgB")
 
 if not openai_api_key:
     raise Exception("OPENAI_API_KEY environment variable not set")
@@ -43,11 +39,9 @@ client = OpenAI(api_key=openai_api_key)
 elevenlabs_client = None
 if elevenlabs_api_key:
     elevenlabs_client = ElevenLabs(api_key=elevenlabs_api_key)
+    logger.info(f"ElevenLabs client initialized with voice ID: {tts_voice_id}")
 else:
     logger.warning("ELEVENLABS_API_KEY not set. Will use OpenAI TTS as fallback.")
-
-# Default voice - using Adam
-DEFAULT_VOICE_ID = "pNInz6obpgDQGcFmaJgB"
 
 # OpenAI TTS fallback function
 async def openai_tts_fallback(text_input):
@@ -82,14 +76,14 @@ async def text_to_speech(request: Request):
     # Try ElevenLabs first if available
     if elevenlabs_client:
         try:
-            logger.info("Attempting to use ElevenLabs TTS")
+            logger.info(f"Attempting to use ElevenLabs TTS with voice ID: {tts_voice_id}")
             
             # We won't use streaming directly from ElevenLabs due to error handling limitations
             # Instead, we'll get the whole audio file and then stream it to the client
             try:
                 # Generate audio with ElevenLabs
                 audio_data = elevenlabs_client.text_to_speech.convert(
-                    voice_id=DEFAULT_VOICE_ID,
+                    voice_id=tts_voice_id,
                     output_format="mp3_44100_128",
                     text=text_input,
                     model_id="eleven_turbo_v2_5",
@@ -162,3 +156,8 @@ async def whisper_transcription(file: UploadFile = File(...)):
     except Exception as e:
         logger.error("Whisper Endpoint Error: %s", e)
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for container orchestration systems."""
+    return {"status": "healthy", "version": "1.0"}

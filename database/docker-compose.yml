@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:latest
+    image: ankane/pgvector
     container_name: lulai-db
     restart: always
     environment:

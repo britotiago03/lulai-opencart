@@ -1,4 +1,3 @@
-// lulai-opencart/lulai-chatbot/nextjs-chatbot/app/scripts/loadDb.ts
 import { Pool } from 'pg';
 import OpenAI from 'openai';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
@@ -49,8 +48,8 @@ export interface ProductData {
 const formatSpecifications = (specs: any): string => {
   if (!specs || typeof specs !== "object") return "";
   return Object.entries(specs)
-    .map(([key, value]) => `${key}: ${value}`)
-    .join("; ");
+      .map(([key, value]) => `${key}: ${value}`)
+      .join("; ");
 };
 
 // Helper function to format details (array or other) into a plain text string
@@ -73,6 +72,10 @@ const resolveUrl = (baseUrl: string, relativeUrl: string): string => {
 const createTables = async (tableName: string, isProductTable: boolean = true) => {
   const client = await pool.connect();
   try {
+    // First check if the pgvector extension exists
+    await client.query('CREATE EXTENSION IF NOT EXISTS vector;');
+
+    // Now create the table if it doesn't exist
     await client.query('BEGIN');
     if (isProductTable) {
       // Create product table with pgvector column for embeddings
@@ -117,7 +120,7 @@ const createTables = async (tableName: string, isProductTable: boolean = true) =
   }
 };
 
-// Fetch product data dynamically (same implementations as before)
+// Fetch product data dynamically
 const fetchProductData = async (url: string, platform: string, apiKey?: string): Promise<ProductData[]> => {
   console.log(`Fetching product data from ${platform} at ${url}...`);
   if (platform === "opencart") return await fetchOpenCartData(url, apiKey);
@@ -225,49 +228,55 @@ const storeProductData = async (products: ProductData[], apiKey: string) => {
 
     const client = await pool.connect();
 
-    for (const product of products) {
-      console.log(`Processing product: ${product.name}`);
-      let vector;
-      try {
-        const embeddings = await openai.embeddings.create({
-          model: "text-embedding-ada-002",
-          input: product.description?.overview || "",
-          encoding_format: "float",
-        });
-        vector = embeddings.data[0].embedding;
-      } catch (error: any) {
-        console.error(`Embedding generation failed for ${product.name}: ${error.message}`);
-        continue;
-      }
+    try {
+      // First clear existing data to ensure we don't have duplicates
+      await client.query(`TRUNCATE TABLE ${productTableName}`);
 
-      await client.query(
-        `INSERT INTO ${productTableName} (
-          vector, text, product_id, product_name, price, quantity, sku, model,
-          image, category, url, availability, description_title,
-          description_overview, description_details, description_specifications
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
-        [
-          JSON.stringify(vector), // Ensure your vector is in a proper format for pgvector
-          product.description?.overview || "",
-          product.id,
-          product.name,
-          product.price,
-          product.quantity,
-          product.sku,
-          product.model,
-          product.image,
-          product.category,
-          product.url,
-          product.availability,
-          product.description?.title,
-          product.description?.overview,
-          product.description?.details || "",
-          product.description?.specifications || ""
-        ]
-      );
+      for (const product of products) {
+        console.log(`Processing product: ${product.name}`);
+        let vector;
+        try {
+          const embeddings = await openai.embeddings.create({
+            model: "text-embedding-ada-002",
+            input: product.description?.overview || "",
+            encoding_format: "float",
+          });
+          vector = embeddings.data[0].embedding;
+        } catch (error: any) {
+          console.error(`Embedding generation failed for ${product.name}: ${error.message}`);
+          continue;
+        }
+
+        await client.query(
+            `INSERT INTO ${productTableName} (
+            vector, text, product_id, product_name, price, quantity, sku, model,
+            image, category, url, availability, description_title,
+            description_overview, description_details, description_specifications
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
+            [
+              JSON.stringify(vector), // Ensure your vector is in a proper format for pgvector
+              product.description?.overview || "",
+              product.id,
+              product.name,
+              product.price,
+              product.quantity,
+              product.sku,
+              product.model,
+              product.image,
+              product.category,
+              product.url,
+              product.availability,
+              product.description?.title,
+              product.description?.overview,
+              product.description?.details || "",
+              product.description?.specifications || ""
+            ]
+        );
+      }
+      console.log("All products stored successfully!");
+    } finally {
+      client.release();
     }
-    client.release();
-    console.log("All products stored successfully!");
   } catch (error) {
     console.error("Error storing product data", error);
     throw error;
@@ -283,12 +292,25 @@ const storeSystemPrompt = async (apiKey: string, customPrompt: string) => {
   const client = await pool.connect();
   try {
     await client.query(
-      `INSERT INTO ${promptTableName} (id, content)
+        `INSERT INTO ${promptTableName} (id, content)
        VALUES ($1, $2)
        ON CONFLICT (id) DO UPDATE SET content = $2`,
-      ["system_prompt", customPrompt]
+        ["system_prompt", customPrompt]
     );
     console.log(`Stored custom prompt for API key: ${apiKey}`);
+
+    // Also update the custom_prompt field in the chatbots table in chatbot_schema
+    try {
+      await client.query(
+          `UPDATE chatbots SET custom_prompt = $1, updated_at = NOW() 
+         WHERE api_key = $2`,
+          [customPrompt, apiKey]
+      );
+      console.log(`Updated custom_prompt in chatbots table for API key: ${apiKey}`);
+    } catch (error) {
+      console.error(`Failed to update chatbots table: ${error}`);
+      // Continue execution even if this fails - the prompt table update is the critical one
+    }
   } finally {
     client.release();
   }
@@ -296,12 +318,12 @@ const storeSystemPrompt = async (apiKey: string, customPrompt: string) => {
 
 // Main integration function
 export const loadProductDataForStore = async ({
-  storeName,
-  productApiUrl,
-  platform,
-  apiKey,
-  customPrompt,
-}: {
+                                                storeName,
+                                                productApiUrl,
+                                                platform,
+                                                apiKey,
+                                                customPrompt,
+                                              }: {
   storeName: string;
   productApiUrl: string;
   platform: string;
@@ -310,6 +332,41 @@ export const loadProductDataForStore = async ({
 }) => {
   console.log(`Starting integration for API key: ${apiKey}`);
   if (!apiKey) throw new Error("API key is required");
+
+  // Verify the chatbot exists in the chatbots table
+  const client = await pool.connect();
+  try {
+    const { rows } = await client.query(
+        `SELECT id FROM chatbots WHERE api_key = $1`,
+        [apiKey]
+    );
+
+    if (rows.length === 0) {
+      console.log(`Chatbot with API key ${apiKey} not found in the database. This might be a new configuration.`);
+      // We'll still proceed with creating the product tables since this might be a new integration
+    } else {
+      console.log(`Found chatbot with API key ${apiKey} in the database.`);
+
+      // Update the chatbot record with the latest information
+      await client.query(
+          `UPDATE chatbots SET 
+         product_api_url = $1, 
+         platform = $2,
+         ${customPrompt ? 'custom_prompt = $3,' : ''} 
+         updated_at = NOW() 
+         WHERE api_key = $4`,
+          customPrompt
+              ? [productApiUrl, platform, customPrompt, apiKey]
+              : [productApiUrl, platform, apiKey]
+      );
+      console.log(`Updated chatbot record with API key: ${apiKey}`);
+    }
+  } catch (error) {
+    console.error(`Error checking chatbot existence: ${error}`);
+    // Continue execution - the critical step is storing the product data
+  } finally {
+    client.release();
+  }
 
   const products = await fetchProductData(productApiUrl, platform, apiKey);
   await storeProductData(products, apiKey);
@@ -325,10 +382,24 @@ export const updateSystemPrompt = async (apiKey: string, customPrompt: string) =
   const promptTableName = `${sanitizedKey}_prompt`;
   const client = await pool.connect();
   try {
+    // First ensure the prompt table exists
+    await createTables(promptTableName, false);
+
+    // Update the prompt in the dedicated prompt table
     await client.query(
-      `UPDATE ${promptTableName} SET content = $1 WHERE id = $2`,
-      [customPrompt, "system_prompt"]
+        `INSERT INTO ${promptTableName} (id, content)
+       VALUES ($1, $2)
+       ON CONFLICT (id) DO UPDATE SET content = $2`,
+        ["system_prompt", customPrompt]
     );
+
+    // Also update the custom_prompt field in the chatbots table
+    await client.query(
+        `UPDATE chatbots SET custom_prompt = $1, updated_at = NOW() 
+       WHERE api_key = $2`,
+        [customPrompt, apiKey]
+    );
+
     console.log(`Updated custom prompt for API key: ${apiKey}`);
   } catch (error: any) {
     console.error(`Error updating custom prompt: ${error.message}`);
