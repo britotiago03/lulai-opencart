@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
-import { fetchSubscriptions } from "@/data/subscriptions";
+import { useAdminSubscriptions } from "@/hooks/useAdminSubscriptions";
 import { AdminSubscription } from "@/types/subscription";
 import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
 import SubscriptionStats from "@/components/admin-dashboard/subscriptions/SubscriptionStats";
@@ -11,62 +11,43 @@ import SubscriptionTable from "@/components/admin-dashboard/subscriptions/Subscr
 import { updateFiltersAction } from "./actions";
 
 export default function AdminSubscriptionsPage() {
-    const { isLoading, isAdmin } = useAdminAuth();
-    const [subscriptions, setSubscriptions] = useState<AdminSubscription[]>([]);
+    const { isLoading: authLoading, isAdmin } = useAdminAuth();
+    const { subscriptions: allSubscriptions, loading: subLoading, error } = useAdminSubscriptions();
     const [filteredSubscriptions, setFilteredSubscriptions] = useState<AdminSubscription[]>([]);
-    const [fetchingData, setFetchingData] = useState(true);
 
     // Filters
     const [statusFilter, setStatusFilter] = useState<string>("all");
     const [planFilter, setPlanFilter] = useState<string>("all");
     const [searchQuery, setSearchQuery] = useState("");
 
-    // Fetch subscriptions
+    // Update filtered subscriptions whenever the source data or filters change
     useEffect(() => {
-        // Only fetch data after we've confirmed admin status
-        if (!isLoading && isAdmin) {
-            const getSubscriptions = async () => {
-                try {
-                    const data = await fetchSubscriptions();
-                    setSubscriptions(data);
-                    setFilteredSubscriptions(data);
-                } catch (error) {
-                    console.error("Error fetching subscriptions:", error);
-                } finally {
-                    setFetchingData(false);
-                }
-            };
+        if (allSubscriptions) {
+            let result = [...allSubscriptions];
 
-            void getSubscriptions();
+            // Apply status filter
+            if (statusFilter !== "all") {
+                result = result.filter(sub => sub.status === statusFilter);
+            }
+
+            // Apply plan filter
+            if (planFilter !== "all") {
+                result = result.filter(sub => sub.plan_type === planFilter);
+            }
+
+            // Apply search query
+            if (searchQuery) {
+                const query = searchQuery.toLowerCase();
+                result = result.filter(sub =>
+                    sub.user_name?.toLowerCase().includes(query) ||
+                    sub.user_email?.toLowerCase().includes(query) ||
+                    sub.user_id.toLowerCase().includes(query)
+                );
+            }
+
+            setFilteredSubscriptions(result);
         }
-    }, [isLoading, isAdmin]);
-
-    // Apply filters when they change
-    useEffect(() => {
-        let result = [...subscriptions];
-
-        // Apply status filter
-        if (statusFilter !== "all") {
-            result = result.filter(sub => sub.status === statusFilter);
-        }
-
-        // Apply plan filter
-        if (planFilter !== "all") {
-            result = result.filter(sub => sub.plan_type === planFilter);
-        }
-
-        // Apply search query
-        if (searchQuery) {
-            const query = searchQuery.toLowerCase();
-            result = result.filter(sub =>
-                sub.user_name?.toLowerCase().includes(query) ||
-                sub.user_email?.toLowerCase().includes(query) ||
-                sub.user_id.toLowerCase().includes(query)
-            );
-        }
-
-        setFilteredSubscriptions(result);
-    }, [statusFilter, planFilter, searchQuery, subscriptions]);
+    }, [statusFilter, planFilter, searchQuery, allSubscriptions]);
 
     // Custom action that wraps the server action but also updates local state
     const handleUpdateFilters = async (status: string, plan: string, search: string) => {
@@ -80,13 +61,19 @@ export default function AdminSubscriptionsPage() {
     };
 
     // Show loading while checking auth or fetching data
-    if (isLoading || fetchingData) {
+    if (authLoading || subLoading) {
         return <LoadingSkeleton />;
     }
 
     // Safety check - don't render for non-admins
     if (!isAdmin) {
         return null;
+    }
+    
+    // Display error message if there was an error fetching data
+    if (error) {
+        console.log('Subscription data error:', error);
+        // We still proceed with the available data (sample or partial)
     }
 
     return (

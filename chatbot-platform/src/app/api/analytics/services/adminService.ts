@@ -113,6 +113,48 @@ export async function getAdminAnalytics(
         LIMIT 5
     `);
 
+    // NEW: Get top products
+    const topProductsResult = await client.query(`
+        SELECT
+            COALESCE(metadata::jsonb->'action'->>'productName', 
+                    CONCAT('Product ID: ', metadata::jsonb->'action'->>'productId')) as product_name,
+            metadata::jsonb->'action'->>'productId' as product_id,
+            COUNT(*) as count
+        FROM conversations
+        WHERE metadata::jsonb->'action'->>'type' = 'cart'
+            AND metadata::jsonb->'action'->>'operation' = 'add'
+            AND created_at > NOW() - INTERVAL '${daysToInclude} days'
+        GROUP BY product_name, product_id
+        ORDER BY count DESC
+        LIMIT 10
+    `);
+
+    // NEW: Get detailed cart operations
+    const detailedCartOperationsResult = await client.query(`
+        SELECT
+            metadata::jsonb->'action'->>'operation' as operation,
+            COALESCE(metadata::jsonb->'action'->>'productName', 
+                    CONCAT('Product ID: ', metadata::jsonb->'action'->>'productId')) as product_name,
+            metadata::jsonb->'action'->>'productId' as product_id,
+            COUNT(*) as count
+        FROM conversations
+        WHERE metadata::jsonb->'action'->>'type' = 'cart'
+            AND created_at > NOW() - INTERVAL '${daysToInclude} days'
+        GROUP BY operation, product_name, product_id
+        ORDER BY count DESC
+        LIMIT 15
+    `);
+
+    // NEW: Get completed purchases
+    const purchasesResult = await client.query(`
+        SELECT COUNT(*) as count
+        FROM conversations
+        WHERE metadata::jsonb->'action'->>'type' = 'purchase'
+            AND created_at > NOW() - INTERVAL '${daysToInclude} days'
+    `);
+
+    const completedPurchases = parseInt(purchasesResult.rows[0]?.count) || 0;
+
     return {
         totalUsers: parseInt(totalUsers.rows[0].count),
         totalChatbots: parseInt(totalChatbots.rows[0].count),
@@ -122,9 +164,12 @@ export async function getAdminAnalytics(
         averageConversationsPerChatbot: parseFloat(averageQuery.rows[0].avg_conversations) || 0,
         averageMessagesPerChatbot: parseFloat(averageQuery.rows[0].avg_messages) || 0,
         averageConversionRate: parseFloat(averageQuery.rows[0].avg_conversion) || 0,
+        completedPurchases,
         recentActivity: recentActivity.rows,
         intentDistribution: intentDistribution.rows,
         topQueries: topQueriesResult.rows,
+        topProducts: topProductsResult.rows || [],
+        detailedCartOperations: detailedCartOperationsResult.rows || [],
         topChatbots: topChatbots.rows,
         topPerformingChatbots: topPerformingChatbots.rows,
         timeRange: daysToInclude

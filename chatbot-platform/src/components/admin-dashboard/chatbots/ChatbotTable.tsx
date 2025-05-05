@@ -1,5 +1,5 @@
-// src/components/admin-dashboard/chatbots/ChatbotTable.tsx
-import { Bot, Eye } from "lucide-react";
+import Link from "next/link";
+import { Bot, Eye, MessageCircle } from "lucide-react";
 import { ChatbotWithStats } from "@/types/chatbot";
 import StatusBadge from "./StatusBadge";
 
@@ -8,6 +8,19 @@ interface ChatbotTableProps {
 }
 
 export default function ChatbotTable({ chatbots }: ChatbotTableProps) {
+    const formatDate = (dateString: string | null) => {
+        if (!dateString) return "Never";
+        
+        try {
+            return new Date(dateString).toLocaleString(undefined, {
+                dateStyle: "short",
+                timeStyle: "short",
+            });
+        } catch (e) {
+            return "Invalid Date";
+        }
+    };
+
     return (
         <div className="overflow-x-auto">
             <table className="w-full">
@@ -41,29 +54,39 @@ export default function ChatbotTable({ chatbots }: ChatbotTableProps) {
                             </div>
                         </td>
                         <td className="py-3 px-4">
-                                <span className="px-2 py-1 text-xs bg-blue-900/30 text-blue-400 rounded-full">
-                                    {chatbot.industry}
-                                </span>
+                            <span className="px-2 py-1 text-xs bg-blue-900/30 text-blue-400 rounded-full">
+                                {chatbot.industry}
+                            </span>
                         </td>
                         <td className="py-3 px-4 text-gray-300">{chatbot.platform}</td>
                         <td className="py-3 px-4">
                             <StatusBadge status={chatbot.status} />
                         </td>
-                        <td className="py-3 px-4">{chatbot.conversationCount}</td>
+                        <td className="py-3 px-4">
+                            {chatbot.conversationCount > 0 && chatbot.api_key ? (
+                                <Link 
+                                    href={`/admin/conversations?filter=${encodeURIComponent(chatbot.api_key)}`}
+                                    className="flex items-center text-blue-500 hover:text-blue-400 cursor-pointer"
+                                >
+                                    <span className="mr-1">{chatbot.conversationCount}</span>
+                                    <MessageCircle className="h-4 w-4" />
+                                </Link>
+                            ) : (
+                                <span>0</span>
+                            )}
+                        </td>
                         <td className="py-3 px-4 text-gray-300">
-                            {new Date(chatbot.lastActive).toLocaleString(undefined, {
-                                dateStyle: "short",
-                                timeStyle: "short",
-                            })}
+                            {formatDate(chatbot.lastActive)}
                         </td>
                         <td className="py-3 px-4">
                             <div className="flex space-x-2">
-                                <button
+                                <Link
+                                    href={`/admin/chatbots/${chatbot.id}`}
                                     className="p-1 text-blue-500 hover:text-blue-400 transition-colors"
                                     title="View details"
                                 >
                                     <Eye className="h-4 w-4" />
-                                </button>
+                                </Link>
                             </div>
                         </td>
                     </tr>

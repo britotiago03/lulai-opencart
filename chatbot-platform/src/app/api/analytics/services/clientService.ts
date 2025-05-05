@@ -69,9 +69,12 @@ export async function getClientAnalytics(
         await updateAnalyticsRecord(client, row.id, chatbotAnalytics);
     }
 
-    // Get recent activity for all user's chatbots
+    // Get recent activity for all user's chatbots with message counts
     const recentActivity = await client.query(`
-        SELECT DATE(created_at) as date, COUNT(DISTINCT user_id || api_key) as count
+        SELECT 
+            DATE(created_at) as date, 
+            COUNT(DISTINCT user_id || api_key) as conversation_count,
+            COUNT(*) as message_count
         FROM conversations
         WHERE api_key = ANY($1)
         AND created_at > NOW() - INTERVAL '${daysToInclude} days'
@@ -85,8 +88,7 @@ export async function getClientAnalytics(
             metadata::jsonb->'intentAnalysis'->>'primaryIntent' as intent,
             COUNT(*) as count
         FROM conversations
-        WHERE 
-            api_key = ANY($1)
+        WHERE api_key = ANY($1)
             AND metadata::jsonb->'intentAnalysis'->>'primaryIntent' IS NOT NULL
             AND created_at > NOW() - INTERVAL '${daysToInclude} days'
         GROUP BY metadata::jsonb->'intentAnalysis'->>'primaryIntent'
@@ -104,6 +106,103 @@ export async function getClientAnalytics(
         ORDER BY count DESC
         LIMIT 5
     `, [apiKeys]);
+    
+    // NEW: Get top products added to cart across all chatbots with improved naming
+    const topProductsResult = await client.query(`
+        WITH ProductData AS (
+            SELECT 
+                metadata::jsonb->'action'->>'productId' as product_id,
+                metadata::jsonb->'action'->>'productName' as product_name,
+                COUNT(*) as count
+            FROM conversations
+            WHERE api_key = ANY($1)
+            AND metadata::jsonb->'action'->>'type' = 'cart'
+            AND metadata::jsonb->'action'->>'operation' = 'add'
+            AND created_at > NOW() - INTERVAL '${daysToInclude} days'
+            GROUP BY product_id, product_name
+            ORDER BY count DESC
+            LIMIT 10
+        ),
+        ProductLookup AS (
+            SELECT DISTINCT 
+                metadata::jsonb->'action'->>'productId' as pid, 
+                metadata::jsonb->'action'->>'productName' as pname
+            FROM conversations 
+            WHERE api_key = ANY($1)
+            AND metadata::jsonb->'action'->>'productName' IS NOT NULL 
+            AND metadata::jsonb->'action'->>'productName' != ''
+        )
+        SELECT 
+            CASE 
+                WHEN product_name IS NOT NULL AND product_name != '' THEN product_name
+                WHEN product_id IS NOT NULL THEN (
+                    -- Try to find a product name from another record with the same ID
+                    SELECT pname FROM ProductLookup
+                    WHERE pid = product_id
+                    LIMIT 1
+                )
+                ELSE CONCAT('Product ID: ', product_id)
+            END as product_name,
+            product_id,
+            count
+        FROM ProductData
+        ORDER BY count DESC
+    `, [apiKeys]);
+
+    // NEW: Get detailed cart operations by product across all chatbots with improved naming
+    const detailedCartOperationsResult = await client.query(`
+        WITH CartData AS (
+            SELECT 
+                metadata::jsonb->'action'->>'operation' as operation,
+                metadata::jsonb->'action'->>'productId' as product_id,
+                metadata::jsonb->'action'->>'productName' as product_name,
+                COUNT(*) as count
+            FROM conversations
+            WHERE api_key = ANY($1)
+            AND metadata::jsonb->'action'->>'type' = 'cart'
+            AND created_at > NOW() - INTERVAL '${daysToInclude} days'
+            GROUP BY operation, product_id, product_name
+            ORDER BY count DESC
+            LIMIT 15
+        ),
+        ProductLookup AS (
+            SELECT DISTINCT 
+                metadata::jsonb->'action'->>'productId' as pid, 
+                metadata::jsonb->'action'->>'productName' as pname
+            FROM conversations 
+            WHERE api_key = ANY($1)
+            AND metadata::jsonb->'action'->>'productName' IS NOT NULL 
+            AND metadata::jsonb->'action'->>'productName' != ''
+        )
+        SELECT 
+            operation,
+            CASE 
+                WHEN product_name IS NOT NULL AND product_name != '' THEN product_name
+                WHEN product_id IS NOT NULL THEN (
+                    -- Try to find a product name from another record with the same ID
+                    SELECT pname FROM ProductLookup
+                    WHERE pid = product_id
+                    LIMIT 1
+                )
+                ELSE CONCAT('Product ID: ', product_id)
+            END as product_name,
+            product_id,
+            count
+        FROM CartData
+        ORDER BY count DESC
+    `, [apiKeys]);
+
+    // NEW: Get completed purchases (if purchase tracking via metadata is available)
+    const purchasesResult = await client.query(`
+        SELECT
+            COUNT(*) as count
+        FROM conversations
+        WHERE api_key = ANY($1)
+        AND metadata::jsonb->'action'->>'type' = 'purchase'
+        AND created_at > NOW() - INTERVAL '${daysToInclude} days'
+    `, [apiKeys]);
+
+    const completedPurchases = parseInt(purchasesResult.rows[0]?.count) || 0;
 
     // Calculate totals and averages
     const averageResponseTime = responseTimeCount > 0 ? totalResponseTime / responseTimeCount : 0;
@@ -115,9 +214,12 @@ export async function getClientAnalytics(
         totalMessages,
         averageResponseTime,
         conversionRate,
+        completedPurchases,
         recentActivity: recentActivity.rows,
         intentDistribution: intentDistribution.rows,
         topQueries: topQueries.rows,
+        topProducts: topProductsResult.rows || [],
+        detailedCartOperations: detailedCartOperationsResult.rows || [],
         chatbotStats,
         timeRange: daysToInclude
     };

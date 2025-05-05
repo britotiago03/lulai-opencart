@@ -144,17 +144,148 @@ export async function calculateChatbotAnalytics(
         [apiKey]
     );
 
+    // Get top products added to cart with direct product name lookup
+    const topProductsResult = await client.query(
+        `WITH ProductData AS (
+            -- First, let's collect all unique products with counts
+            SELECT 
+                COALESCE(
+                    metadata::jsonb->'action'->>'productId', 
+                    metadata::jsonb->'navigationAction'->>'productId'
+                ) as product_id,
+                COUNT(*) as count
+            FROM conversations
+            WHERE api_key = $1
+            AND metadata::jsonb->'action'->>'type' = 'cart'
+            AND metadata::jsonb->'action'->>'operation' = 'add'
+            AND created_at > NOW() - INTERVAL '${daysToInclude} days'
+            GROUP BY product_id
+            ORDER BY count DESC
+            LIMIT 10
+         )
+         -- For each product, look up the best product name across all conversations
+         SELECT 
+             pd.product_id,
+             -- Look for the best available product name across all conversations
+             (
+                 SELECT 
+                     COALESCE(
+                         -- First try to find a conversation with a direct product name
+                         (
+                             SELECT 
+                                 COALESCE(
+                                     metadata::jsonb->'action'->>'productName',
+                                     metadata::jsonb->'navigationAction'->>'productName'
+                                 )
+                             FROM conversations
+                             WHERE api_key = $1
+                             AND (
+                                 (metadata::jsonb->'action'->>'productId' = pd.product_id AND metadata::jsonb->'action'->>'productName' IS NOT NULL)
+                                 OR
+                                 (metadata::jsonb->'navigationAction'->>'productId' = pd.product_id AND metadata::jsonb->'navigationAction'->>'productName' IS NOT NULL)
+                             )
+                             AND (
+                                 metadata::jsonb->'action'->>'productName' != '' 
+                                 OR 
+                                 metadata::jsonb->'navigationAction'->>'productName' != ''
+                             )
+                             LIMIT 1
+                         ),
+                         -- If not found, use the product ID
+                         pd.product_id
+                     )
+             ) as product_name,
+             pd.count
+         FROM ProductData pd
+         ORDER BY pd.count DESC`,
+        [apiKey]  // Only pass apiKey once since we use $1 for both places
+    );
+
+    // Get detailed cart operations by product with comprehensive product name lookup
+    const detailedCartOperationsResult = await client.query(
+        `WITH CartData AS (
+            -- First, let's collect all unique product operations with counts
+            SELECT 
+                metadata::jsonb->'action'->>'operation' as operation,
+                COALESCE(
+                    metadata::jsonb->'action'->>'productId', 
+                    metadata::jsonb->'navigationAction'->>'productId'
+                ) as product_id,
+                COUNT(*) as count
+            FROM conversations
+            WHERE api_key = $1
+            AND metadata::jsonb->'action'->>'type' = 'cart'
+            AND created_at > NOW() - INTERVAL '${daysToInclude} days'
+            GROUP BY operation, product_id
+            ORDER BY count DESC
+            LIMIT 15
+         )
+         -- For each operation and product, look up the best product name across all conversations
+         SELECT 
+             cd.operation,
+             cd.product_id,
+             -- Look for the best available product name across all conversations
+             (
+                 SELECT 
+                     COALESCE(
+                         -- First try to find a conversation with a direct product name
+                         (
+                             SELECT 
+                                 COALESCE(
+                                     metadata::jsonb->'action'->>'productName',
+                                     metadata::jsonb->'navigationAction'->>'productName'
+                                 )
+                             FROM conversations
+                             WHERE api_key = $1
+                             AND (
+                                 (metadata::jsonb->'action'->>'productId' = cd.product_id AND metadata::jsonb->'action'->>'productName' IS NOT NULL)
+                                 OR
+                                 (metadata::jsonb->'navigationAction'->>'productId' = cd.product_id AND metadata::jsonb->'navigationAction'->>'productName' IS NOT NULL)
+                             )
+                             AND (
+                                 metadata::jsonb->'action'->>'productName' != '' 
+                                 OR 
+                                 metadata::jsonb->'navigationAction'->>'productName' != ''
+                             )
+                             LIMIT 1
+                         ),
+                         -- If not found, use the product ID
+                         cd.product_id
+                     )
+             ) as product_name,
+             cd.count
+         FROM CartData cd
+         ORDER BY cd.count DESC`,
+        [apiKey]  // Only pass apiKey once since we use $1 for both places
+    );
+
+    // NEW: Get completed purchases (if purchase tracking via metadata is available)
+    const purchasesResult = await client.query(
+        `SELECT
+             COUNT(*) as count
+         FROM conversations
+         WHERE api_key = $1
+           AND metadata::jsonb->'action'->>'type' = 'purchase'
+           AND created_at > NOW() - INTERVAL '${daysToInclude} days'`,
+        [apiKey]
+    );
+
+    const completedPurchases = parseInt(purchasesResult.rows[0]?.count) || 0;
+
     return {
         totalConversations,
         totalMessages,
         averageResponseTime,
         conversions,
         conversionRate,
+        completedPurchases,
         dailyStats: dailyStatsResult.rows,
         topQueries: topQueriesResult.rows,
         intentDistribution: intentDistributionResult.rows || [],
         cartOperations: cartOperationsResult.rows || [],
-        navigationActions: navigationActionsResult.rows || []
+        navigationActions: navigationActionsResult.rows || [],
+        topProducts: topProductsResult.rows || [],
+        detailedCartOperations: detailedCartOperationsResult.rows || []
     };
 }
 

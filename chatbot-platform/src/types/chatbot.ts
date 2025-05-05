@@ -20,4 +20,5 @@ export interface ChatbotWithStats extends Chatbot {
     status: "active" | "inactive" | "error";
     conversationCount: number;
     lastActive: string;
+    api_key: string; // Add this to ensure it's available for linking to conversations
 }

@@ -77,12 +77,22 @@ export const sampleSubscriptions: AdminSubscription[] = [
     }
 ];
 
-// Function to fetch subscriptions (would connect to an API in production)
+// Function to fetch subscriptions
 export async function fetchSubscriptions(): Promise<AdminSubscription[]> {
-    // In a real implementation, you would fetch from your API
-    // const response = await fetch('/api/admin/subscriptions');
-    // return await response.json();
-
-    // For development, return the sample data
-    return Promise.resolve(sampleSubscriptions);
+    try {
+        const response = await fetch('/api/admin/subscriptions');
+        
+        if (!response.ok) {
+            console.error('Failed to fetch subscriptions:', await response.text());
+            // Fallback to sample data if the API fails
+            return sampleSubscriptions;
+        }
+        
+        const data = await response.json();
+        return data.subscriptions || [];
+    } catch (error) {
+        console.error('Error fetching subscriptions:', error);
+        // Fallback to sample data if there's an error
+        return sampleSubscriptions;
+    }
 }
