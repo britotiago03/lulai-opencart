@@ -1,11 +1,9 @@
-// src/types/widget-config.ts
-
 export interface WidgetConfig {
     primaryColor: string;
     secondaryColor: string;
-    buttonSize: string;
-    windowWidth: string;
-    windowHeight: string;
+    buttonSize: number;
+    windowWidth: number;
+    windowHeight: number;
     headerText: string;
     fontFamily: string;
 }
