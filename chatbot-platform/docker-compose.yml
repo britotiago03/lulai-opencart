@@ -20,8 +20,8 @@ services:
       NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: "pk_test_51QzSlhJkXSsnTAnudTTHKbYwCBYr2oUPWgmDv63iiZhyzFCAgYciho4xO1ohZz4lDzUbilfr9asgHX5D66Jh6w2Q00VGQBARi8"
       STRIPE_SECRET_KEY: "sk_test_51QzSlhJkXSsnTAnuMGfUTh8vy4qwrKIJXe9GnO0dG6XcaJkrAJ6fJK4JKiq1iQvuWCLFeC5SV7CxsbgoIb7Ut7gN00NaU7jWt7"
       STRIPE_PUBLISHABLE_KEY: "pk_test_51QzSlhJkXSsnTAnudTTHKbYwCBYr2oUPWgmDv63iiZhyzFCAgYciho4xO1ohZz4lDzUbilfr9asgHX5D66Jh6w2Q00VGQBARi8"
-      ADMIN_NAME: "Jeff Bezos"
-      ADMIN_EMAIL: "britotiago123@gmail.com"
+      ADMIN_NAME: "Tiago Brito"
+      ADMIN_EMAIL: "britotiago101@gmail.com"
       API_URL: "http://localhost:3001"
       NEXT_PUBLIC_APP_URL: "http://localhost:3001"
       NEXT_PUBLIC_CHATBOT_URL: "http://localhost:3005"
@@ -34,4 +34,10 @@ networks:
   database_network:
     external: true
     name: lulai_db_network
+
+
+
+
+
+
 
