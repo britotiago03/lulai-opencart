@@ -10,7 +10,7 @@ const SimplePieChart = dynamic(() => import("@/components/dashboard/analytics/ch
     loading: () => <div className="h-full flex items-center justify-center text-gray-400">Loading chart...</div>
 });
 
-export default function IntentDistribution({
+export default function IntentDistributionChart({
     items
 }: { items: IntentItem[] | undefined }) {
     const [open, setOpen] = useState(false);

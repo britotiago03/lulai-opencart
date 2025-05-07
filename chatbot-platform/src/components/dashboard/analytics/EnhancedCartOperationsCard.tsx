@@ -24,9 +24,14 @@ export default function EnhancedCartOperationsCard({
 
     const max = items[0]?.count ?? 1;
     const addOperations = items.find(i => i.operation === "add")?.count ?? 0;
+    
+    // Ensure sane values for metrics
+    const normalizedConversionRate = conversionRate !== undefined ? 
+        Math.min(100, Math.max(0, conversionRate)) : 0;
+        
     const cartAbandonmentRate = completedPurchases !== undefined && addOperations 
-        ? ((addOperations - completedPurchases) / addOperations * 100).toFixed(1)
-        : "N/A";
+        ? Math.min(100, Math.max(0, ((addOperations - completedPurchases) / Math.max(1, addOperations) * 100)))
+        : 0;
 
     return (
         <Card className="bg-[#1b2539] border-0">
@@ -63,7 +68,7 @@ export default function EnhancedCartOperationsCard({
                     <div className="mt-6 border-t border-gray-700 pt-4 grid grid-cols-2 gap-4">
                         <div className="bg-[#232b3c] p-3 rounded-md">
                             <p className="text-sm text-gray-400">Cart Success Rate</p>
-                            <p className="text-xl font-semibold">{conversionRate?.toFixed(1)}%</p>
+                            <p className="text-xl font-semibold">{normalizedConversionRate.toFixed(1)}%</p>
                         </div>
                         <div className="bg-[#232b3c] p-3 rounded-md">
                             <p className="text-sm text-gray-400">Cart Add Actions</p>
@@ -78,7 +83,7 @@ export default function EnhancedCartOperationsCard({
                                 </div>
                                 <div className="bg-[#232b3c] p-3 rounded-md">
                                     <p className="text-sm text-gray-400">Cart Abandonment</p>
-                                    <p className="text-xl font-semibold">{cartAbandonmentRate}%</p>
+                                    <p className="text-xl font-semibold">{cartAbandonmentRate.toFixed(1)}%</p>
                                 </div>
                             </>
                         )}

@@ -1,17 +1,35 @@
 // src/app/api/analytics/utils/sessionUtils.ts
 import { getServerSession } from "next-auth/next";
 import { PoolClient } from "pg";
-import { userAuthOptions } from "@/lib/auth-config";
+import { userAuthOptions, adminAuthOptions } from "@/lib/auth-config";
 
 export interface SessionData {
     user: {
         id: string;
         role: string;
     };
+    isAdminCrossAccess?: boolean;
 }
 
 export async function getAuthenticatedSession(): Promise<SessionData | null> {
-    return await getServerSession(userAuthOptions);
+    // First try user session
+    let session = await getServerSession(userAuthOptions);
+    
+    // If no user session found, try admin session
+    if (!session) {
+        const adminSession = await getServerSession(adminAuthOptions);
+        
+        // If admin session found, create a proxy session with user role data
+        if (adminSession && adminSession.user?.role === "admin") {
+            session = {
+                ...adminSession,
+                // Add a flag to indicate this is an admin accessing user endpoints
+                isAdminCrossAccess: true
+            };
+        }
+    }
+    
+    return session;
 }
 
 export async function validateChatbotOwnership(

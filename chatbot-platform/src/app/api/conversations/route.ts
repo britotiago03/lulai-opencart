@@ -1,20 +1,12 @@
 // src/app/api/conversations/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { userAuthOptions } from "@/lib/auth-config";
 import { pool } from "@/lib/db";
+import { withCrossAuth } from "@/lib/cross-auth";
+import { randomUUID } from "crypto";
 
 // GET: Retrieve conversations for a specific chatbot or user
-export async function GET(req: NextRequest) {
+export const GET = withCrossAuth(async (req: NextRequest, session: any) => {
     try {
-        const session = await getServerSession(userAuthOptions);
-
-        if (!session) {
-            return NextResponse.json(
-                { message: "Unauthorized" },
-                { status: 401 }
-            );
-        }
 
         const { searchParams } = new URL(req.url);
         const chatbotId = searchParams.get('chatbotId');
@@ -179,6 +171,72 @@ export async function GET(req: NextRequest) {
         }
     } catch (error) {
         console.error("Error fetching conversations:", error);
+        return NextResponse.json(
+            { message: "Internal server error", error: error instanceof Error ? error.message : String(error) },
+            { status: 500 }
+        );
+    }
+});
+
+// POST: Create a new conversation entry (including system messages for purchase tracking)
+export async function POST(req: NextRequest) {
+    try {
+        const { apiKey, role, content, metadata } = await req.json();
+
+        if (!apiKey || !role || !content) {
+            return NextResponse.json(
+                { message: "Missing required fields: apiKey, role, content" },
+                { status: 400 }
+            );
+        }
+
+        const client = await pool.connect();
+        try {
+            // Validate the API key exists
+            const apiKeyCheck = await client.query(
+                "SELECT id FROM chatbots WHERE api_key = $1",
+                [apiKey]
+            );
+
+            if (apiKeyCheck.rows.length === 0) {
+                return NextResponse.json(
+                    { message: "Invalid API key" },
+                    { status: 400 }
+                );
+            }
+
+            // Generate a conversation ID if this is a new conversation
+            const userId = metadata?.userId || randomUUID();
+            const sessionId = metadata?.sessionId || randomUUID();
+
+            // Insert the new conversation entry
+            await client.query(
+                `INSERT INTO conversations (
+                    id,
+                    user_id,
+                    session_id,
+                    api_key,
+                    message_role,
+                    message_content,
+                    metadata
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+                [
+                    randomUUID(),
+                    userId,
+                    sessionId,
+                    apiKey,
+                    role,
+                    content,
+                    JSON.stringify(metadata || {})
+                ]
+            );
+
+            return NextResponse.json({ success: true });
+        } finally {
+            client.release();
+        }
+    } catch (error) {
+        console.error("Error creating conversation:", error);
         return NextResponse.json(
             { message: "Internal server error", error: error instanceof Error ? error.message : String(error) },
             { status: 500 }

@@ -2,6 +2,7 @@
 import { PoolClient } from "pg";
 import { pool } from "@/lib/db";
 import { ChatbotAnalytics } from "../types";
+import { analyzeConversationInsights, analyzeConversationFlow } from "./conversationAnalyzer";
 
 export async function getDbClient(): Promise<PoolClient> {
     return await pool.connect();
@@ -11,7 +12,7 @@ export async function calculateChatbotAnalytics(
     client: PoolClient,
     apiKey: string,
     daysToInclude = 30
-): Promise<ChatbotAnalytics> {
+): Promise<ChatbotAnalytics & { apiKey: string }> {
     // Count distinct conversations (grouped by user_id)
     const conversationsResult = await client.query(
         `SELECT COUNT(DISTINCT user_id) as count
@@ -272,7 +273,12 @@ export async function calculateChatbotAnalytics(
 
     const completedPurchases = parseInt(purchasesResult.rows[0]?.count) || 0;
 
+    // Analyze conversations for insights and flow patterns
+    const intentInsights = await analyzeConversationInsights(client, apiKey);
+    const conversationFlow = await analyzeConversationFlow(client, apiKey);
+
     return {
+        apiKey, // Include the API key for components that need it
         totalConversations,
         totalMessages,
         averageResponseTime,
@@ -285,7 +291,9 @@ export async function calculateChatbotAnalytics(
         cartOperations: cartOperationsResult.rows || [],
         navigationActions: navigationActionsResult.rows || [],
         topProducts: topProductsResult.rows || [],
-        detailedCartOperations: detailedCartOperationsResult.rows || []
+        detailedCartOperations: detailedCartOperationsResult.rows || [],
+        intentInsights,
+        conversationFlow
     };
 }
 

@@ -8,6 +8,20 @@ export interface IntentItem {
     count: number;
 }
 
+export interface IntentInsight {
+    insight: string;
+    explanation: string;
+    importance: "high" | "medium" | "low";
+    confidence: number;
+}
+
+export interface ConversationFlowStep {
+    step: string;
+    description: string;
+    percentage: number;
+    color?: string;
+}
+
 // Daily stats (used in charts, now extends ChartDataItem)
 export interface DailyItem extends ChartDataItem {
     date: string;
@@ -40,6 +54,14 @@ export interface DetailedCartOpItem {
     count: number;
 }
 
+// New: Detailed navigation action with product info
+export interface DetailedNavAction {
+    target: string;
+    product_name?: string;
+    product_id?: string | number;
+    count: number;
+}
+
 export interface ChatbotStat {
     name: string;
     totalUsers: number;
@@ -53,6 +75,7 @@ export interface ChatbotStat {
 }
 
 export interface AnalyticsData {
+    apiKey?: string;             // API key for specific chatbot
     totalConversations: number;
     totalMessages: number;
     averageResponseTime: number;
@@ -67,6 +90,9 @@ export interface AnalyticsData {
     navigationActions?: NavAction[];
     topProducts?: ProductItem[];
     detailedCartOperations?: DetailedCartOpItem[];
+    detailedNavigationActions?: DetailedNavAction[];
+    intentInsights?: IntentInsight[];
+    conversationFlow?: ConversationFlowStep[];
     chatbotStats?: ChatbotStat[];
     topPerformingChatbots?: ChatbotStat[];
     totalCartActions?: number;

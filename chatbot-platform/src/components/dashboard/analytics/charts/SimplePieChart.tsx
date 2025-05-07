@@ -44,31 +44,47 @@ const SimplePieChart: React.FC<SimplePieChartProps> = ({
 
     return (
         <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
+            <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
                 <Pie
                     data={formattedData}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    outerRadius={100}
+                    outerRadius={80}
+                    innerRadius={0}
+                    paddingAngle={2}
                     fill="#8884d8"
                     dataKey="value"
                     nameKey="name"
-                    label={(entry) => {
-                        // Custom label formatter: Show name and value for slices with significant value
-                        // Only show name for larger segments to prevent overlap
-                        const percent = Math.round((entry.value / data.reduce((sum, item) => sum + item.count, 0)) * 100);
-                        return percent >= 10 ? entry.name : '';
-                    }}
-                    labelLine={{
-                        stroke: '#8884d8',
-                        strokeWidth: 1,
+                    label={({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
+                        // Only show label for larger segments to prevent overlap
+                        if (percent < 0.1) return null;
+                        
+                        const RADIAN = Math.PI / 180;
+                        const radius = 25 + innerRadius + (outerRadius - innerRadius);
+                        const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                        const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                        
+                        return (
+                            <text 
+                                x={x} 
+                                y={y} 
+                                fill="#fff"
+                                textAnchor={x > cx ? 'start' : 'end'} 
+                                dominantBaseline="central"
+                                fontSize="12"
+                            >
+                                {formattedData[index].name} ({(percent * 100).toFixed(0)}%)
+                            </text>
+                        );
                     }}
                 >
                     {formattedData.map((_, index) => (
                         <Cell
                             key={`cell-${index}`}
                             fill={colors[index % colors.length]}
+                            stroke="rgba(0, 0, 0, 0.1)"
+                            strokeWidth={1}
                         />
                     ))}
                 </Pie>

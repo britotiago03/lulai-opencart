@@ -38,7 +38,19 @@ const SimpleLineChart: React.FC<SimpleLineChartProps> = ({
         date: item.date,
         count: typeof item.count === 'number' ? item.count : 0,
         messages: typeof item.messages === 'number' ? item.messages : 0
-    }));
+    })).sort((a, b) => {
+        // Try to parse as dates first
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        
+        // If both are valid dates, compare them
+        if (!isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) {
+            return dateA.getTime() - dateB.getTime();
+        }
+        
+        // Otherwise, just compare as strings
+        return a.date.localeCompare(b.date);
+    });
 
     return (
         <ResponsiveContainer width="100%" height="100%">

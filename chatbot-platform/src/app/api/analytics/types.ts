@@ -87,9 +87,14 @@ export interface ClientAnalytics {
     totalMessages: number;
     averageResponseTime: number;
     conversionRate: number;
+    completedPurchases?: number;
     recentActivity: RecentActivity[];
     intentDistribution: IntentCount[];
     topQueries: QueryCount[];
     chatbotStats: ChatbotStat[];
+    intentInsights?: any[];         // Add missing intentInsights field
+    conversationFlow?: any[];       // Add missing conversationFlow field
+    topProducts?: any[];            // Add missing topProducts field
+    detailedCartOperations?: any[]; // Add missing detailedCartOperations field
     timeRange: number;
 }

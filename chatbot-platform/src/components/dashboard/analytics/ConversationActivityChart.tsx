@@ -23,15 +23,36 @@ export default function ConversationActivityChart({ data }: { data: DailyItem[] 
     const formatData = () => {
         if (!data || data.length === 0) return [];
         
-        return data.map(item => ({
-            date: typeof item.date === 'string' ? item.date : "Unknown",
-            count: typeof item.conversation_count === 'number' 
-                ? item.conversation_count 
-                : (typeof item.count === 'number' ? item.count : 0),
-            messages: typeof item.message_count === 'number' 
-                ? item.message_count 
-                : (typeof item.messages === 'number' ? item.messages : 0)
-        }));
+        return data.map(item => {
+            // Ensure date is properly formatted
+            let formattedDate = "Unknown";
+            if (typeof item.date === 'string') {
+                // Try to parse and format as a date
+                try {
+                    const dateObj = new Date(item.date);
+                    if (!isNaN(dateObj.getTime())) {
+                        formattedDate = dateObj.toLocaleDateString(undefined, {
+                            month: 'short',
+                            day: 'numeric'
+                        });
+                    } else {
+                        formattedDate = item.date;
+                    }
+                } catch (e) {
+                    formattedDate = item.date;
+                }
+            }
+            
+            return {
+                date: formattedDate,
+                count: typeof item.conversation_count === 'number' 
+                    ? item.conversation_count 
+                    : (typeof item.count === 'number' ? item.count : 0),
+                messages: typeof item.message_count === 'number' 
+                    ? item.message_count 
+                    : (typeof item.messages === 'number' ? item.messages : 0)
+            };
+        });
     };
     
     const chartData = formatData();

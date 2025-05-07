@@ -11,7 +11,7 @@ function ChatbotList({ chatbots }: ChatbotListProps) {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {chatbots.map((chatbot) => (
-                <Link key={chatbot.id} href={`/dashboard/agents/${chatbot.id}`}>
+                <Link key={chatbot.id} href={`/dashboard/agents`}>
                     <div className="border border-gray-700 rounded-lg p-4 hover:bg-[#232b3c] transition-colors cursor-pointer h-full">
                         <div className="flex items-start justify-between mb-2">
                             <div className="font-medium line-clamp-1">{chatbot.name}</div>

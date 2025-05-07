@@ -12,7 +12,7 @@ const ChatWidget = () => {
 
     return <lulai-chat-widget
         api-endpoint="http://localhost:3005/api/chat"
-        api-key="e40ca87b876d4959083ab7a3777507fe" // Replace with your generated API key
+        api-key="ydfb0660779c2fe12085ed0c357f7f3b" // Replace with your generated API key
     ></lulai-chat-widget>;
 };
 

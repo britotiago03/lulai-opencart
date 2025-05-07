@@ -2,6 +2,7 @@
 import { PoolClient } from "pg";
 import { calculateChatbotAnalytics, updateAnalyticsRecord } from "../utils/dbUtils";
 import { ClientAnalytics, ChatbotStat } from "../types";
+import { analyzeConversationInsights, analyzeConversationFlow } from "../utils/conversationAnalyzer";
 
 export async function getClientAnalytics(
     client: PoolClient,
@@ -204,6 +205,36 @@ export async function getClientAnalytics(
 
     const completedPurchases = parseInt(purchasesResult.rows[0]?.count) || 0;
 
+    // Analyze conversations for insights and flow patterns
+    // Since this is for all chatbots, we'll choose the most active one for analysis
+    // or analyze them all if there's just a few
+    let intentInsights = [];
+    let conversationFlow = [];
+
+    if (apiKeys.length > 0) {
+        // If more than 3 chatbots, just use the first one for insights
+        // to avoid excessive processing
+        if (apiKeys.length <= 3) {
+            // For fewer chatbots, analyze each and combine results
+            for (const apiKey of apiKeys) {
+                const insights = await analyzeConversationInsights(client, apiKey);
+                const flow = await analyzeConversationFlow(client, apiKey);
+                
+                if (insights.length > 0 && intentInsights.length === 0) {
+                    intentInsights = insights;
+                }
+                
+                if (flow.length > 0 && conversationFlow.length === 0) {
+                    conversationFlow = flow;
+                }
+            }
+        } else {
+            // For many chatbots, just use the first one
+            intentInsights = await analyzeConversationInsights(client, apiKeys[0]);
+            conversationFlow = await analyzeConversationFlow(client, apiKeys[0]);
+        }
+    }
+
     // Calculate totals and averages
     const averageResponseTime = responseTimeCount > 0 ? totalResponseTime / responseTimeCount : 0;
     const conversionRate = totalConversations > 0 ? (totalConversions / totalConversations) * 100 : 0;
@@ -220,6 +251,8 @@ export async function getClientAnalytics(
         topQueries: topQueries.rows,
         topProducts: topProductsResult.rows || [],
         detailedCartOperations: detailedCartOperationsResult.rows || [],
+        intentInsights,
+        conversationFlow,
         chatbotStats,
         timeRange: daysToInclude
     };
