@@ -25,6 +25,8 @@ services:
       TTS_API_KEY: "sk_45f83853ba87af0df3819ef2e727a9fc018c0c18fa0e4f0a"
       TTS_API_URL: "https://api.elevenlabs.io/v1/text-to-speech"
       TTS_VOICE_ID: "ErXwobaYiN019PkySvjV"
+      NEXT_PUBLIC_TTS_API_URL: "http://localhost:8001/tts"
+      NEXT_PUBLIC_STT_API_URL: "http://localhost:8001/whisper"
       ADMIN_EMAIL: "jktungno@gmail.com"
     networks:
       - database_network
