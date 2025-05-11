@@ -1,15 +1,35 @@
-// src/components/home/HomePage.tsx
 "use client";
-import { HeroSection } from "@/components/home/HeroSection";
-import { FeaturesSection } from "@/components/home/FeaturesSection";
-import { CTASection } from "@/components/home/CTASection";
+import { HeroSection } from "@/components/marketing/HeroSection";
+import { FeatureSection, FeatureShowcase } from "@/components/marketing/FeatureSection";
+import { ProcessSection, IntegrationSection } from "@/components/marketing/ProcessSection";
+import { CTASection, NewsletterSection, ChatWidget } from "@/components/marketing/CTASection";
 
 export const HomePage = () => {
     return (
         <>
+            {/* Hero Section */}
             <HeroSection />
-            <FeaturesSection />
+
+            {/* Feature Section */}
+            <FeatureSection />
+
+            {/* Process Section */}
+            <ProcessSection />
+
+            {/* Feature Showcase */}
+            <FeatureShowcase />
+
+            {/* Integration Section */}
+            <IntegrationSection />
+
+            {/* CTA Section */}
             <CTASection />
+
+            {/* Newsletter Section */}
+            <NewsletterSection />
+
+            {/* Chat Widget Demo */}
+            <ChatWidget />
         </>
     );
 };

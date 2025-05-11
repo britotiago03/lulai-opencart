@@ -1,7 +1,7 @@
 // src/components/ThemeProvider.tsx
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 type Theme = "dark" | "light" | "system";
 
@@ -9,8 +9,6 @@ type ThemeProviderProps = {
     children: React.ReactNode;
     defaultTheme?: Theme;
     storageKey?: string;
-    attribute?: string;
-    enableSystem?: boolean;
 };
 
 type ThemeProviderState = {
@@ -29,8 +27,6 @@ export function ThemeProvider({
                                   children,
                                   defaultTheme = "system",
                                   storageKey = "ui-theme",
-                                  attribute = "class",
-                                  enableSystem = true,
                                   ...props
                               }: ThemeProviderProps) {
     const [theme, setTheme] = useState<Theme>(
@@ -42,14 +38,14 @@ export function ThemeProvider({
 
         root.classList.remove("light", "dark");
 
-        if (theme === "system" && enableSystem) {
+        if (theme === "system") {
             const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
             root.classList.add(systemTheme);
             return;
         }
 
         root.classList.add(theme);
-    }, [theme, enableSystem]);
+    }, [theme]);
 
     const value = {
         theme,

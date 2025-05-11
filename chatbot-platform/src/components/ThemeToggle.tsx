@@ -26,7 +26,6 @@ export function ThemeToggle({ className }: { className?: string }) {
         );
     }
 
-    // After mounted, render the actual button with appropriate icon
     return (
         <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
