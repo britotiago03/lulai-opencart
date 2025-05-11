@@ -38,42 +38,18 @@ export default function ChatbotsMonitoringPage() {
 
                     // Fetch additional user and stats data to combine with the chatbots
                     // This step would be replaced with your actual API call that returns the enhanced data
-                    const enhancedChatbots: ChatbotWithStats[] = await Promise.all(
-                        chatbotsData.map(async (chatbot: Chatbot) => {
-                            // In a real scenario, you might make separate API calls to get these details
-                            // or your API might already return them
-                            try {
-                                // Get user details
-                                const userResponse = await fetch(`/api/users/${chatbot.user_id}`);
-                                const userData = await userResponse.json();
-
-                                // Get conversation stats
-                                const statsResponse = await fetch(`/api/conversations/stats?chatbotId=${chatbot.id}`);
-                                const statsData = await statsResponse.json();
-
-                                // Return enhanced chatbot data
-                                return {
-                                    ...chatbot,
-                                    userName: userData.name,
-                                    userEmail: userData.email,
-                                    status: statsData.status || "inactive",
-                                    conversationCount: statsData.count || 0,
-                                    lastActive: statsData.lastActive || chatbot.updated_at
-                                };
-                            } catch (err) {
-                                // Fallback with default values if API calls fail
-                                console.error(`Error fetching details for chatbot ${chatbot.id}:`, err);
-                                return {
-                                    ...chatbot,
-                                    userName: "Unknown User",
-                                    userEmail: "unknown@example.com",
-                                    status: "inactive" as const,
-                                    conversationCount: 0,
-                                    lastActive: chatbot.updated_at
-                                };
-                            }
-                        })
-                    );
+                    // We'll use chatbotsData directly since it now contains all the information we need
+                    const enhancedChatbots: ChatbotWithStats[] = chatbotsData.map((chatbot: any) => {
+                        return {
+                            ...chatbot,
+                            userName: chatbot.userName || "Unknown User",
+                            userEmail: chatbot.userEmail || "unknown@example.com",
+                            status: chatbot.status || "inactive",
+                            conversationCount: parseInt(chatbot.conversationCount) || 0,
+                            lastActive: chatbot.lastActive || chatbot.updated_at,
+                            api_key: chatbot.api_key || "" // Ensure API key is available
+                        };
+                    });
 
                     setChatbots(enhancedChatbots);
                 } catch (err) {

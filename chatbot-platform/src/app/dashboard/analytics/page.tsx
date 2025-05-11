@@ -7,8 +7,10 @@ import KeyMetrics from "@/components/dashboard/analytics/KeyMetrics";
 import ConversationActivityChart from "@/components/dashboard/analytics/ConversationActivityChart";
 import IntentDistributionChart from "@/components/dashboard/analytics/IntentDistributionChart";
 import CartOperationsCard from "@/components/dashboard/analytics/CartOperationsCard";
+import EnhancedCartOperationsCard from "@/components/dashboard/analytics/EnhancedCartOperationsCard";
 import NavigationActionsCard from "@/components/dashboard/analytics/NavigationActionsCard";
 import TopQueries from "@/components/dashboard/analytics/TopQueries";
+import TopProductsCard from "@/components/dashboard/analytics/TopProductsCard";
 import { AdminTopChatbots, ClientChatbotStats } from "@/components/dashboard/analytics/PerformanceTables";
 import { aggregateCartOps, aggregateNavActions } from "@/utils/analytics";
 import { Card, CardContent } from "@/components/ui/card";
@@ -35,8 +37,8 @@ export default function AnalyticsPage() {
     /* ---------- transformed datasets ---------- */
     const daily = (data.recentActivity ?? data.dailyStats ?? []).map(d => ({
         date: new Date(d.date).toLocaleDateString(),
-        count: d.count,
-        messages: d.messages
+        count: d.conversation_count || d.count || 0,
+        messages: d.message_count || d.messages || 0
     }));
     const intent  = data.intentDistribution;
     const cartOps = chatbotId ? data.cartOperations : aggregateCartOps(data.chatbotStats ?? []);
@@ -75,13 +77,29 @@ export default function AnalyticsPage() {
 
             {/* carts & navigation */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                <CartOperationsCard items={cartOps} conversionRate={data.conversionRate}
-                                    extendedMetrics={!!chatbotId}/>
+                {data.detailedCartOperations ? (
+                    <EnhancedCartOperationsCard 
+                        items={cartOps} 
+                        conversionRate={data.conversionRate}
+                        extendedMetrics={!!chatbotId}
+                        detailedOperations={data.detailedCartOperations}
+                        completedPurchases={data.completedPurchases}
+                    />
+                ) : (
+                    <CartOperationsCard 
+                        items={cartOps} 
+                        conversionRate={data.conversionRate}
+                        extendedMetrics={!!chatbotId}
+                    />
+                )}
                 <NavigationActionsCard items={navAct}/>
             </div>
 
-            {/* queries */}
-            <TopQueries list={data.topQueries}/>
+            {/* top products & queries */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <TopProductsCard products={data.topProducts}/>
+                <TopQueries list={data.topQueries}/>
+            </div>
 
             {/* tables */}
             {session?.user?.role === "admin" && !chatbotId && data.topPerformingChatbots &&

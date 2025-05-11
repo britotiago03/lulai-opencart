@@ -8,7 +8,7 @@ export const GET = withAdminAuth(async () => {
     try {
         // Join tables to get all relevant information
         const result = await client.query(`
-      SELECT c.id, c.name, c.user_id, u.name as user_name, u.email as user_email,
+      SELECT c.id, c.name, c.user_id, c.api_key, u.name as user_name, u.email as user_email,
              c.industry, c.platform, c.created_at, 
              a.conversation_count, a.message_count,
              CASE 
@@ -38,7 +38,8 @@ export const GET = withAdminAuth(async () => {
             created_at: chatbot.created_at,
             status: chatbot.status,
             conversationCount: chatbot.conversation_count || 0,
-            lastActive: chatbot.last_active || chatbot.created_at
+            lastActive: chatbot.last_active || chatbot.created_at,
+            api_key: chatbot.api_key // Add the API key
         }));
 
         return NextResponse.json(formattedChatbots);
