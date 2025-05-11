@@ -19,9 +19,9 @@ export default function useAgentSettings(id: string) {
     const [widgetConfig, setWidgetConfig] = useState<WidgetConfig>({
         primaryColor: "#007bff",
         secondaryColor: "#e0f7fa",
-        buttonSize: "60",
-        windowWidth: "360",
-        windowHeight: "500",
+        buttonSize: 60,
+        windowWidth: 360,
+        windowHeight: 500,
         headerText: "Chat with us",
         fontFamily: "Helvetica Neue, Helvetica, Arial, sans-serif",
     });

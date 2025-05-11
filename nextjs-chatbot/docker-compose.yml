@@ -27,7 +27,7 @@ services:
     container_name: lulai-python-server
     restart: always
     ports:
-      - "8000:8000"
+      - "8001:8000"
     environment:
       OPENAI_API_KEY: "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"
       ELEVENLABS_API_KEY: "sk_32e81a4e50ca74689fb1cbcdf7be41fa76a7aad6d8de4898"
