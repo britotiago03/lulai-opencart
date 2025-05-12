@@ -7,7 +7,6 @@ import Navbar from "@/components/layout/Navbar";
 import "./globals.css";
 import { initializeAdminSystem } from "@/lib/admin-init";
 // AIShoppingAssistant code: <AIShoppingAssistant />
-import ChatWidget from "@/components/widget";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -50,7 +49,6 @@ export default function RootLayout({
             <main>
                 {children}
             </main>
-            <ChatWidget />
         </Providers>
         </body>
         </html>
