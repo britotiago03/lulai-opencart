@@ -25,6 +25,21 @@ export interface NavAction {
     count: number;
 }
 
+// New: Product item for top products analytics
+export interface ProductItem {
+    product_name: string;
+    product_id?: string | number;
+    count: number;
+}
+
+// New: Detailed cart operation with product info
+export interface DetailedCartOpItem {
+    operation: string;
+    product_name: string;
+    product_id?: string | number;
+    count: number;
+}
+
 export interface ChatbotStat {
     name: string;
     totalUsers: number;
@@ -34,6 +49,7 @@ export interface ChatbotStat {
     conversionRate: number;
     cartOperations?: CartOpItem[];
     navigationActions?: NavAction[];
+    topProducts?: ProductItem[];
 }
 
 export interface AnalyticsData {
@@ -42,12 +58,15 @@ export interface AnalyticsData {
     averageResponseTime: number;
     conversionRate: number;
     conversions?: number;
+    completedPurchases?: number;
     recentActivity?: DailyItem[];
     dailyStats?: DailyItem[];
     intentDistribution?: IntentItem[];
     topQueries?: { message_content: string; count: number }[];
     cartOperations?: CartOpItem[];
     navigationActions?: NavAction[];
+    topProducts?: ProductItem[];
+    detailedCartOperations?: DetailedCartOpItem[];
     chatbotStats?: ChatbotStat[];
     topPerformingChatbots?: ChatbotStat[];
     totalCartActions?: number;

@@ -1,0 +1,7 @@
+ Rebuild and restart chatbot platform
+    cd chatbot-platform && docker compose down && docker compose up --build -d
+
+
+cd ..  # Go back to the main project directory
+  docker compose -f database/docker-compose.yml -f ecommerce-store/docker-compose.yml -f nextjs-chatbot/docker-compose.yml -f chatbot-platform/docker-compose.yml down
+  ./deploy.sh  # This will rebuild and restart everything

@@ -1,50 +1,60 @@
-// src/app/admin/conversations/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
-import { MessageSquare, Calendar, Search, ChevronRight } from "lucide-react";
+import { MessageSquare, Search, ArrowLeft } from "lucide-react";
 import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
-import { Conversation } from "@/types/conversation";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { useAdminConversations } from "@/hooks/useAdminConversations";
+import AdminGroupedConversations from "@/components/admin-dashboard/conversations/AdminGroupedConversations";
+import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function AdminConversationsPage() {
     // Use admin auth hook instead of regular session
     const { isLoading, isAdmin } = useAdminAuth();
-    const [loading, setLoading] = useState(true);
-    const [conversations, setConversations] = useState<Conversation[]>([]);
+    const { conversations, loading: conversationsLoading, error } = useAdminConversations();
     const [search, setSearch] = useState("");
-    const [error, setError] = useState<string | null>(null);
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const apiKeyFilter = searchParams.get('filter');
+    const [chatbotName, setChatbotName] = useState<string | null>(null);
 
+    // Get chatbot name if we're filtering by API key
     useEffect(() => {
-        // Only fetch conversations after confirming admin status
-        if (!isLoading && isAdmin) {
-            const fetchConversations = async () => {
-                try {
-                    setLoading(true);
-                    const response = await fetch("/api/admin/conversations");
-                    if (!response.ok) {
-                        setError("Failed to fetch conversations");
-                        return;
+        if (apiKeyFilter) {
+            fetch(`/api/admin/chatbots`)
+                .then(res => res.json())
+                .then(chatbots => {
+                    const matchingChatbot = chatbots.find((c: any) => c.api_key === apiKeyFilter);
+                    if (matchingChatbot) {
+                        setChatbotName(matchingChatbot.name);
                     }
-
-                    const data = await response.json();
-                    setConversations(data);
-                } catch (err) {
-                    console.error("Error fetching conversations:", err);
-                    setError("Failed to load conversations. Please try again.");
-                } finally {
-                    setLoading(false);
-                }
-            };
-
-            void fetchConversations();
+                })
+                .catch(err => console.error("Error fetching chatbot name:", err));
         }
-    }, [isLoading, isAdmin]);
+    }, [apiKeyFilter]);
+
+    // Filter conversations based on search and API key
+    const filteredConversations = conversations
+        .filter(convo => {
+            // First filter by API key if it's provided
+            if (apiKeyFilter && apiKeyFilter !== "undefined" && convo.api_key !== apiKeyFilter) {
+                return false;
+            }
+            
+            // Then filter by search term if provided
+            if (search) {
+                return convo.message_content.toLowerCase().includes(search.toLowerCase()) ||
+                    convo.chatbot_name?.toLowerCase().includes(search.toLowerCase()) ||
+                    convo.user_id.toLowerCase().includes(search.toLowerCase());
+            }
+            
+            return true;
+        });
 
     // Show loading while admin auth is being checked
-    if (isLoading || loading) {
+    if (isLoading || conversationsLoading) {
         return <LoadingSkeleton />;
     }
 
@@ -53,39 +63,48 @@ export default function AdminConversationsPage() {
         return null; // The hook will handle redirection
     }
 
-    // Filter conversations based on search
-    const filteredConversations = search
-        ? conversations.filter((convo) =>
-            convo.message_content.toLowerCase().includes(search.toLowerCase()) ||
-            convo.chatbot_name?.toLowerCase().includes(search.toLowerCase()) ||
-            convo.user_id.toLowerCase().includes(search.toLowerCase())
-        )
-        : conversations;
-
-    // Group conversations by date
-    const groupedConversations: Record<string, Conversation[]> = filteredConversations.reduce((groups, convo) => {
-        const date = new Date(convo.created_at).toLocaleDateString();
-        if (!groups[date]) {
-            groups[date] = [];
-        }
-        groups[date].push(convo);
-        return groups;
-    }, {} as Record<string, Conversation[]>);
-
     return (
         <div className="max-w-7xl mx-auto p-6">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                <h1 className="text-2xl font-bold">All Platform Conversations</h1>
+            <div className="flex flex-col gap-4 mb-6">
+                {/* Header Row */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        {apiKeyFilter && apiKeyFilter !== "undefined" && (
+                            <div className="flex items-center mb-2">
+                                <Link href="/admin/conversations" className="flex items-center text-blue-500 hover:text-blue-400 mr-2">
+                                    <ArrowLeft className="h-4 w-4 mr-1" />
+                                    Back to all conversations
+                                </Link>
+                            </div>
+                        )}
+                        
+                        <h1 className="text-2xl font-bold">
+                            {apiKeyFilter && apiKeyFilter !== "undefined"
+                                ? `Conversations for ${chatbotName || 'Chatbot'}`
+                                : 'All Platform Conversations'}
+                        </h1>
+                        
+                        {apiKeyFilter && apiKeyFilter !== "undefined" ? (
+                            <p className="text-sm text-gray-400 mt-1">
+                                Showing {filteredConversations.length} conversations for this chatbot
+                            </p>
+                        ) : apiKeyFilter === "undefined" ? (
+                            <p className="text-sm text-red-400 mt-1">
+                                Error: Invalid chatbot filter. Showing all conversations instead.
+                            </p>
+                        ) : null}
+                    </div>
 
-                <div className="relative w-full md:w-64">
-                    <input
-                        type="text"
-                        placeholder="Search conversations..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 bg-[#1b2539] border border-gray-700 rounded-md text-white"
-                    />
-                    <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                    <div className="relative w-full md:w-64">
+                        <input
+                            type="text"
+                            placeholder="Search conversations..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 bg-[#1b2539] border border-gray-700 rounded-md text-white"
+                        />
+                        <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                    </div>
                 </div>
             </div>
 
@@ -112,49 +131,7 @@ export default function AdminConversationsPage() {
                     </CardContent>
                 </Card>
             ) : (
-                <div className="space-y-8">
-                    {Object.entries(groupedConversations).map(([date, convos]) => (
-                        <div key={date}>
-                            <div className="flex items-center mb-4">
-                                <Calendar className="h-5 w-5 text-gray-400 mr-2" />
-                                <h2 className="text-lg font-medium text-gray-300">{date}</h2>
-                            </div>
-
-                            <div className="space-y-4">
-                                {convos.map((convo: Conversation) => (
-                                    <Link key={convo.id} href={`/admin/conversations/thread/${convo.user_id}-${convo.api_key}`}>
-                                        <Card className="bg-[#1b2539] border-0 hover:bg-[#232b3c] transition-colors cursor-pointer">
-                                            <CardContent className="p-4">
-                                                <div className="flex justify-between mb-2">
-                                                    <div className="flex items-center text-sm text-gray-400">
-                                                        <MessageSquare className="h-4 w-4 mr-1" />
-                                                        {new Date(convo.created_at).toLocaleTimeString([], {
-                                                            hour: "2-digit",
-                                                            minute: "2-digit",
-                                                        })}
-                                                    </div>
-                                                    <div className="flex items-center">
-                                                        <div className="text-xs px-2 py-1 bg-blue-900/30 text-blue-400 rounded-full mr-2">
-                                                            {convo.message_role}
-                                                        </div>
-                                                        <ChevronRight className="h-4 w-4 text-gray-500" />
-                                                    </div>
-                                                </div>
-                                                <p className="font-medium truncate">{convo.message_content}</p>
-                                                <div className="flex justify-between mt-2 text-sm text-gray-400">
-                                                    <p>User: {convo.user_id}</p>
-                                                    {convo.chatbot_name && (
-                                                        <p>Chatbot: {convo.chatbot_name}</p>
-                                                    )}
-                                                </div>
-                                            </CardContent>
-                                        </Card>
-                                    </Link>
-                                ))}
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                <AdminGroupedConversations conversations={filteredConversations} />
             )}
         </div>
     );
