@@ -21,7 +21,7 @@ services:
       NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: "pk_test_51QzSlhJkXSsnTAnudTTHKbYwCBYr2oUPWgmDv63iiZhyzFCAgYciho4xO1ohZz4lDzUbilfr9asgHX5D66Jh6w2Q00VGQBARi8"
       STRIPE_SECRET_KEY: "sk_test_51QzSlhJkXSsnTAnuMGfUTh8vy4qwrKIJXe9GnO0dG6XcaJkrAJ6fJK4JKiq1iQvuWCLFeC5SV7CxsbgoIb7Ut7gN00NaU7jWt7"
       STRIPE_PUBLISHABLE_KEY: "pk_test_51QzSlhJkXSsnTAnudTTHKbYwCBYr2oUPWgmDv63iiZhyzFCAgYciho4xO1ohZz4lDzUbilfr9asgHX5D66Jh6w2Q00VGQBARi8"
-      OPENAI_API_KEY: "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"
+      OPENAI_API_KEY: "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"
       TTS_API_KEY: "sk_45f83853ba87af0df3819ef2e727a9fc018c0c18fa0e4f0a"
       TTS_API_URL: "https://api.elevenlabs.io/v1/text-to-speech"
       TTS_VOICE_ID: "ErXwobaYiN019PkySvjV"

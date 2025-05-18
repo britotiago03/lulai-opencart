@@ -26,7 +26,7 @@ services:
       NEXT_PUBLIC_APP_URL: "http://localhost:3001"
       NEXT_PUBLIC_CHATBOT_URL: "http://localhost:3005"
       CHATBOT_SERVICE_URL: "http://lulai-chatbot-service:3000"
-      OPENAI_API_KEY: "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"
+      OPENAI_API_KEY: "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"
     networks:
       - database_network
 
