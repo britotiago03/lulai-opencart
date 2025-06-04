@@ -6,7 +6,7 @@ services:
     ports:
       - "3005:3000"
     environment:
-      OPENAI_API_KEY: "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"
+      OPENAI_API_KEY: "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"
       NEXT_PUBLIC_PYTHON_SERVER_URL: "http://localhost:8001/"
       NEXT_PUBLIC_API_KEY: "f70d5dc9b2324bbb4bd8e31cde172222"
       DATABASE_URL: "postgresql://postgres:postgres@lulai-db:5432/lulai?options=--search_path%3Dchatbot_schema"
@@ -29,7 +29,7 @@ services:
     ports:
       - "8001:8000"
     environment:
-      OPENAI_API_KEY: "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"
+      OPENAI_API_KEY: "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"
       ELEVENLABS_API_KEY: "sk_32e81a4e50ca74689fb1cbcdf7be41fa76a7aad6d8de4898"
       TTS_API_URL: "https://api.elevenlabs.io/v1/text-to-speech"
       TTS_VOICE_ID: "ErXwobaYiN019PkySvjV"
